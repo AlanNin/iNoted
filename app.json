@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -21,7 +21,46 @@
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
-    }
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "scheme": "com.app.expo-router-inoted",
+    "plugins": [
+      [
+        "expo-font",
+        {
+          "fonts": [
+            {
+              "Geist-Black": "./assets/fonts/Geist-Black.otf"
+            },
+            {
+              "Geist-Bold": "./assets/fonts/Geist-Bold.otf"
+            },
+            {
+              "Geist-ExtraBold": "./assets/fonts/Geist-ExtraBold.otf"
+            },
+            {
+              "Geist-ExtraLight": "./assets/fonts/Geist-ExtraLight.otf"
+            },
+            {
+              "Geist-Light": "./assets/fonts/Geist-Light.otf"
+            },
+            {
+              "Geist-Medium": "./assets/fonts/Geist-Medium.otf"
+            },
+            {
+              "Geist-Regular": "./assets/fonts/Geist-Regular.otf"
+            },
+            {
+              "Geist-SemiBold": "./assets/fonts/Geist-SemiBold.otf"
+            },
+            {
+              "Geist-Thin": "./assets/fonts/Geist-Thin.otf"
+            }
+          ]
+        }
+      ],
+      "expo-router"
+    ]
   }
 }
