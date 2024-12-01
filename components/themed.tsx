@@ -3,6 +3,7 @@ import {
   View as DefaultView,
   TouchableOpacity as DefaultTouchableOpacity,
   Image as DefaultImage,
+  TextInput as DefaultTextInput,
 } from "react-native";
 import colors from "@/constants/colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -17,6 +18,7 @@ export type ViewProps = ThemeProps & DefaultView["props"];
 export type TouchableOpacityProps = ThemeProps &
   React.ComponentProps<typeof DefaultTouchableOpacity>;
 export type ImageProps = ThemeProps & DefaultImage["props"];
+export type TextInputProps = ThemeProps & DefaultTextInput["props"];
 
 export function useThemeColor(
   props: { light?: string; dark?: string },
@@ -36,7 +38,12 @@ export function Text(props: TextProps) {
   const { style, lightColor, darkColor, ...otherProps } = props;
   const color = useThemeColor({ light: lightColor, dark: darkColor }, "text");
 
-  return <DefaultText style={[{ color }, style]} {...otherProps} />;
+  return (
+    <DefaultText
+      style={[{ color, fontFamily: "Geist-Regular", fontSize: 16 }, style]}
+      {...otherProps}
+    />
+  );
 }
 
 export function View(props: ViewProps) {
@@ -59,6 +66,30 @@ export function TouchableOpacity(props: TouchableOpacityProps) {
   return (
     <DefaultTouchableOpacity
       style={[{ backgroundColor }, style]}
+      {...otherProps}
+    />
+  );
+}
+
+export function TextInput(props: TextInputProps) {
+  const { style, lightColor, darkColor, ...otherProps } = props;
+  const color = useThemeColor({ light: lightColor, dark: darkColor }, "text");
+  const placeholderTextColor = useThemeColor(
+    { light: lightColor, dark: darkColor },
+    "text_muted2"
+  );
+
+  return (
+    <DefaultTextInput
+      style={[
+        {
+          color,
+          fontFamily: "Geist-Regular",
+          fontSize: 16,
+        },
+        style,
+      ]}
+      placeholderTextColor={placeholderTextColor}
       {...otherProps}
     />
   );

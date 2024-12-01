@@ -1,7 +1,7 @@
 import * as React from "react";
 import { StyleSheet, useColorScheme, Image } from "react-native";
 import { Text, TouchableOpacity, View } from "@/components/themed";
-import { ArrowRight } from "lucide-react-native";
+import { ArrowRight, CircleCheckBig } from "lucide-react-native";
 import { MotiView } from "moti";
 import colors from "@/constants/colors";
 import { router } from "expo-router";
@@ -24,7 +24,7 @@ const steps = [
   },
 ];
 
-export default function Component() {
+export default function StartScreen() {
   const colorScheme = useColorScheme();
   const [currentStep, setCurrentStep] = React.useState(0);
 
@@ -59,20 +59,22 @@ export default function Component() {
     );
   }
 
+  const currentStepData = steps[currentStep] || steps[0];
+
   return (
     <View style={styles.container}>
       <MotiView
-        from={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        key={`step-${currentStep}`}
+        from={{ opacity: 0, translateY: 10 }}
+        animate={{ opacity: 1, translateY: 0 }}
         transition={{
           type: "timing",
-          duration: 200,
+          duration: 300,
         }}
         style={styles.stepsContainer}
-        key={currentStep}
       >
         <Image
-          source={steps[currentStep].image}
+          source={currentStepData.image}
           style={[
             currentStep === 0 ? styles.logo : styles.imageShowCase,
             currentStep === 0 && {
@@ -88,9 +90,10 @@ export default function Component() {
             },
           ]}
           accessibilityLabel={`Step ${currentStep + 1} Image`}
+          resizeMode="contain"
         />
-        <Text style={styles.title}>{steps[currentStep].title}</Text>
-        <Text style={styles.subtitle}>{steps[currentStep].subtitle}</Text>
+        <Text style={styles.title}>{currentStepData.title}</Text>
+        <Text style={styles.subtitle}>{currentStepData.subtitle}</Text>
       </MotiView>
 
       <View style={styles.dotsContainer}>
@@ -114,7 +117,15 @@ export default function Component() {
         <Text style={[styles.buttonText, { color: colors.dark.tint }]}>
           {currentStep === steps.length - 1 ? "Get Started" : "Continue"}
         </Text>
-        <ArrowRight size={20} color={colors.dark.tint} style={styles.icon} />
+        {currentStep === steps.length - 1 ? (
+          <CircleCheckBig
+            size={20}
+            color={colors.dark.tint}
+            style={styles.icon}
+          />
+        ) : (
+          <ArrowRight size={20} color={colors.dark.tint} style={styles.icon} />
+        )}
       </TouchableOpacity>
     </View>
   );
