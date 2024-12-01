@@ -10,6 +10,7 @@ import {
 import { useColorScheme } from "@/hooks/useColorScheme";
 import "react-native-reanimated";
 import "react-native-gesture-handler";
+import ReactQueryProvider from "@/providers/react_query";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -32,11 +33,13 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="(screens)" options={{ headerShown: false }} />
-      </Stack>
-    </ThemeProvider>
+    <ReactQueryProvider>
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="(screens)" options={{ headerShown: false }} />
+        </Stack>
+      </ThemeProvider>
+    </ReactQueryProvider>
   );
 }

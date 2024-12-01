@@ -11,20 +11,22 @@ import {
 import colors from "@/constants/colors";
 import { router } from "expo-router";
 import { formatLongDate } from "@/lib/format_date";
+import { createNote } from "@/queries/notes";
 
 export default function NewNoteScreen() {
   const colorScheme = useColorScheme();
   const [inputs, setInputs] = React.useState<NewNote>({
     title: "",
     content: "",
-    last_edited_at: new Date(),
   });
+
+  const [lastEdited, setLastEdited] = React.useState(new Date());
 
   const undoStack = React.useRef<NewNote[]>([]);
   const redoStack = React.useRef<NewNote[]>([]);
   const debounceTimer = React.useRef<NodeJS.Timeout | null>(null);
 
-  const handleInputChange = (name: keyof NewNote, value: string) => {
+  function handleInputChange(name: keyof NewNote, value: string) {
     if (undoStack.current.length > 0) {
       if (debounceTimer.current) {
         clearTimeout(debounceTimer.current);
@@ -40,35 +42,39 @@ export default function NewNoteScreen() {
     }
 
     setInputs((prev) => ({ ...prev, [name]: value }));
-    setInputs((prev) => ({
-      ...prev,
-      last_edited_at: new Date(),
-    }));
-  };
+    setLastEdited(new Date());
+  }
 
-  const handleUndo = () => {
+  function handleUndo() {
     if (undoStack.current.length > 0) {
       const previousState = undoStack.current.pop()!;
       redoStack.current.push({ ...inputs });
       setInputs(previousState);
-      setInputs((prev) => ({
-        ...prev,
-        last_edited_at: new Date(),
-      }));
+      setLastEdited(new Date());
     }
-  };
+  }
 
-  const handleRedo = () => {
+  function handleRedo() {
     if (redoStack.current.length > 0) {
       const nextState = redoStack.current.pop()!;
       undoStack.current.push({ ...inputs });
       setInputs(nextState);
-      setInputs((prev) => ({
-        ...prev,
-        last_edited_at: new Date(),
-      }));
+      setLastEdited(new Date());
     }
-  };
+  }
+
+  async function handleCreateNote() {
+    if (inputs.content.length === 0) {
+      return;
+    }
+
+    try {
+      await createNote(inputs);
+      router.back();
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -124,9 +130,7 @@ export default function NewNoteScreen() {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.button}
-              onPress={() => {
-                console.log("TODO: Dots -> More");
-              }}
+              onPress={handleCreateNote}
               disabled={inputs.content.length === 0}
             >
               <Save
@@ -172,7 +176,7 @@ export default function NewNoteScreen() {
               },
             ]}
           >
-            Last edited at {formatLongDate(inputs.last_edited_at)}
+            Last edited at {formatLongDate(lastEdited)}
           </Text>
           <TextInput
             value={inputs.title}
