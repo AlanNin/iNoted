@@ -178,13 +178,7 @@ export default function HomeScreen() {
             ]}
             onPress={() => router.push("./(notes)/new")}
           >
-            <Plus
-              size={28}
-              color={
-                colorScheme === "light" ? colors.light.text : colors.dark.text
-              }
-              strokeWidth={1.5}
-            />
+            <Plus size={28} color={colors.dark.text} strokeWidth={1.5} />
           </TouchableOpacity>
         </View>
       </View>

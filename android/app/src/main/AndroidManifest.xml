@@ -26,6 +26,7 @@
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="com.app.expo-router-inoted"/>
         <data android:scheme="com.anonymous.iNoted"/>
+        <data android:scheme="exp+inoted"/>
       </intent-filter>
     </activity>
   </application>

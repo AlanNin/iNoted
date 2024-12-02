@@ -9,7 +9,7 @@ export default {
     tabIconSelected: "#000",
     primary: "#FF5781",
     foggy: "rgba(0, 0, 0, 0.3)",
-    foggy2: "rgba(0, 0, 0, 0.15)",
+    foggy2: "rgba(0, 0, 0, 0.08)",
   },
   dark: {
     text: "#fff",

@@ -11,7 +11,6 @@ import {
 import colors from "@/constants/colors";
 import { router } from "expo-router";
 import { formatLongDate } from "@/lib/format_date";
-import { createNote } from "@/queries/notes";
 
 export default function NewNoteScreen() {
   const colorScheme = useColorScheme();
@@ -69,8 +68,8 @@ export default function NewNoteScreen() {
     }
 
     try {
-      await createNote(inputs);
-      router.back();
+      // await createNote(inputs);
+      // router.back();
     } catch (error) {
       console.log(error);
     }

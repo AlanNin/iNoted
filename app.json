@@ -2,6 +2,7 @@
   "expo": {
     "name": "iNoted",
     "slug": "iNoted",
+    "platforms": ["ios", "android"],
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -27,6 +28,15 @@
       "bundler": "metro"
     },
     "scheme": "com.app.expo-router-inoted",
-    "plugins": ["expo-font", "expo-router", "@prisma/react-native"]
+    "plugins": ["expo-font", "expo-router"],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "66e41cc9-cdfe-486b-bdd9-bc9154cc52c9"
+      }
+    },
+    "owner": "alandevnin"
   }
 }
