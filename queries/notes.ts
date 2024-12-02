@@ -1,42 +1,66 @@
-// import { extendedClient } from "@/prisma/prisma_client";
+import { db_client } from "@/db/client";
+import { notes } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
-// export function createNote(data: NewNote) {
-//   return extendedClient.notes.create({
-//     data: {
-//       title: data.title,
-//       content: data.content,
-//     },
-//   });
-// }
+export async function createNote(note: NewNote) {
+  try {
+    await db_client.insert(notes).values({
+      title: note.title,
+      content: note.content,
+    });
+  } catch (error) {
+    throw new Error("Could not create the note");
+  }
+}
 
-// export function deleteNote(id: number) {
-//   return extendedClient.notes.delete({
-//     where: {
-//       id,
-//     },
-//   });
-// }
+export async function deleteNote(id: number) {
+  try {
+    const result = await db_client.delete(notes).where(eq(notes.id, id));
+    if (!result) {
+      throw new Error("Note not found");
+    }
+  } catch (error) {
+    throw new Error("Could not delete the note");
+  }
+}
 
-// export function updateNote(id: number, data: NewNote) {
-//   return extendedClient.notes.update({
-//     where: {
-//       id,
-//     },
-//     data: {
-//       title: data.title,
-//       content: data.content,
-//     },
-//   });
-// }
+export async function updateNote(id: number, note: NewNote) {
+  try {
+    const result = await db_client
+      .update(notes)
+      .set({ title: note.title, content: note.content })
+      .where(eq(notes.id, id));
 
-// export function getNoteById(id: number) {
-//   return extendedClient.notes.findUnique({
-//     where: {
-//       id,
-//     },
-//   });
-// }
+    if (!result) {
+      throw new Error("Note not found");
+    }
+  } catch (error) {
+    throw new Error("Could not update the note");
+  }
+}
 
-// export function getAllNotes() {
-//   return extendedClient.notes.findMany();
-// }
+export async function getNoteById(id: number) {
+  try {
+    const note = await db_client
+      .select()
+      .from(notes)
+      .where(eq(notes.id, id))
+      .limit(1);
+
+    if (note.length === 0) {
+      throw new Error("Note not found");
+    }
+
+    return note[0];
+  } catch (error) {
+    throw new Error("Could not fetch the note");
+  }
+}
+
+export async function getAllNotes() {
+  try {
+    return await db_client.select().from(notes);
+  } catch (error) {
+    throw new Error("Could not fetch notes");
+  }
+}

@@ -3,6 +3,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   useColorScheme,
+  FlatList,
 } from "react-native";
 import React, { useState } from "react";
 import { Text, TextInput, View } from "@/components/themed";
@@ -12,14 +13,24 @@ import {
   ListFilter,
   Menu,
   Plus,
+  Rows3,
   Spline,
 } from "lucide-react-native";
 import colors from "@/constants/colors";
 import { router } from "expo-router";
+import { useQuery } from "@tanstack/react-query";
+import { getAllNotes } from "@/queries/notes";
+import NoteCard from "@/components/note_card";
 
 export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [displayMode, setDisplayMode] = useState<"grid" | "list">("grid");
   const colorScheme = useColorScheme();
+
+  const { data: notes, isLoading: isLoadingNotes } = useQuery({
+    queryKey: ["notes"],
+    queryFn: () => getAllNotes(),
+  });
 
   return (
     <SafeAreaView style={styles.container}>
@@ -35,7 +46,7 @@ export default function HomeScreen() {
             },
           ]}
         >
-          <TouchableOpacity style={styles.menuButton}>
+          <TouchableOpacity>
             <Menu
               size={24}
               color={
@@ -52,15 +63,27 @@ export default function HomeScreen() {
             onChangeText={setSearchQuery}
           />
 
-          <TouchableOpacity style={styles.iconButton}>
-            <LayoutGrid
-              size={24}
-              color={
-                colorScheme === "light" ? colors.light.tint : colors.dark.tint
-              }
-              strokeWidth={1.5}
-            />
-          </TouchableOpacity>
+          {displayMode === "grid" ? (
+            <TouchableOpacity onPress={() => setDisplayMode("list")}>
+              <LayoutGrid
+                size={24}
+                color={
+                  colorScheme === "light" ? colors.light.tint : colors.dark.tint
+                }
+                strokeWidth={1.5}
+              />
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity onPress={() => setDisplayMode("grid")}>
+              <Rows3
+                size={24}
+                color={
+                  colorScheme === "light" ? colors.light.tint : colors.dark.tint
+                }
+                strokeWidth={1.5}
+              />
+            </TouchableOpacity>
+          )}
 
           {/* <TouchableOpacity
             style={[
@@ -142,33 +165,50 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <View style={styles.content}>{/* Something here */}</View>
+      <View style={styles.content}>
+        <FlatList
+          key={displayMode}
+          data={notes}
+          renderItem={({ item }) => <NoteCard note={item} />}
+          numColumns={displayMode === "grid" ? 2 : 1}
+          style={styles.noteListContainer}
+          contentContainerStyle={styles.notesListWrapper}
+          columnWrapperStyle={
+            displayMode === "grid" ? styles.notesListWrapper : null
+          }
+        />
+      </View>
 
       <View style={styles.addButtonContainer}>
-        <Text style={styles.emptyText}>
-          Let's start by creating your first{" "}
-          <Text
-            style={[
-              styles.emptyText,
-              colorScheme === "light"
-                ? { color: colors.light.primary }
-                : { color: colors.dark.primary },
-            ]}
-          >
-            note
+        {notes?.length === 0 && (
+          <Text style={styles.emptyText}>
+            Let's start by creating your first{" "}
+            <Text
+              style={[
+                styles.emptyText,
+                colorScheme === "light"
+                  ? { color: colors.light.primary }
+                  : { color: colors.dark.primary },
+              ]}
+            >
+              note
+            </Text>
           </Text>
-        </Text>
+        )}
+
         <View style={styles.fabContainer}>
-          <Spline
-            size={36}
-            color={
-              colorScheme === "light"
-                ? colors.light.primary
-                : colors.dark.primary
-            }
-            strokeWidth={1.5}
-            style={styles.spline}
-          />
+          {notes?.length === 0 && (
+            <Spline
+              size={36}
+              color={
+                colorScheme === "light"
+                  ? colors.light.primary
+                  : colors.dark.primary
+              }
+              strokeWidth={1.5}
+              style={styles.spline}
+            />
+          )}
           <TouchableOpacity
             style={[
               styles.fab,
@@ -192,28 +232,25 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: 16,
-    gap: 16,
+    gap: 12,
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 9999,
-    paddingHorizontal: 12,
-    paddingVertical: 0,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    gap: 12,
   },
-  menuButton: {
-    padding: 8,
-  },
+
   searchInput: {
     flex: 1,
     color: "#fff",
     fontSize: 16,
     lineHeight: 28,
   },
-  iconButton: {
-    padding: 8,
-  },
+
   settingsButton: {
     borderRadius: 20,
     padding: 8,
@@ -242,10 +279,14 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 16,
-    justifyContent: "center",
-    alignItems: "center",
   },
+  noteListContainer: {
+    paddingHorizontal: 16,
+  },
+  notesListWrapper: {
+    gap: 12,
+  },
+
   emptyText: {
     letterSpacing: 0.5,
     width: "auto",

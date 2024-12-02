@@ -2,7 +2,10 @@
   "expo": {
     "name": "iNoted",
     "slug": "iNoted",
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -28,7 +31,12 @@
       "bundler": "metro"
     },
     "scheme": "com.app.expo-router-inoted",
-    "plugins": ["expo-font", "expo-router"],
+    "plugins": [
+      "expo-font",
+      "expo-router",
+      "expo-sqlite",
+      "react-native-edge-to-edge"
+    ],
     "extra": {
       "router": {
         "origin": false

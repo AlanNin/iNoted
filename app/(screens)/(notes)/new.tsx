@@ -11,9 +11,14 @@ import {
 import colors from "@/constants/colors";
 import { router } from "expo-router";
 import { formatLongDate } from "@/lib/format_date";
+import { createNote } from "@/queries/notes";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function NewNoteScreen() {
+  const queryClient = useQueryClient();
+
   const colorScheme = useColorScheme();
+
   const [inputs, setInputs] = React.useState<NewNote>({
     title: "",
     content: "",
@@ -68,8 +73,9 @@ export default function NewNoteScreen() {
     }
 
     try {
-      // await createNote(inputs);
-      // router.back();
+      await createNote(inputs);
+      await queryClient.refetchQueries({ queryKey: ["notes"] });
+      router.back();
     } catch (error) {
       console.log(error);
     }
@@ -180,12 +186,7 @@ export default function NewNoteScreen() {
           <TextInput
             value={inputs.title}
             onChangeText={(e) => handleInputChange("title", e)}
-            style={[
-              styles.noteTitle,
-              {
-                textAlignVertical: "top",
-              },
-            ]}
+            style={[styles.noteTitle]}
             placeholder="Untitled note"
             multiline={true}
           />
@@ -193,12 +194,7 @@ export default function NewNoteScreen() {
             value={inputs.content}
             onChangeText={(e) => handleInputChange("content", e)}
             multiline={true}
-            style={[
-              styles.noteContent,
-              {
-                textAlignVertical: "top",
-              },
-            ]}
+            style={[styles.noteContent]}
             placeholder="Capture your thoughts..."
           />
         </View>
@@ -243,11 +239,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     padding: 0,
     margin: 0,
+    textAlignVertical: "top",
   },
   noteContent: {
     padding: 0,
     margin: 0,
     flex: 1,
+    textAlignVertical: "top",
   },
   noteSave: {
     position: "absolute",
