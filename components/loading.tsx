@@ -1,6 +1,6 @@
 import { Loader2 } from "lucide-react-native";
 import React from "react";
-import { useColorScheme } from "react-native";
+import useColorScheme from "@/hooks/useColorScheme";
 import { MotiView } from "moti";
 import colors from "@/constants/colors";
 import { Easing } from "react-native-reanimated";
@@ -9,8 +9,8 @@ export default function Loader({
   size = 32,
   color,
   strokeWidth = 1.5,
-}: Loader) {
-  const colorScheme = useColorScheme();
+}: LoaderProps) {
+  const theme = useColorScheme();
 
   return (
     <MotiView
@@ -29,7 +29,7 @@ export default function Loader({
         color={
           color
             ? color
-            : colorScheme === "light"
+            : theme === "light"
             ? colors.light.tint
             : colors.dark.tint
         }

@@ -1,9 +1,9 @@
-type NewNote = {
+type NewNoteProps = {
   title: string;
   content: string;
 };
 
-type Note = {
+type NoteProps = {
   id: number;
   title: string;
   content: string;

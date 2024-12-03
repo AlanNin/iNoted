@@ -2,29 +2,24 @@ import {
   Text as DefaultText,
   View as DefaultView,
   TouchableOpacity as DefaultTouchableOpacity,
-  Image as DefaultImage,
   TextInput as DefaultTextInput,
 } from "react-native";
+import { MotiView as DefaultMotiView } from "moti";
+import useColorScheme from "@/hooks/useColorScheme";
 import colors from "@/constants/colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
-
-type ThemeProps = {
-  lightColor?: string;
-  darkColor?: string;
-};
-
-export type TextProps = ThemeProps & DefaultText["props"];
-export type ViewProps = ThemeProps & DefaultView["props"];
-export type TouchableOpacityProps = ThemeProps &
-  React.ComponentProps<typeof DefaultTouchableOpacity>;
-export type ImageProps = ThemeProps & DefaultImage["props"];
-export type TextInputProps = ThemeProps & DefaultTextInput["props"];
+import {
+  MotiViewProps,
+  TextInputProps,
+  TextProps,
+  TouchableOpacityProps,
+  ViewProps,
+} from "@/types/themed";
 
 export function useThemeColor(
   props: { light?: string; dark?: string },
   colorName: keyof typeof colors.light & keyof typeof colors.dark
 ) {
-  const theme = useColorScheme() ?? "light";
+  const theme = useColorScheme();
   const colorFromProps = props[theme];
 
   if (colorFromProps) {
@@ -35,8 +30,11 @@ export function useThemeColor(
 }
 
 export function Text(props: TextProps) {
-  const { style, lightColor, darkColor, ...otherProps } = props;
-  const color = useThemeColor({ light: lightColor, dark: darkColor }, "text");
+  const { style, customTextColor, ...otherProps } = props;
+  const color = useThemeColor(
+    { light: customTextColor, dark: customTextColor },
+    "text"
+  );
 
   return (
     <DefaultText
@@ -47,9 +45,9 @@ export function Text(props: TextProps) {
 }
 
 export function View(props: ViewProps) {
-  const { style, lightColor, darkColor, ...otherProps } = props;
+  const { style, customBackgroundColor, ...otherProps } = props;
   const backgroundColor = useThemeColor(
-    { light: lightColor, dark: darkColor },
+    { light: customBackgroundColor, dark: customBackgroundColor },
     "background"
   );
 
@@ -57,9 +55,9 @@ export function View(props: ViewProps) {
 }
 
 export function TouchableOpacity(props: TouchableOpacityProps) {
-  const { style, lightColor, darkColor, ...otherProps } = props;
+  const { style, customBackgroundColor = "transparent", ...otherProps } = props;
   const backgroundColor = useThemeColor(
-    { light: lightColor, dark: darkColor },
+    { light: customBackgroundColor, dark: customBackgroundColor },
     "background"
   );
 
@@ -72,11 +70,21 @@ export function TouchableOpacity(props: TouchableOpacityProps) {
 }
 
 export function TextInput(props: TextInputProps) {
-  const { style, lightColor, darkColor, ...otherProps } = props;
-  const color = useThemeColor({ light: lightColor, dark: darkColor }, "text");
+  const {
+    style,
+    customTextColor,
+    customPlaceholderColor,
+    ...otherProps
+  } = props;
+
+  const color = useThemeColor(
+    { light: customTextColor, dark: customTextColor },
+    "text"
+  );
+
   const placeholderTextColor = useThemeColor(
-    { light: lightColor, dark: darkColor },
-    "text_muted2"
+    { light: customPlaceholderColor, dark: customPlaceholderColor },
+    "text_muted"
   );
 
   return (
@@ -92,5 +100,17 @@ export function TextInput(props: TextInputProps) {
       placeholderTextColor={placeholderTextColor}
       {...otherProps}
     />
+  );
+}
+
+export function MotiView(props: MotiViewProps) {
+  const { style, customBackgroundColor, ...otherProps } = props;
+  const backgroundColor = useThemeColor(
+    { light: customBackgroundColor, dark: customBackgroundColor },
+    "background"
+  );
+
+  return (
+    <DefaultMotiView style={[{ backgroundColor }, style]} {...otherProps} />
   );
 }

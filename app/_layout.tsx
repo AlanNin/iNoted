@@ -7,7 +7,7 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import useColorScheme from "@/hooks/useColorScheme";
 import "react-native-reanimated";
 import "react-native-gesture-handler";
 import ReactQueryProvider from "@/providers/react_query";
@@ -31,23 +31,19 @@ import colors from "@/constants/colors";
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const theme = useColorScheme();
 
   // * Edge to edge
 
-  setBackgroundColorAsync(
-    colorScheme === "light" ? colors.light.background : colors.dark.background
-  );
+  setBackgroundColorAsync(colors[theme].background);
 
-  setButtonStyleAsync(colorScheme === "light" ? "dark" : "light");
+  setButtonStyleAsync(theme === "light" ? "dark" : "light");
 
   setStatusBarTranslucent(false);
 
-  setStatusBarBackgroundColor(
-    colorScheme === "light" ? colors.light.background : colors.dark.background
-  );
+  setStatusBarBackgroundColor(colors[theme].background);
 
-  setStatusBarStyle(colorScheme === "light" ? "dark" : "light");
+  setStatusBarStyle(theme === "light" ? "dark" : "light");
 
   setStatusBarHidden(false);
 
@@ -74,7 +70,7 @@ export default function RootLayout() {
 
   return (
     <ReactQueryProvider>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <ThemeProvider value={theme === "dark" ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="(screens)" options={{ headerShown: false }} />

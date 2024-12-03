@@ -1,8 +1,8 @@
 import * as React from "react";
-import { StyleSheet, useColorScheme, Image } from "react-native";
-import { Text, TouchableOpacity, View } from "@/components/themed";
+import { StyleSheet, Image } from "react-native";
+import useColorScheme from "@/hooks/useColorScheme";
+import { MotiView, Text, TouchableOpacity, View } from "@/components/themed";
 import { ArrowRight, CircleCheckBig } from "lucide-react-native";
-import { MotiView } from "moti";
 import colors from "@/constants/colors";
 import { router } from "expo-router";
 
@@ -25,7 +25,7 @@ const steps = [
 ];
 
 export default function StartScreen() {
-  const colorScheme = useColorScheme();
+  const theme = useColorScheme();
   const [currentStep, setCurrentStep] = React.useState(0);
 
   const handleNextStep = () => {
@@ -42,13 +42,7 @@ export default function StartScreen() {
         from={{ width: 4 }}
         animate={{
           width: active ? 24 : 4,
-          backgroundColor: active
-            ? colorScheme === "light"
-              ? colors.light.primary
-              : colors.dark.primary
-            : colorScheme === "light"
-            ? colors.light.foggy
-            : colors.dark.foggy,
+          backgroundColor: active ? colors[theme].primary : colors[theme].foggy,
         }}
         transition={{
           type: "timing",
@@ -78,8 +72,7 @@ export default function StartScreen() {
           style={[
             currentStep === 0 ? styles.logo : styles.imageShowCase,
             currentStep === 0 && {
-              tintColor:
-                colorScheme === "light" ? colors.light.tint : colors.dark.tint,
+              tintColor: colors[theme].tint,
             },
             currentStep === 1 && {
               height: 400,
@@ -111,10 +104,9 @@ export default function StartScreen() {
       <TouchableOpacity
         style={styles.button}
         onPress={handleNextStep}
-        lightColor={colors.light.primary}
-        darkColor={colors.dark.primary}
+        customBackgroundColor={colors[theme].primary}
       >
-        <Text style={[styles.buttonText, { color: colors.dark.tint }]}>
+        <Text style={styles.buttonText} customTextColor={colors.dark.tint}>
           {currentStep === steps.length - 1 ? "Get Started" : "Continue"}
         </Text>
         {currentStep === steps.length - 1 ? (

@@ -1,42 +1,22 @@
-import {
-  StyleSheet,
-  TouchableOpacity,
-  SafeAreaView,
-  useColorScheme,
-  Dimensions,
-} from "react-native";
-import React, { useEffect, useRef, useState } from "react";
-import { Text, TextInput, View } from "@/components/themed";
-import {
-  ChevronUp,
-  Filter,
-  LayoutGrid,
-  Menu,
-  Plus,
-  Rows3,
-  Spline,
-  SquarePen,
-} from "lucide-react-native";
+import { StyleSheet, SafeAreaView, FlatList } from "react-native";
+import React, { useRef, useState } from "react";
+import { Text, TextInput, TouchableOpacity, View } from "@/components/themed";
 import colors from "@/constants/colors";
 import { router } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { getAllNotes } from "@/queries/notes";
-import NoteCardGrid from "@/components/note_card_grid";
+import NoteCard from "@/components/note_card";
 import Loader from "@/components/loading";
 import { MotiView } from "moti";
-import NoteCardList from "@/components/note_card_list";
-import {
-  DataProvider,
-  LayoutProvider,
-  RecyclerListView,
-} from "recyclerlistview";
+import Icon from "@/components/icon";
+import useColorScheme from "@/hooks/useColorScheme";
 
 export default function HomeScreen() {
-  const colorScheme = useColorScheme();
   const [searchQuery, setSearchQuery] = useState("");
-  const [displayMode, setDisplayMode] = useState<"grid" | "list">("grid");
-  const listRef = useRef<RecyclerListView>(null);
-  const { width } = Dimensions.get("window");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const theme = useColorScheme();
+
+  const listRef = useRef<FlatList<NoteProps> | null>(null);
 
   // notes data
   const { data: notesData, isLoading: isLoadingNotesData } = useQuery({
@@ -48,55 +28,48 @@ export default function HomeScreen() {
     ? [...notesData, ...Array((3 - (notesData.length % 3)) % 3).fill({})]
     : [];
 
-  // notes list
-  const dataProvider = new DataProvider(
-    (r1, r2) => r1.id !== r2.id
-  ).cloneWithRows(displayMode === "grid" ? notes : notesData!);
-
-  const layoutProvider = new LayoutProvider(
-    () => "note",
-    (type, dim) => {
-      dim.width = width / (displayMode === "grid" ? 3 : 1);
-      dim.height = displayMode === "grid" ? 216 : 140;
-    }
-  );
-
-  const rowRenderer = (_type: any, data: Note, index: number) => {
-    return displayMode === "grid" ? (
-      <NoteCardGrid note={data} index={index} />
-    ) : (
-      <NoteCardList note={data} index={index} />
-    );
-  };
-
   // scroll management
-  // const contentScrollY = useRef(0);
+  // const [isFabVisible, setIsFabVisible] = useState(true);
+  // const [isUpArrowVisible, setIsUpArrowVisible] = useState(false);
+  // const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+  // const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+  //   const { y } = event.nativeEvent.contentOffset;
+  //   if (y <= 0) {
+  //     setIsFabVisible(true);
+  //     setIsUpArrowVisible(false);
+  //   } else {
+  //     setIsFabVisible(false);
+  //     if (scrollTimeout.current) {
+  //       clearTimeout(scrollTimeout.current);
+  //     }
+  //     scrollTimeout.current = setTimeout(() => {
+  //       setIsFabVisible(true);
+  //       setIsUpArrowVisible(true);
+  //     }, 500);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   return () => {
+  //     if (scrollTimeout.current) {
+  //       clearTimeout(scrollTimeout.current);
+  //     }
+  //   };
+  // }, []);
+
   // const scrollToTop = () => {
-  //   listRef.current?.scrollToOffset(0, 0, true);
+  //   listRef.current?.scrollToOffset({ offset: 0, animated: true });
   // };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <View
-          style={[
-            styles.searchContainer,
-            {
-              backgroundColor:
-                colorScheme === "light"
-                  ? colors.light.foggy2
-                  : colors.dark.foggy2,
-            },
-          ]}
+          style={styles.searchContainer}
+          customBackgroundColor={colors[theme].foggier}
         >
           <TouchableOpacity>
-            <Menu
-              size={24}
-              color={
-                colorScheme === "light" ? colors.light.tint : colors.dark.tint
-              }
-              strokeWidth={1.8}
-            />
+            <Icon name="Menu" strokeWidth={1.8} />
           </TouchableOpacity>
 
           <TextInput
@@ -106,50 +79,26 @@ export default function HomeScreen() {
             onChangeText={setSearchQuery}
           />
 
-          {displayMode === "grid" ? (
+          {viewMode === "grid" ? (
             <TouchableOpacity
-              onPress={() => setDisplayMode("list")}
+              onPress={() => setViewMode("list")}
               disabled={notes?.length === 0}
             >
-              <LayoutGrid
-                size={24}
-                color={
-                  notes?.length > 0
-                    ? colorScheme === "light"
-                      ? colors.light.tint
-                      : colors.dark.tint
-                    : colorScheme === "light"
-                    ? colors.light.text_muted2
-                    : colors.dark.text_muted2
-                }
-                strokeWidth={1.5}
-              />
+              <Icon name="LayoutGrid" muted={notes?.length === 0} />
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
-              onPress={() => setDisplayMode("grid")}
+              onPress={() => setViewMode("grid")}
               disabled={notes?.length === 0}
             >
-              <Rows3
-                size={24}
-                color={
-                  notes?.length > 0
-                    ? colorScheme === "light"
-                      ? colors.light.tint
-                      : colors.dark.tint
-                    : colorScheme === "light"
-                    ? colors.light.text_muted2
-                    : colors.dark.text_muted2
-                }
-                strokeWidth={1.5}
-              />
+              <Icon name="Rows3" muted={notes?.length === 0} />
             </TouchableOpacity>
           )}
 
           {/* <TouchableOpacity
             style={[
               styles.settingsButton,
-              colorScheme === "light"
+              theme === "light"
                 ? { backgroundColor: colors.light.primary }
                 : { backgroundColor: colors.dark.primary },
             ]}
@@ -160,64 +109,27 @@ export default function HomeScreen() {
 
         <View style={styles.subHeader}>
           <Text
-            style={[
-              styles.notesCount,
-              {
-                color:
-                  colorScheme === "light"
-                    ? colors.light.text_muted
-                    : colors.dark.text_muted,
-              },
-            ]}
+            style={styles.notesCount}
+            customTextColor={colors[theme].grayscale}
           >
             All Notes ({notes.length})
           </Text>
           <View style={styles.actions}>
             <TouchableOpacity style={styles.actionButton}>
-              <Filter
-                size={16}
-                color={
-                  colorScheme === "light"
-                    ? colors.light.text_muted
-                    : colors.dark.text_muted
-                }
-                strokeWidth={1.5}
-              />
+              <Icon name="Filter" size={16} grayscale />
               <Text
-                style={[
-                  styles.actionText,
-                  {
-                    color:
-                      colorScheme === "light"
-                        ? colors.light.text_muted
-                        : colors.dark.text_muted,
-                  },
-                ]}
+                style={styles.actionText}
+                customTextColor={colors[theme].grayscale}
               >
                 Sort
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.actionButton}>
-              <SquarePen
-                size={16}
-                color={
-                  colorScheme === "light"
-                    ? colors.light.text_muted
-                    : colors.dark.text_muted
-                }
-                strokeWidth={1.5}
-              />
+              <Icon name="SquarePen" size={16} grayscale />
               <Text
-                style={[
-                  styles.actionText,
-                  {
-                    color:
-                      colorScheme === "light"
-                        ? colors.light.text_muted
-                        : colors.dark.text_muted,
-                  },
-                ]}
+                style={styles.actionText}
+                customTextColor={colors[theme].grayscale}
               >
                 Edit
               </Text>
@@ -233,13 +145,21 @@ export default function HomeScreen() {
             <Text style={styles.loadingText}>Loading notes...</Text>
           </View>
         ) : (
-          <RecyclerListView
+          <FlatList
             ref={listRef}
-            dataProvider={dataProvider}
-            layoutProvider={layoutProvider}
-            rowRenderer={rowRenderer}
-            renderAheadOffset={500}
-            key={displayMode}
+            key={viewMode}
+            keyExtractor={(item, index) => item.id || `placeholder-${index}`}
+            data={viewMode === "grid" ? notes : notesData}
+            renderItem={({ item, index }) => (
+              <NoteCard note={item} index={index} viewMode={viewMode} />
+            )}
+            numColumns={viewMode === "grid" ? 3 : 1}
+            style={styles.noteListContainer}
+            contentContainerStyle={styles.notesListWrapper}
+            columnWrapperStyle={
+              viewMode === "grid" ? styles.notesListWrapper : null
+            }
+            removeClippedSubviews={true}
           />
         )}
       </View>
@@ -250,12 +170,7 @@ export default function HomeScreen() {
             <Text style={styles.emptyText}>
               Let's start by creating your first{" "}
               <Text
-                style={[
-                  styles.emptyText,
-                  colorScheme === "light"
-                    ? { color: colors.light.primary }
-                    : { color: colors.dark.primary },
-                ]}
+                style={[styles.emptyText, { color: colors[theme].primary }]}
               >
                 note
               </Text>
@@ -265,6 +180,7 @@ export default function HomeScreen() {
           <MotiView
             from={{ opacity: 0 }}
             animate={{
+              // opacity: isFabVisible ? 1 : 0,
               opacity: 1,
             }}
             transition={{
@@ -274,27 +190,14 @@ export default function HomeScreen() {
             style={styles.fabContainer}
           >
             {notes?.length === 0 && (
-              <Spline
-                size={36}
-                color={
-                  colorScheme === "light"
-                    ? colors.light.primary
-                    : colors.dark.primary
-                }
-                strokeWidth={1.5}
-                style={styles.spline}
-              />
+              <Icon name="Spline" themed size={36} style={styles.spline} />
             )}
             <TouchableOpacity
-              style={[
-                styles.fab,
-                colorScheme === "light"
-                  ? { backgroundColor: colors.light.primary }
-                  : { backgroundColor: colors.dark.primary },
-              ]}
+              style={styles.fab}
+              customBackgroundColor={colors[theme].primary}
               onPress={() => router.push("./(notes)/new")}
             >
-              <Plus size={28} color={colors.dark.text} strokeWidth={1.5} />
+              <Icon name="Plus" size={28} customColor={colors.dark.tint} />
             </TouchableOpacity>
           </MotiView>
         </View>
@@ -304,7 +207,7 @@ export default function HomeScreen() {
         <MotiView
           from={{ opacity: 0 }}
           animate={{
-            opacity: 1,
+            opacity: isUpArrowVisible && !isFabVisible ? 1 : 0,
           }}
           transition={{
             type: "timing",
@@ -315,17 +218,13 @@ export default function HomeScreen() {
           <TouchableOpacity
             style={[
               styles.scrollButtonIcon,
-              colorScheme === "light"
-                ? { backgroundColor: colors.light.primary }
-                : { backgroundColor: colors.light.primary },
+              theme === "light"
+                ? { backgroundColor: colors.light.primary_dark }
+                : { backgroundColor: colors.light.primary_dark },
             ]}
+            onPress={scrollToTop}
           >
-            <ChevronUp
-              size={24}
-              color={colors.dark.tint}
-              strokeWidth={1.5}
-              onPress={scrollToTop}
-            />
+            <ChevronUp size={24} color={colors.dark.tint} strokeWidth={1.5} />
           </TouchableOpacity>
         </MotiView>
       )} */}
@@ -353,7 +252,6 @@ const styles = StyleSheet.create({
 
   searchInput: {
     flex: 1,
-    color: "#fff",
     fontSize: 16,
     lineHeight: 28,
   },
@@ -393,8 +291,6 @@ const styles = StyleSheet.create({
   notesListWrapper: {
     gap: 20,
     paddingBottom: 12,
-    width: "100%",
-    flex: 1,
   },
   emptyText: {
     letterSpacing: 0.5,

@@ -1,34 +1,27 @@
-import { StyleSheet, useColorScheme } from "react-native";
+import { StyleSheet } from "react-native";
+import useColorScheme from "@/hooks/useColorScheme";
 import React from "react";
 import { Text, TextInput, TouchableOpacity, View } from "@/components/themed";
-import {
-  ArrowLeft,
-  EllipsisVertical,
-  Redo2,
-  Save,
-  Undo2,
-} from "lucide-react-native";
 import colors from "@/constants/colors";
 import { router } from "expo-router";
 import { formatLongDate } from "@/lib/format_date";
 import { createNote } from "@/queries/notes";
 import { useQueryClient } from "@tanstack/react-query";
+import Icon from "@/components/icon";
 
 export default function NewNoteScreen() {
-  const colorScheme = useColorScheme();
-
-  const [inputs, setInputs] = React.useState<NewNote>({
+  const theme = useColorScheme();
+  const [lastEdited, setLastEdited] = React.useState(new Date());
+  const undoStack = React.useRef<NewNoteProps[]>([]);
+  const redoStack = React.useRef<NewNoteProps[]>([]);
+  const debounceTimer = React.useRef<NodeJS.Timeout | null>(null);
+  const queryClient = useQueryClient();
+  const [inputs, setInputs] = React.useState<NewNoteProps>({
     title: "",
     content: "",
   });
 
-  const [lastEdited, setLastEdited] = React.useState(new Date());
-
-  const undoStack = React.useRef<NewNote[]>([]);
-  const redoStack = React.useRef<NewNote[]>([]);
-  const debounceTimer = React.useRef<NodeJS.Timeout | null>(null);
-
-  function handleInputChange(name: keyof NewNote, value: string) {
+  function handleInputChange(name: keyof NewNoteProps, value: string) {
     if (undoStack.current.length > 0) {
       if (debounceTimer.current) {
         clearTimeout(debounceTimer.current);
@@ -65,14 +58,21 @@ export default function NewNoteScreen() {
     }
   }
 
+  async function refetchNotes() {
+    await queryClient.refetchQueries({ queryKey: ["notes"] });
+  }
+
   async function handleCreateNote() {
     if (inputs.content.length === 0) {
       return;
     }
 
     try {
-      await createNote(inputs);
-      await useQueryClient().refetchQueries({ queryKey: ["notes"] });
+      await createNote({
+        ...inputs,
+        title: inputs.title.length === 0 ? "Untitled note" : inputs.title,
+      });
+      await refetchNotes();
       router.back();
     } catch (error) {
       console.log(error);
@@ -84,13 +84,7 @@ export default function NewNoteScreen() {
       <View style={styles.wrapper}>
         <View style={styles.header}>
           <TouchableOpacity style={styles.button} onPress={() => router.back()}>
-            <ArrowLeft
-              size={24}
-              color={
-                colorScheme === "light" ? colors.light.text : colors.dark.text
-              }
-              strokeWidth={1.5}
-            />
+            <Icon name="ArrowLeft" />
           </TouchableOpacity>
           <View style={styles.headerSecton}>
             <TouchableOpacity
@@ -98,57 +92,21 @@ export default function NewNoteScreen() {
               onPress={handleUndo}
               disabled={undoStack.current.length === 0}
             >
-              <Undo2
-                size={24}
-                color={
-                  undoStack.current.length > 0
-                    ? colorScheme === "light"
-                      ? colors.light.tint
-                      : colors.dark.tint
-                    : colorScheme === "light"
-                    ? colors.light.text_muted2
-                    : colors.dark.text_muted2
-                }
-                strokeWidth={1.5}
-              />
+              <Icon name="Undo2" muted={undoStack.current.length === 0} />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.button}
               onPress={handleRedo}
               disabled={redoStack.current.length === 0}
             >
-              <Redo2
-                size={24}
-                color={
-                  redoStack.current.length > 0
-                    ? colorScheme === "light"
-                      ? colors.light.tint
-                      : colors.dark.tint
-                    : colorScheme === "light"
-                    ? colors.light.text_muted2
-                    : colors.dark.text_muted2
-                }
-                strokeWidth={1.5}
-              />
+              <Icon name="Redo2" muted={redoStack.current.length === 0} />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.button}
               onPress={handleCreateNote}
               disabled={inputs.content.length === 0}
             >
-              <Save
-                size={24}
-                color={
-                  colorScheme === "light"
-                    ? inputs.content.length > 0
-                      ? colors.light.text
-                      : colors.light.text_muted2
-                    : inputs.content.length > 0
-                    ? colors.dark.text
-                    : colors.dark.text_muted2
-                }
-                strokeWidth={1.5}
-              />
+              <Icon name="Save" muted={inputs.content.length === 0} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -157,27 +115,14 @@ export default function NewNoteScreen() {
                 console.log("TODO: Dots -> More");
               }}
             >
-              <EllipsisVertical
-                size={24}
-                color={
-                  colorScheme === "light" ? colors.light.text : colors.dark.text
-                }
-                strokeWidth={1.5}
-              />
+              <Icon name="EllipsisVertical" />
             </TouchableOpacity>
           </View>
         </View>
         <View style={styles.content}>
           <Text
-            style={[
-              styles.lastEditedText,
-              {
-                color:
-                  colorScheme === "light"
-                    ? colors.light.text_muted
-                    : colors.dark.text_muted,
-              },
-            ]}
+            style={styles.lastEditedText}
+            customTextColor={colors[theme].grayscale}
           >
             Last edited at {formatLongDate(lastEdited)}
           </Text>
