@@ -2,24 +2,39 @@ import { StyleSheet, useColorScheme } from "react-native";
 import { Text, View } from "./themed";
 import colors from "@/constants/colors";
 import { formatLongDate } from "@/lib/format_date";
+import { memo } from "react";
+import { MotiView } from "moti";
 
-export default function NoteCard({ note }: { note: Note }) {
+const NoteCardList = memo(({ note, index }: { note: Note; index?: number }) => {
+  if (!note.id) {
+    return <View style={styles.container} />;
+  }
+
   const colorScheme = useColorScheme();
 
+  const delay = index ? index * 50 : 0;
+
   return (
-    <View
+    <MotiView
+      from={{ opacity: 0, translateY: 10 }}
+      animate={{ opacity: 1, translateY: 0 }}
+      transition={{
+        type: "timing",
+        duration: 350,
+        delay,
+      }}
       style={[
         styles.container,
         {
           backgroundColor:
-            colorScheme === "light" ? colors.light.foggy2 : colors.dark.foggy2,
+            colorScheme === "light" ? colors.light.foggy3 : colors.dark.foggy3,
         },
       ]}
     >
       <Text style={styles.title} numberOfLines={1}>
         {note.title}
       </Text>
-      <Text style={styles.content} numberOfLines={3}>
+      <Text style={styles.content} numberOfLines={2}>
         {note.content}
       </Text>
       <Text
@@ -36,9 +51,9 @@ export default function NoteCard({ note }: { note: Note }) {
       >
         {formatLongDate(note.created_at)}
       </Text>
-    </View>
+    </MotiView>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -49,6 +64,8 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     gap: 12,
     height: 140,
+    marginBottom: 16,
+    marginHorizontal: 16,
   },
   title: {
     fontWeight: "bold",
@@ -62,3 +79,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
 });
+
+export default NoteCardList;

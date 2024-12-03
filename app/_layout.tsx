@@ -19,6 +19,7 @@ import {
   setStatusBarBackgroundColor,
   setStatusBarHidden,
   setStatusBarStyle,
+  StatusBar,
 } from "expo-status-bar";
 import {
   setButtonStyleAsync,

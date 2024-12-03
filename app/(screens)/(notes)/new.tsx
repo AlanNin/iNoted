@@ -15,8 +15,6 @@ import { createNote } from "@/queries/notes";
 import { useQueryClient } from "@tanstack/react-query";
 
 export default function NewNoteScreen() {
-  const queryClient = useQueryClient();
-
   const colorScheme = useColorScheme();
 
   const [inputs, setInputs] = React.useState<NewNote>({
@@ -74,7 +72,7 @@ export default function NewNoteScreen() {
 
     try {
       await createNote(inputs);
-      await queryClient.refetchQueries({ queryKey: ["notes"] });
+      await useQueryClient().refetchQueries({ queryKey: ["notes"] });
       router.back();
     } catch (error) {
       console.log(error);
@@ -105,8 +103,8 @@ export default function NewNoteScreen() {
                 color={
                   undoStack.current.length > 0
                     ? colorScheme === "light"
-                      ? colors.light.text
-                      : colors.dark.text
+                      ? colors.light.tint
+                      : colors.dark.tint
                     : colorScheme === "light"
                     ? colors.light.text_muted2
                     : colors.dark.text_muted2
@@ -124,8 +122,8 @@ export default function NewNoteScreen() {
                 color={
                   redoStack.current.length > 0
                     ? colorScheme === "light"
-                      ? colors.light.text
-                      : colors.dark.text
+                      ? colors.light.tint
+                      : colors.dark.tint
                     : colorScheme === "light"
                     ? colors.light.text_muted2
                     : colors.dark.text_muted2
