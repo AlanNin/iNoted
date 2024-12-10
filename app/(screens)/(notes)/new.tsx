@@ -1,13 +1,20 @@
 import { StyleSheet } from "react-native";
 import useColorScheme from "@/hooks/useColorScheme";
 import React from "react";
-import { Text, TextInput, TouchableOpacity, View } from "@/components/themed";
+import {
+  MarkdownTextInput,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "@/components/themed";
 import colors from "@/constants/colors";
 import { router } from "expo-router";
 import { formatLongDate } from "@/lib/format_date";
 import { createNote } from "@/queries/notes";
 import { useQueryClient } from "@tanstack/react-query";
 import Icon from "@/components/icon";
+import { parseExpensiMark } from "@expensify/react-native-live-markdown";
 
 export default function NewNoteScreen() {
   const theme = useColorScheme();
@@ -109,14 +116,14 @@ export default function NewNoteScreen() {
               <Icon name="Save" muted={inputs.content.length === 0} />
             </TouchableOpacity>
 
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={styles.button}
               onPress={() => {
                 console.log("TODO: Dots -> More");
               }}
             >
               <Icon name="EllipsisVertical" />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </View>
         <View style={styles.content}>
@@ -133,12 +140,14 @@ export default function NewNoteScreen() {
             placeholder="Untitled note"
             multiline={true}
           />
-          <TextInput
+          <MarkdownTextInput
             value={inputs.content}
             onChangeText={(e) => handleInputChange("content", e)}
             multiline={true}
             style={[styles.noteContent]}
             placeholder="Capture your thoughts..."
+            autoFocus={true}
+            parser={parseExpensiMark}
           />
         </View>
       </View>
@@ -189,6 +198,7 @@ const styles = StyleSheet.create({
     margin: 0,
     flex: 1,
     textAlignVertical: "top",
+    fontSize: 16,
   },
   noteSave: {
     position: "absolute",

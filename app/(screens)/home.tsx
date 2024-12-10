@@ -1,5 +1,5 @@
 import { StyleSheet, SafeAreaView, FlatList } from "react-native";
-import React, { useRef, useState } from "react";
+import React from "react";
 import { Text, TextInput, TouchableOpacity, View } from "@/components/themed";
 import colors from "@/constants/colors";
 import { router } from "expo-router";
@@ -12,11 +12,11 @@ import Icon from "@/components/icon";
 import useColorScheme from "@/hooks/useColorScheme";
 
 export default function HomeScreen() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
   const theme = useColorScheme();
 
-  const listRef = useRef<FlatList<NoteProps> | null>(null);
+  const listRef = React.useRef<FlatList<NoteProps> | null>(null);
 
   // notes data
   const { data: notesData, isLoading: isLoadingNotesData } = useQuery({
@@ -29,8 +29,8 @@ export default function HomeScreen() {
     : [];
 
   // scroll management
-  // const [isFabVisible, setIsFabVisible] = useState(true);
-  // const [isUpArrowVisible, setIsUpArrowVisible] = useState(false);
+  // const [isFabVisible, setIsFabVisible] = React.useState(true);
+  // const [isUpArrowVisible, setIsUpArrowVisible] = React.useState(false);
   // const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
   // const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
   //   const { y } = event.nativeEvent.contentOffset;
@@ -112,7 +112,7 @@ export default function HomeScreen() {
             style={styles.notesCount}
             customTextColor={colors[theme].grayscale}
           >
-            All Notes ({notes.length})
+            All Notes ({notes.length || "..."})
           </Text>
           <View style={styles.actions}>
             <TouchableOpacity style={styles.actionButton}>

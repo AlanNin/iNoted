@@ -4,12 +4,14 @@ type ColorScheme = {
   background: string;
   tint: string;
   grayscale: string;
+  grayscale_light: string;
   primary: string;
   primary_dark: string;
   primary_foggy: string;
   foggy: string;
   foggier: string;
   foggiest: string;
+  danger: string;
 };
 
 type Colors = {

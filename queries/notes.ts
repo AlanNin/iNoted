@@ -2,7 +2,7 @@ import { db_client } from "@/db/client";
 import { notes } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function createNote(note: NewNote) {
+export async function createNote(note: NewNoteProps) {
   try {
     await db_client.insert(notes).values({
       title: note.title,
@@ -24,7 +24,7 @@ export async function deleteNote(id: number) {
   }
 }
 
-export async function updateNote(id: number, note: NewNote) {
+export async function updateNote(id: number, note: NewNoteProps) {
   try {
     const result = await db_client
       .update(notes)

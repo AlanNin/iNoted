@@ -1,10 +1,11 @@
 import { StyleSheet } from "react-native";
 import useColorScheme from "@/hooks/useColorScheme";
-import { Text, View } from "./themed";
+import { Text, TouchableOpacity, View } from "./themed";
 import colors from "@/constants/colors";
 import { formatLongDate, formatMediumDate } from "@/lib/format_date";
 import { memo } from "react";
 import { MotiView } from "moti";
+import { router } from "expo-router";
 
 const NoteCardGrid = memo(
   ({
@@ -17,28 +18,87 @@ const NoteCardGrid = memo(
     viewMode: "grid" | "list";
   }) => {
     if (!note.id) {
-      return <View style={gridStyles.container} />;
+      return <View style={gridStyles.innerContainer} />;
     }
 
     const theme = useColorScheme();
 
     const delay = index ? index * 50 : 0;
 
+    const handleRedirect = () => {
+      router.push(`./(notes)/${note.id}`);
+    };
+
     if (viewMode === "grid") {
       return (
-        <MotiView
-          from={{ opacity: 0, translateY: 10 }}
-          animate={{ opacity: 1, translateY: 0 }}
-          transition={{
-            type: "timing",
-            duration: 250,
-            delay,
-          }}
-          style={gridStyles.container}
+        <TouchableOpacity
+          onPress={handleRedirect}
+          style={gridStyles.outerContainer}
         >
-          <View
+          <MotiView
+            from={{ opacity: 0, translateY: 10 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{
+              type: "timing",
+              duration: 250,
+              delay,
+            }}
+            style={gridStyles.innerContainer}
+          >
+            <View
+              style={[
+                gridStyles.contentContainer,
+                {
+                  backgroundColor:
+                    theme === "light"
+                      ? colors.light.foggiest
+                      : colors.dark.foggiest,
+                },
+              ]}
+            >
+              <Text style={gridStyles.content} numberOfLines={8}>
+                {note.content}
+              </Text>
+            </View>
+            <View style={gridStyles.detailsContainer}>
+              <Text style={gridStyles.title} numberOfLines={2}>
+                {note.title}
+              </Text>
+
+              <Text
+                style={[
+                  gridStyles.date,
+                  {
+                    color:
+                      theme === "light"
+                        ? colors.light.grayscale
+                        : colors.dark.grayscale,
+                  },
+                ]}
+                numberOfLines={1}
+              >
+                {formatMediumDate(note.created_at)}
+              </Text>
+            </View>
+          </MotiView>
+        </TouchableOpacity>
+      );
+    } else {
+      return (
+        <TouchableOpacity
+          onPress={handleRedirect}
+          style={listStyles.outerContainer}
+        >
+          <MotiView
+            from={{ opacity: 0, translateY: 10 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{
+              type: "timing",
+              duration: 250,
+              delay,
+            }}
             style={[
-              gridStyles.contentContainer,
+              listStyles.innerContainer,
               {
                 backgroundColor:
                   theme === "light"
@@ -47,18 +107,15 @@ const NoteCardGrid = memo(
               },
             ]}
           >
-            <Text style={gridStyles.content} numberOfLines={8}>
-              {note.content}
-            </Text>
-          </View>
-          <View style={gridStyles.detailsContainer}>
-            <Text style={gridStyles.title} numberOfLines={2}>
+            <Text style={listStyles.title} numberOfLines={1}>
               {note.title}
             </Text>
-
+            <Text style={listStyles.content} numberOfLines={2}>
+              {note.content}
+            </Text>
             <Text
               style={[
-                gridStyles.date,
+                listStyles.date,
                 {
                   color:
                     theme === "light"
@@ -68,62 +125,23 @@ const NoteCardGrid = memo(
               ]}
               numberOfLines={1}
             >
-              {formatMediumDate(note.created_at)}
+              {formatLongDate(note.created_at)}
             </Text>
-          </View>
-        </MotiView>
-      );
-    } else {
-      return (
-        <MotiView
-          from={{ opacity: 0, translateY: 10 }}
-          animate={{ opacity: 1, translateY: 0 }}
-          transition={{
-            type: "timing",
-            duration: 250,
-            delay,
-          }}
-          style={[
-            listStyles.container,
-            {
-              backgroundColor:
-                theme === "light"
-                  ? colors.light.foggiest
-                  : colors.dark.foggiest,
-            },
-          ]}
-        >
-          <Text style={listStyles.title} numberOfLines={1}>
-            {note.title}
-          </Text>
-          <Text style={listStyles.content} numberOfLines={2}>
-            {note.content}
-          </Text>
-          <Text
-            style={[
-              listStyles.date,
-              {
-                color:
-                  theme === "light"
-                    ? colors.light.grayscale
-                    : colors.dark.grayscale,
-              },
-            ]}
-            numberOfLines={1}
-          >
-            {formatLongDate(note.created_at)}
-          </Text>
-        </MotiView>
+          </MotiView>
+        </TouchableOpacity>
       );
     }
   }
 );
 
 const gridStyles = StyleSheet.create({
-  container: {
+  outerContainer: {
+    flex: 1,
+    height: 216,
+  },
+  innerContainer: {
     flex: 1,
     gap: 8,
-    height: 216,
   },
   contentContainer: {
     padding: 12,
@@ -150,14 +168,17 @@ const gridStyles = StyleSheet.create({
 });
 
 const listStyles = StyleSheet.create({
-  container: {
+  outerContainer: {
+    flex: 1,
+    height: 140,
+  },
+  innerContainer: {
     flex: 1,
     padding: 12,
     borderRadius: 8,
     display: "flex",
     flexDirection: "column",
     gap: 12,
-    height: 140,
   },
   title: {
     fontWeight: "bold",

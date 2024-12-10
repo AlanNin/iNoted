@@ -14,40 +14,14 @@ import ReactQueryProvider from "@/providers/react_query";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import { db_client, expo_db } from "@/db/client";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
-import {
-  setStatusBarTranslucent,
-  setStatusBarBackgroundColor,
-  setStatusBarHidden,
-  setStatusBarStyle,
-  StatusBar,
-} from "expo-status-bar";
-import {
-  setButtonStyleAsync,
-  setBackgroundColorAsync,
-} from "expo-navigation-bar";
 import migrations from "@/drizzle/migrations";
 import colors from "@/constants/colors";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const theme = useColorScheme();
-
-  // * Edge to edge
-
-  setBackgroundColorAsync(colors[theme].background);
-
-  setButtonStyleAsync(theme === "light" ? "dark" : "light");
-
-  setStatusBarTranslucent(false);
-
-  setStatusBarBackgroundColor(colors[theme].background);
-
-  setStatusBarStyle(theme === "light" ? "dark" : "light");
-
-  setStatusBarHidden(false);
-
-  // *
 
   const [fontsLoaded, fontsError] = useFonts({
     "Geist-Regular": require("@/assets/fonts/Geist-Regular.otf"),
@@ -70,12 +44,18 @@ export default function RootLayout() {
 
   return (
     <ReactQueryProvider>
-      <ThemeProvider value={theme === "dark" ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="(screens)" options={{ headerShown: false }} />
-        </Stack>
-      </ThemeProvider>
+      <SafeAreaProvider>
+        <ThemeProvider value={theme === "dark" ? DarkTheme : DefaultTheme}>
+          <SafeAreaView
+            style={{ flex: 1, backgroundColor: colors[theme].background }}
+          >
+            <Stack>
+              <Stack.Screen name="index" options={{ headerShown: false }} />
+              <Stack.Screen name="(screens)" options={{ headerShown: false }} />
+            </Stack>
+          </SafeAreaView>
+        </ThemeProvider>
+      </SafeAreaProvider>
     </ReactQueryProvider>
   );
 }
