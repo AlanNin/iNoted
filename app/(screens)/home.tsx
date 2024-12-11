@@ -40,18 +40,17 @@ export default function HomeScreen() {
       let compareResult = 0;
 
       switch (sortBy.key) {
-        case "Alphabetically":
-          compareResult = a.title.localeCompare(b.title);
-          break;
-        case "Recently added":
+        case sortTypes[0]:
           compareResult =
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          break;
+        case sortTypes[1]:
+          compareResult = a.title.localeCompare(b.title);
           break;
         default:
           compareResult = 0;
       }
 
-      // Ajustar el orden (ascendente o descendente)
       return sortBy.order === "asc" ? compareResult : -compareResult;
     });
 

@@ -88,7 +88,12 @@ const BottomDrawerSort = React.forwardRef<
             style={styles.closeButton}
             customBackgroundColor={colors[theme].primary}
           >
-            <Text style={styles.closeButtonText}>Close</Text>
+            <Text
+              style={styles.closeButtonText}
+              customTextColor={colors.dark.text}
+            >
+              Close
+            </Text>
           </TouchableOpacity>
         </BottomSheetView>
       </BottomSheetModal>
