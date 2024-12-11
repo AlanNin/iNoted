@@ -22,12 +22,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Icon from "@/components/icon";
 import Loader from "@/components/loading";
 import { parseExpensiMark } from "@expensify/react-native-live-markdown";
-import {
-  BottomSheetModal,
-  BottomSheetView,
-  BottomSheetModalProvider,
-} from "@gorhom/bottom-sheet";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { toast } from "@backpackapp-io/react-native-toast";
+import BottomDrawerConfirm from "@/components/bottom_drawer_confirm";
 
 export default function NoteScreen() {
   const note = useLocalSearchParams();
@@ -41,7 +38,7 @@ export default function NoteScreen() {
     content: "",
   });
   const [isMoreModalOpen, setIsMoreModalOpen] = React.useState(false);
-  const bottomSheetModalRef = React.useRef<BottomSheetModal>(null);
+  const bottomDrawerRef = React.useRef<BottomSheetModal>(null);
 
   const { data: noteData, isLoading: isLoadingNoteData } = useQuery({
     queryKey: ["note", Number(note.noteId)],
@@ -119,7 +116,7 @@ export default function NoteScreen() {
   const handlePresentModalPress = React.useCallback(() => {
     Keyboard.dismiss();
     setIsMoreModalOpen(false);
-    bottomSheetModalRef.current?.present();
+    bottomDrawerRef.current?.present();
   }, []);
 
   async function handleDeleteNote() {
@@ -281,49 +278,13 @@ export default function NoteScreen() {
             />
           </View>
         </View>
-        <BottomSheetModalProvider>
-          <BottomSheetModal
-            ref={bottomSheetModalRef}
-            backdropComponent={() => (
-              <TouchableOpacity
-                style={[styles.bottomSheetBackdrop]}
-                activeOpacity={1}
-                onPress={() => bottomSheetModalRef.current?.dismiss()}
-              />
-            )}
-            backgroundStyle={{
-              backgroundColor: colors[theme].background,
-            }}
-            handleIndicatorStyle={{
-              backgroundColor: colors[theme].grayscale,
-            }}
-          >
-            <BottomSheetView style={styles.bottomSheetContent}>
-              <Text style={styles.bottomSheetTitle}>Delete this note?</Text>
-              <Text style={styles.bottomSheetDescription}>
-                This note will be permanently deleted from this device.
-              </Text>
-              <View style={styles.deleteActions}>
-                <TouchableOpacity
-                  onPress={() => bottomSheetModalRef.current?.dismiss()}
-                  style={styles.deleteActionsButtons}
-                >
-                  <Text>Cancel</Text>
-                </TouchableOpacity>
-                <View
-                  style={styles.deleteActionsDivider}
-                  customBackgroundColor={colors[theme].foggy}
-                />
-                <TouchableOpacity
-                  onPress={handleDeleteNote}
-                  style={styles.deleteActionsButtons}
-                >
-                  <Text style={{ color: colors[theme].primary }}>Delete</Text>
-                </TouchableOpacity>
-              </View>
-            </BottomSheetView>
-          </BottomSheetModal>
-        </BottomSheetModalProvider>
+        <BottomDrawerConfirm
+          ref={bottomDrawerRef}
+          title="Delete this note?"
+          description="This note will be permanently deleted from this device."
+          submitButtonText="Delete"
+          onSubmit={() => handleDeleteNote()}
+        />
       </View>
     </TouchableWithoutFeedback>
   );
@@ -375,38 +336,6 @@ const styles = StyleSheet.create({
   },
   moreModalDivider: {
     height: 1,
-  },
-  bottomSheetBackdrop: {
-    backgroundColor: "rgba(0,0,0,0.5)",
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  bottomSheetContent: {
-    padding: 16,
-    gap: 20,
-  },
-  bottomSheetTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  bottomSheetDescription: {
-    textAlign: "center",
-  },
-  deleteActionsDivider: {
-    width: 1,
-  },
-  deleteActions: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 20,
-    marginVertical: 8,
-  },
-  deleteActionsButtons: {
-    padding: 4,
   },
   content: {
     flex: 1,

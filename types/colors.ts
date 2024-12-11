@@ -7,6 +7,7 @@ type ColorScheme = {
   grayscale_light: string;
   primary: string;
   primary_dark: string;
+  primary_light: string;
   primary_foggy: string;
   foggy: string;
   foggier: string;

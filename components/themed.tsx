@@ -32,11 +32,10 @@ export function useThemeColor(
 }
 
 export function Text(props: TextProps) {
-  const { style, customTextColor, ...otherProps } = props;
-  const color = useThemeColor(
-    { light: customTextColor, dark: customTextColor },
-    "text"
-  );
+  const { style, customTextColor, disabled, ...otherProps } = props;
+  const color = disabled
+    ? useThemeColor({}, "text_muted")
+    : useThemeColor({ light: customTextColor, dark: customTextColor }, "text");
 
   return (
     <DefaultText
@@ -79,6 +78,8 @@ export function TextInput(props: TextInputProps) {
     ...otherProps
   } = props;
 
+  const theme = useColorScheme();
+
   const color = useThemeColor(
     { light: customTextColor, dark: customTextColor },
     "text"
@@ -99,6 +100,7 @@ export function TextInput(props: TextInputProps) {
         },
         style,
       ]}
+      selectionColor={colors[theme].primary}
       placeholderTextColor={placeholderTextColor}
       {...otherProps}
     />
@@ -112,6 +114,8 @@ export function MarkdownTextInput(props: MarkdownTextInputProps) {
     customPlaceholderColor,
     ...otherProps
   } = props;
+
+  const theme = useColorScheme();
 
   const color = useThemeColor(
     { light: customTextColor, dark: customTextColor },
@@ -133,6 +137,7 @@ export function MarkdownTextInput(props: MarkdownTextInputProps) {
         },
         style,
       ]}
+      selectionColor={colors[theme].primary}
       placeholderTextColor={placeholderTextColor}
       {...otherProps}
     />

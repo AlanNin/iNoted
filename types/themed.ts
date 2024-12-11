@@ -13,6 +13,7 @@ type ThemedProps = {
 
 type ThemedTextProps = ThemedProps & {
   customTextColor?: string;
+  disabled?: boolean;
 };
 
 type ThemedInputProps = ThemedTextProps & {

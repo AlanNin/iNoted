@@ -10,13 +10,20 @@ import Loader from "@/components/loading";
 import { MotiView } from "moti";
 import Icon from "@/components/icon";
 import useColorScheme from "@/hooks/useColorScheme";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import BottomDrawerSort from "@/components/bottom_drawer_sort";
 
 export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
   const theme = useColorScheme();
-
+  const sortBottomDrawerRef = React.useRef<BottomSheetModal>(null);
   const listRef = React.useRef<FlatList<NoteProps> | null>(null);
+  const sortTypes = ["Recently added", "A-Z"] as const;
+  const [sortBy, setSortBy] = React.useState<{
+    key: string;
+    order: "asc" | "desc";
+  }>({ key: sortTypes[0], order: "desc" });
 
   // notes data
   const { data: notesData, isLoading: isLoadingNotesData } = useQuery({
@@ -24,42 +31,50 @@ export default function HomeScreen() {
     queryFn: () => getAllNotes(),
   });
 
-  const notes = notesData
-    ? [...notesData, ...Array((3 - (notesData.length % 3)) % 3).fill({})]
+  const sortedNotes = React.useMemo(() => {
+    if (!notesData) return [];
+
+    const sorted = [...notesData];
+
+    sorted.sort((a, b) => {
+      let compareResult = 0;
+
+      switch (sortBy.key) {
+        case "Alphabetically":
+          compareResult = a.title.localeCompare(b.title);
+          break;
+        case "Recently added":
+          compareResult =
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          break;
+        default:
+          compareResult = 0;
+      }
+
+      // Ajustar el orden (ascendente o descendente)
+      return sortBy.order === "asc" ? compareResult : -compareResult;
+    });
+
+    return sorted;
+  }, [notesData, sortBy]);
+
+  const notes = sortedNotes
+    ? [...sortedNotes, ...Array((3 - (sortedNotes.length % 3)) % 3).fill({})]
     : [];
 
-  // scroll management
-  // const [isFabVisible, setIsFabVisible] = React.useState(true);
-  // const [isUpArrowVisible, setIsUpArrowVisible] = React.useState(false);
-  // const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
-  // const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-  //   const { y } = event.nativeEvent.contentOffset;
-  //   if (y <= 0) {
-  //     setIsFabVisible(true);
-  //     setIsUpArrowVisible(false);
-  //   } else {
-  //     setIsFabVisible(false);
-  //     if (scrollTimeout.current) {
-  //       clearTimeout(scrollTimeout.current);
-  //     }
-  //     scrollTimeout.current = setTimeout(() => {
-  //       setIsFabVisible(true);
-  //       setIsUpArrowVisible(true);
-  //     }, 500);
-  //   }
-  // };
+  const handlePresentModalPress = React.useCallback(() => {
+    sortBottomDrawerRef.current?.present();
+  }, []);
 
-  // useEffect(() => {
-  //   return () => {
-  //     if (scrollTimeout.current) {
-  //       clearTimeout(scrollTimeout.current);
-  //     }
-  //   };
-  // }, []);
-
-  // const scrollToTop = () => {
-  //   listRef.current?.scrollToOffset({ offset: 0, animated: true });
-  // };
+  const toggleSortOrder = (actionTitle: typeof sortTypes[number]) => {
+    setSortBy((prevState) => ({
+      key: actionTitle,
+      order:
+        prevState.key === actionTitle && prevState.order === "desc"
+          ? "asc"
+          : "desc",
+    }));
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -94,17 +109,6 @@ export default function HomeScreen() {
               <Icon name="Rows3" muted={notesData?.length === 0} />
             </TouchableOpacity>
           )}
-
-          {/* <TouchableOpacity
-            style={[
-              styles.settingsButton,
-              theme === "light"
-                ? { backgroundColor: colors.light.primary }
-                : { backgroundColor: colors.dark.primary },
-            ]}
-          >
-            <Settings size={20} color={colors.dark.tint} strokeWidth={1.5} />
-          </TouchableOpacity> */}
         </View>
 
         <View style={styles.subHeader}>
@@ -115,21 +119,40 @@ export default function HomeScreen() {
             All Notes ({isLoadingNotesData ? "..." : notesData?.length})
           </Text>
           <View style={styles.actions}>
-            <TouchableOpacity style={styles.actionButton}>
-              <Icon name="Filter" size={16} grayscale />
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={handlePresentModalPress}
+              disabled={notesData?.length === 0}
+            >
+              <Icon
+                name="ArrowDownUp"
+                size={16}
+                grayscale
+                muted={notesData?.length === 0}
+              />
               <Text
                 style={styles.actionText}
                 customTextColor={colors[theme].grayscale}
+                disabled={notesData?.length === 0}
               >
                 Sort
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionButton}>
-              <Icon name="SquarePen" size={16} grayscale />
+            <TouchableOpacity
+              style={styles.actionButton}
+              disabled={notesData?.length === 0}
+            >
+              <Icon
+                name="SquarePen"
+                size={16}
+                grayscale
+                muted={notesData?.length === 0}
+              />
               <Text
                 style={styles.actionText}
                 customTextColor={colors[theme].grayscale}
+                disabled={notesData?.length === 0}
               >
                 Edit
               </Text>
@@ -202,32 +225,16 @@ export default function HomeScreen() {
           </MotiView>
         </View>
       )}
-
-      {/* {!isLoadingNotesData && (
-        <MotiView
-          from={{ opacity: 0 }}
-          animate={{
-            opacity: isUpArrowVisible && !isFabVisible ? 1 : 0,
-          }}
-          transition={{
-            type: "timing",
-            duration: 200,
-          }}
-          style={styles.scrollButtonContainer}
-        >
-          <TouchableOpacity
-            style={[
-              styles.scrollButtonIcon,
-              theme === "light"
-                ? { backgroundColor: colors.light.primary_dark }
-                : { backgroundColor: colors.light.primary_dark },
-            ]}
-            onPress={scrollToTop}
-          >
-            <ChevronUp size={24} color={colors.dark.tint} strokeWidth={1.5} />
-          </TouchableOpacity>
-        </MotiView>
-      )} */}
+      <BottomDrawerSort
+        ref={sortBottomDrawerRef}
+        title="Sort your notes"
+        actions={sortTypes.map((type) => ({
+          title: type,
+          action: () => toggleSortOrder(type),
+          isSelected: sortBy.key === type,
+          order: sortBy.order,
+        }))}
+      />
     </SafeAreaView>
   );
 }
