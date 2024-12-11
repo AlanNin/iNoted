@@ -82,16 +82,16 @@ export default function HomeScreen() {
           {viewMode === "grid" ? (
             <TouchableOpacity
               onPress={() => setViewMode("list")}
-              disabled={notes?.length === 0}
+              disabled={notesData?.length === 0}
             >
-              <Icon name="LayoutGrid" muted={notes?.length === 0} />
+              <Icon name="LayoutGrid" muted={notesData?.length === 0} />
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
               onPress={() => setViewMode("grid")}
-              disabled={notes?.length === 0}
+              disabled={notesData?.length === 0}
             >
-              <Icon name="Rows3" muted={notes?.length === 0} />
+              <Icon name="Rows3" muted={notesData?.length === 0} />
             </TouchableOpacity>
           )}
 
@@ -112,7 +112,7 @@ export default function HomeScreen() {
             style={styles.notesCount}
             customTextColor={colors[theme].grayscale}
           >
-            All Notes ({notes.length || "..."})
+            All Notes ({isLoadingNotesData ? "..." : notesData?.length})
           </Text>
           <View style={styles.actions}>
             <TouchableOpacity style={styles.actionButton}>
@@ -166,7 +166,7 @@ export default function HomeScreen() {
 
       {!isLoadingNotesData && (
         <View style={styles.addButtonContainer}>
-          {notes?.length === 0 && (
+          {notesData?.length === 0 && (
             <Text style={styles.emptyText}>
               Let's start by creating your first{" "}
               <Text
@@ -189,7 +189,7 @@ export default function HomeScreen() {
             }}
             style={styles.fabContainer}
           >
-            {notes?.length === 0 && (
+            {notesData?.length === 0 && (
               <Icon name="Spline" themed size={36} style={styles.spline} />
             )}
             <TouchableOpacity

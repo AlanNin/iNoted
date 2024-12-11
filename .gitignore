@@ -37,3 +37,6 @@ yarn-error.*
 # native files
 /ios
 /android
+
+# drizzle
+/drizzle

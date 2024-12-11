@@ -15,6 +15,7 @@ import { createNote } from "@/queries/notes";
 import { useQueryClient } from "@tanstack/react-query";
 import Icon from "@/components/icon";
 import { parseExpensiMark } from "@expensify/react-native-live-markdown";
+import { toast } from "@backpackapp-io/react-native-toast";
 
 export default function NewNoteScreen() {
   const theme = useColorScheme();
@@ -80,9 +81,10 @@ export default function NewNoteScreen() {
         title: inputs.title.length === 0 ? "Untitled note" : inputs.title,
       });
       await refetchNotes();
+      toast.success("Note created successfully!");
       router.back();
     } catch (error) {
-      console.log(error);
+      toast.error("An error occurred. Please try again.");
     }
   }
 
@@ -131,7 +133,7 @@ export default function NewNoteScreen() {
             style={styles.lastEditedText}
             customTextColor={colors[theme].grayscale}
           >
-            Last edited at {formatLongDate(lastEdited)}
+            Last edited on {formatLongDate(lastEdited)}
           </Text>
           <TextInput
             value={inputs.title}

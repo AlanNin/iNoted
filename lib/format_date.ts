@@ -1,24 +1,46 @@
-export function formatLongDate(date: string | Date) {
-  const parsedDate = typeof date === "string" ? new Date(date) : date;
+import { format, parseISO, isValid } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 
-  if (isNaN(parsedDate.getTime())) {
+export function formatLongDate(date: string | Date): string {
+  let formatedDate: Date;
+
+  if (typeof date === "string") {
+    if (date.includes(" ")) {
+      const isoDate = date.replace(" ", "T") + "Z";
+      formatedDate = new Date(isoDate);
+    } else {
+      formatedDate = parseISO(date);
+    }
+  } else {
+    formatedDate = new Date(date);
+  }
+
+  if (!isValid(formatedDate)) {
     throw new Error("Invalid date format");
   }
 
-  const day = parsedDate.getDate();
-  const month = parsedDate.toLocaleString("default", { month: "short" });
-  const year = parsedDate.getFullYear();
-  const hours = parsedDate.getHours() % 12 || 12;
-  const minutes = parsedDate.getMinutes().toString().padStart(2, "0");
-  const period = parsedDate.getHours() < 12 ? "AM" : "PM";
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-  return `${day} ${month} ${year}, ${hours}:${minutes} ${period}`;
+  const zonedDate = toZonedTime(formatedDate, timeZone);
+
+  return format(zonedDate, "MMMM d, yyyy 'at' h:mm a");
 }
 
 export function formatMediumDate(date: string | Date) {
-  const parsedDate = typeof date === "string" ? new Date(date) : date;
+  let parsedDate: Date;
 
-  if (isNaN(parsedDate.getTime())) {
+  if (typeof date === "string") {
+    if (date.includes(" ")) {
+      const isoDate = date.replace(" ", "T") + "Z";
+      parsedDate = new Date(isoDate);
+    } else {
+      parsedDate = parseISO(date);
+    }
+  } else {
+    parsedDate = new Date(date);
+  }
+
+  if (!isValid(parsedDate)) {
     throw new Error("Invalid date format");
   }
 
@@ -26,5 +48,5 @@ export function formatMediumDate(date: string | Date) {
   const month = parsedDate.toLocaleString("default", { month: "short" });
   const year = parsedDate.getFullYear();
 
-  return `${day} ${month} ${year}`;
+  return `${day} ${month}, ${year}`;
 }

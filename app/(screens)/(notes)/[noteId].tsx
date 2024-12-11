@@ -3,8 +3,7 @@ import {
   TouchableWithoutFeedback,
   BackHandler,
   Share,
-  Clipboard,
-  Alert,
+  Keyboard,
 } from "react-native";
 import useColorScheme from "@/hooks/useColorScheme";
 import React from "react";
@@ -23,19 +22,15 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Icon from "@/components/icon";
 import Loader from "@/components/loading";
 import { parseExpensiMark } from "@expensify/react-native-live-markdown";
+import {
+  BottomSheetModal,
+  BottomSheetView,
+  BottomSheetModalProvider,
+} from "@gorhom/bottom-sheet";
+import { toast } from "@backpackapp-io/react-native-toast";
 
 export default function NoteScreen() {
   const note = useLocalSearchParams();
-
-  // note data
-  const { data: noteData, isLoading: isLoadingNoteData } = useQuery({
-    queryKey: ["note", Number(note.noteId)],
-    queryFn: () => getNoteById(Number(note.noteId)),
-    enabled: note.noteId !== undefined,
-  });
-
-  // *
-
   const theme = useColorScheme();
   const undoStack = React.useRef<NewNoteProps[]>([]);
   const redoStack = React.useRef<NewNoteProps[]>([]);
@@ -46,6 +41,13 @@ export default function NoteScreen() {
     content: "",
   });
   const [isMoreModalOpen, setIsMoreModalOpen] = React.useState(false);
+  const bottomSheetModalRef = React.useRef<BottomSheetModal>(null);
+
+  const { data: noteData, isLoading: isLoadingNoteData } = useQuery({
+    queryKey: ["note", Number(note.noteId)],
+    queryFn: () => getNoteById(Number(note.noteId)),
+    enabled: note.noteId !== undefined,
+  });
 
   React.useEffect(() => {
     setInputs({
@@ -107,23 +109,30 @@ export default function NoteScreen() {
         title: inputs.title.length === 0 ? "Untitled note" : inputs.title,
       });
       await refetchNotes();
+      toast.success("Note updated successfully!");
       router.back();
     } catch (error) {
-      console.log(error);
+      toast.error("An error occurred. Please try again.");
     }
   }
+
+  const handlePresentModalPress = React.useCallback(() => {
+    Keyboard.dismiss();
+    setIsMoreModalOpen(false);
+    bottomSheetModalRef.current?.present();
+  }, []);
 
   async function handleDeleteNote() {
     try {
       await deleteNote(Number(note.noteId));
       await refetchNotes();
+      toast.success("Note deleted successfully!");
       router.back();
     } catch (error) {
-      console.log(error);
+      toast.error("An error occurred. Please try again.");
     }
   }
 
-  // this function most create a share that contains note title and content, it should be able to send it to social medias or just copy
   async function handleShareNote() {
     try {
       setIsMoreModalOpen(false);
@@ -135,7 +144,7 @@ export default function NoteScreen() {
         message: message,
       });
     } catch (error) {
-      console.log("Error sharing note:", error);
+      toast.error("An error occurred. Please try again.");
     }
   }
 
@@ -228,15 +237,15 @@ export default function NoteScreen() {
                       />
                       <TouchableOpacity
                         style={styles.moreModalButton}
-                        onPress={handleDeleteNote}
+                        onPress={handlePresentModalPress}
                       >
                         <Icon
                           name="Eraser"
                           strokeWidth={1.2}
                           size={18}
-                          customColor={colors[theme].danger}
+                          customColor={colors[theme].primary}
                         />
-                        <Text customTextColor={colors[theme].danger}>
+                        <Text customTextColor={colors[theme].primary}>
                           Delete
                         </Text>
                       </TouchableOpacity>
@@ -251,7 +260,7 @@ export default function NoteScreen() {
               style={styles.lastEditedText}
               customTextColor={colors[theme].grayscale}
             >
-              Last edited at {formatLongDate(noteData?.updated_at!)}
+              Last edited on {formatLongDate(noteData?.updated_at!)}
             </Text>
             <TextInput
               value={inputs.title}
@@ -272,6 +281,49 @@ export default function NoteScreen() {
             />
           </View>
         </View>
+        <BottomSheetModalProvider>
+          <BottomSheetModal
+            ref={bottomSheetModalRef}
+            backdropComponent={() => (
+              <TouchableOpacity
+                style={[styles.bottomSheetBackdrop]}
+                activeOpacity={1}
+                onPress={() => bottomSheetModalRef.current?.dismiss()}
+              />
+            )}
+            backgroundStyle={{
+              backgroundColor: colors[theme].background,
+            }}
+            handleIndicatorStyle={{
+              backgroundColor: colors[theme].grayscale,
+            }}
+          >
+            <BottomSheetView style={styles.bottomSheetContent}>
+              <Text style={styles.bottomSheetTitle}>Delete this note?</Text>
+              <Text style={styles.bottomSheetDescription}>
+                This note will be permanently deleted from this device.
+              </Text>
+              <View style={styles.deleteActions}>
+                <TouchableOpacity
+                  onPress={() => bottomSheetModalRef.current?.dismiss()}
+                  style={styles.deleteActionsButtons}
+                >
+                  <Text>Cancel</Text>
+                </TouchableOpacity>
+                <View
+                  style={styles.deleteActionsDivider}
+                  customBackgroundColor={colors[theme].foggy}
+                />
+                <TouchableOpacity
+                  onPress={handleDeleteNote}
+                  style={styles.deleteActionsButtons}
+                >
+                  <Text style={{ color: colors[theme].primary }}>Delete</Text>
+                </TouchableOpacity>
+              </View>
+            </BottomSheetView>
+          </BottomSheetModal>
+        </BottomSheetModalProvider>
       </View>
     </TouchableWithoutFeedback>
   );
@@ -323,6 +375,38 @@ const styles = StyleSheet.create({
   },
   moreModalDivider: {
     height: 1,
+  },
+  bottomSheetBackdrop: {
+    backgroundColor: "rgba(0,0,0,0.5)",
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  bottomSheetContent: {
+    padding: 16,
+    gap: 20,
+  },
+  bottomSheetTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  bottomSheetDescription: {
+    textAlign: "center",
+  },
+  deleteActionsDivider: {
+    width: 1,
+  },
+  deleteActions: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 20,
+    marginVertical: 8,
+  },
+  deleteActionsButtons: {
+    padding: 4,
   },
   content: {
     flex: 1,

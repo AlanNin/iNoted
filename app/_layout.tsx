@@ -17,6 +17,9 @@ import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import migrations from "@/drizzle/migrations";
 import colors from "@/constants/colors";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SheetProvider } from "react-native-actions-sheet";
+import { Toasts } from "@backpackapp-io/react-native-toast";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -43,19 +46,32 @@ export default function RootLayout() {
   }
 
   return (
-    <ReactQueryProvider>
-      <SafeAreaProvider>
-        <ThemeProvider value={theme === "dark" ? DarkTheme : DefaultTheme}>
-          <SafeAreaView
-            style={{ flex: 1, backgroundColor: colors[theme].background }}
-          >
-            <Stack>
-              <Stack.Screen name="index" options={{ headerShown: false }} />
-              <Stack.Screen name="(screens)" options={{ headerShown: false }} />
-            </Stack>
-          </SafeAreaView>
-        </ThemeProvider>
-      </SafeAreaProvider>
-    </ReactQueryProvider>
+    <SafeAreaProvider>
+      <GestureHandlerRootView>
+        <ReactQueryProvider>
+          <ThemeProvider value={theme === "dark" ? DarkTheme : DefaultTheme}>
+            <SafeAreaView
+              style={{ flex: 1, backgroundColor: colors[theme].background }}
+            >
+              <SheetProvider context="global">
+                <Stack>
+                  <Stack.Screen name="index" options={{ headerShown: false }} />
+                  <Stack.Screen
+                    name="(screens)"
+                    options={{ headerShown: false }}
+                  />
+                </Stack>
+              </SheetProvider>
+            </SafeAreaView>
+          </ThemeProvider>
+        </ReactQueryProvider>
+        <Toasts
+          overrideDarkMode={theme !== "dark"}
+          defaultStyle={{
+            indicator: { backgroundColor: colors[theme].primary },
+          }}
+        />
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 }
