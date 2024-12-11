@@ -1,6 +1,6 @@
 import { db_client } from "@/db/client";
 import { notes } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 
 export async function createNote(note: NewNoteProps) {
   try {
@@ -22,6 +22,17 @@ export async function deleteNote(id: number) {
     }
   } catch (error) {
     throw new Error("Could not delete the note");
+  }
+}
+
+export async function deleteNotes(ids: number[]) {
+  try {
+    const result = await db_client.delete(notes).where(inArray(notes.id, ids));
+    if (!result) {
+      throw new Error("Note not found");
+    }
+  } catch (error) {
+    throw new Error("Could not delete the notes");
   }
 }
 

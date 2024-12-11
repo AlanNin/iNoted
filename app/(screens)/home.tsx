@@ -1,17 +1,24 @@
-import { StyleSheet, SafeAreaView, FlatList } from "react-native";
+import { StyleSheet, SafeAreaView, FlatList, BackHandler } from "react-native";
 import React from "react";
-import { Text, TextInput, TouchableOpacity, View } from "@/components/themed";
+import {
+  MotiView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "@/components/themed";
 import colors from "@/constants/colors";
 import { router } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
-import { getAllNotes } from "@/queries/notes";
+import { deleteNotes, getAllNotes } from "@/queries/notes";
 import NoteCard from "@/components/note_card";
 import Loader from "@/components/loading";
-import { MotiView } from "moti";
 import Icon from "@/components/icon";
 import useColorScheme from "@/hooks/useColorScheme";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import BottomDrawerSort from "@/components/bottom_drawer_sort";
+import BottomDrawerConfirm from "@/components/bottom_drawer_confirm";
+import { toast } from "@backpackapp-io/react-native-toast";
 
 export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -24,9 +31,16 @@ export default function HomeScreen() {
     key: string;
     order: "asc" | "desc";
   }>({ key: sortTypes[0], order: "desc" });
+  const [isEditMode, setIsEditMode] = React.useState(false);
+  const [selectedNotes, setSelectedNotes] = React.useState<number[]>([]);
+  const bottomDeleteMultipleDrawerRef = React.useRef<BottomSheetModal>(null);
 
   // notes data
-  const { data: notesData, isLoading: isLoadingNotesData } = useQuery({
+  const {
+    data: notesData,
+    isLoading: isLoadingNotesData,
+    refetch: refetchNotes,
+  } = useQuery({
     queryKey: ["notes"],
     queryFn: () => getAllNotes(),
   });
@@ -61,7 +75,7 @@ export default function HomeScreen() {
     ? [...sortedNotes, ...Array((3 - (sortedNotes.length % 3)) % 3).fill({})]
     : [];
 
-  const handlePresentModalPress = React.useCallback(() => {
+  const handleToggleBottomSortDrawer = React.useCallback(() => {
     sortBottomDrawerRef.current?.present();
   }, []);
 
@@ -74,6 +88,72 @@ export default function HomeScreen() {
           : "desc",
     }));
   };
+
+  const toggleEditMode = () => {
+    setIsEditMode((prevState) => !prevState);
+    setSelectedNotes([]);
+  };
+
+  React.useEffect(() => {
+    const backAction = () => {
+      if (isEditMode) {
+        setIsEditMode(false);
+        return true;
+      }
+      return false;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, [isEditMode]);
+
+  const handleSelectNote = React.useCallback(
+    (noteId: number) => {
+      if (selectedNotes.includes(noteId)) {
+        setSelectedNotes((prevState) =>
+          prevState.filter((id) => id !== noteId)
+        );
+      } else {
+        setSelectedNotes((prevState) => [...prevState, noteId]);
+      }
+    },
+    [selectedNotes]
+  );
+
+  const handleToggleBottomDeleteMultipleDrawer = React.useCallback(() => {
+    bottomDeleteMultipleDrawerRef.current?.present();
+  }, []);
+
+  const handleDeleteMultipleNotes = React.useCallback(async () => {
+    try {
+      await deleteNotes(selectedNotes);
+      await refetchNotes();
+      toast.success("Notes deleted successfully!");
+      setIsEditMode(false);
+      setSelectedNotes([]);
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+    }
+  }, [selectedNotes]);
+
+  const renderItem = React.useCallback(
+    ({ item, index }: { item: NoteProps; index: number }) => (
+      <NoteCard
+        note={item}
+        index={index}
+        viewMode={viewMode}
+        isEditMode={isEditMode}
+        setEditMode={setIsEditMode}
+        selectedNotes={selectedNotes}
+        handleSelectNote={handleSelectNote}
+      />
+    ),
+    [viewMode, isEditMode, selectedNotes]
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -120,7 +200,7 @@ export default function HomeScreen() {
           <View style={styles.actions}>
             <TouchableOpacity
               style={styles.actionButton}
-              onPress={handlePresentModalPress}
+              onPress={handleToggleBottomSortDrawer}
               disabled={notesData?.length === 0}
             >
               <Icon
@@ -141,9 +221,10 @@ export default function HomeScreen() {
             <TouchableOpacity
               style={styles.actionButton}
               disabled={notesData?.length === 0}
+              onPress={toggleEditMode}
             >
               <Icon
-                name="SquarePen"
+                name={isEditMode ? "PenOff" : "SquarePen"}
                 size={16}
                 grayscale
                 muted={notesData?.length === 0}
@@ -153,14 +234,14 @@ export default function HomeScreen() {
                 customTextColor={colors[theme].grayscale}
                 disabled={notesData?.length === 0}
               >
-                Edit
+                {isEditMode ? "Cancel Edit" : "Edit"}
               </Text>
             </TouchableOpacity>
           </View>
         </View>
       </View>
 
-      <View style={styles.content}>
+      <View style={[styles.content, { paddingBottom: isEditMode ? 68 : 0 }]}>
         {isLoadingNotesData ? (
           <View style={styles.loadingContainer}>
             <Loader />
@@ -170,11 +251,9 @@ export default function HomeScreen() {
           <FlatList
             ref={listRef}
             key={viewMode}
-            keyExtractor={(item, index) => item.id || `placeholder-${index}`}
-            data={viewMode === "grid" ? notes : notesData}
-            renderItem={({ item, index }) => (
-              <NoteCard note={item} index={index} viewMode={viewMode} />
-            )}
+            keyExtractor={(item) => item.id?.toString()}
+            data={notes}
+            renderItem={renderItem}
             numColumns={viewMode === "grid" ? 3 : 1}
             style={styles.noteListContainer}
             contentContainerStyle={styles.notesListWrapper}
@@ -186,7 +265,7 @@ export default function HomeScreen() {
         )}
       </View>
 
-      {!isLoadingNotesData && (
+      {!isLoadingNotesData && !isEditMode && (
         <View style={styles.addButtonContainer}>
           {notesData?.length === 0 && (
             <Text style={styles.emptyText}>
@@ -202,7 +281,6 @@ export default function HomeScreen() {
           <MotiView
             from={{ opacity: 0 }}
             animate={{
-              // opacity: isFabVisible ? 1 : 0,
               opacity: 1,
             }}
             transition={{
@@ -224,6 +302,65 @@ export default function HomeScreen() {
           </MotiView>
         </View>
       )}
+
+      {isEditMode && (
+        <MotiView
+          style={[
+            styles.editMenuContainer,
+            { borderTopColor: colors[theme].foggier },
+          ]}
+          customBackgroundColor={colors[theme].background}
+          from={{ opacity: 0, translateY: 10 }}
+          animate={{
+            opacity: 1,
+            translateY: 0,
+          }}
+          transition={{
+            type: "timing",
+            duration: 250,
+          }}
+        >
+          <TouchableOpacity
+            style={styles.editMenuButton}
+            onPress={handleToggleBottomDeleteMultipleDrawer}
+            disabled={selectedNotes.length === 0}
+          >
+            <Icon
+              name="Eraser"
+              size={24}
+              strokeWidth={1}
+              muted={selectedNotes.length === 0}
+            />
+            <Text
+              style={styles.editMenuButtonText}
+              customTextColor={colors[theme].text}
+              disabled={selectedNotes.length === 0}
+            >
+              Delete
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.editMenuButton}
+            onPress={() => {}}
+            disabled={selectedNotes.length === 0}
+          >
+            <Icon
+              name="NotebookPen"
+              size={24}
+              strokeWidth={1}
+              muted={selectedNotes.length === 0}
+            />
+            <Text
+              style={styles.editMenuButtonText}
+              customTextColor={colors[theme].text}
+              disabled={selectedNotes.length === 0}
+            >
+              Move
+            </Text>
+          </TouchableOpacity>
+        </MotiView>
+      )}
+
       <BottomDrawerSort
         ref={sortBottomDrawerRef}
         title="Sort your notes"
@@ -233,6 +370,14 @@ export default function HomeScreen() {
           isSelected: sortBy.key === type,
           order: sortBy.order,
         }))}
+      />
+
+      <BottomDrawerConfirm
+        ref={bottomDeleteMultipleDrawerRef}
+        title="Delete selected notes?"
+        description={`This notes will be permanently deleted from this device. You have selected ${selectedNotes.length} notes.`}
+        submitButtonText="Delete"
+        onSubmit={handleDeleteMultipleNotes}
       />
     </SafeAreaView>
   );
@@ -357,5 +502,29 @@ const styles = StyleSheet.create({
   scrollButtonIcon: {
     padding: 4,
     borderRadius: 9999,
+  },
+  editMenuContainer: {
+    position: "absolute",
+    width: "100%",
+    bottom: 0,
+    height: 68,
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 8,
+    borderTopWidth: 1,
+    elevation: 12,
+  },
+  editMenuButton: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: "center",
+    gap: 4,
+    margin: "auto",
+  },
+  editMenuButtonText: {
+    fontSize: 12,
   },
 });

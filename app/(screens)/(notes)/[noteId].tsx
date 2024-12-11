@@ -9,6 +9,7 @@ import useColorScheme from "@/hooks/useColorScheme";
 import React from "react";
 import {
   MarkdownTextInput,
+  MotiView,
   Text,
   TextInput,
   TouchableOpacity,
@@ -217,9 +218,15 @@ export default function NoteScreen() {
                 </TouchableOpacity>
                 {isMoreModalOpen && (
                   <TouchableWithoutFeedback>
-                    <View
+                    <MotiView
                       style={styles.moreModal}
                       customBackgroundColor={colors[theme].grayscale_light}
+                      from={{ opacity: 0, translateY: -10 }}
+                      animate={{ opacity: 1, translateY: 0 }}
+                      transition={{
+                        type: "timing",
+                        duration: 150,
+                      }}
                     >
                       <TouchableOpacity
                         style={styles.moreModalButton}
@@ -246,7 +253,7 @@ export default function NoteScreen() {
                           Delete
                         </Text>
                       </TouchableOpacity>
-                    </View>
+                    </MotiView>
                   </TouchableWithoutFeedback>
                 )}
               </View>

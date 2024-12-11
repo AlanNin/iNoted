@@ -1,50 +1,86 @@
 import { StyleSheet } from "react-native";
 import useColorScheme from "@/hooks/useColorScheme";
-import { Text, TouchableOpacity, View } from "./themed";
+import { MotiView, Text, TouchableOpacity, View } from "./themed";
 import colors from "@/constants/colors";
 import { formatLongDate, formatMediumDate } from "@/lib/format_date";
-import { memo } from "react";
-import { MotiView } from "moti";
 import { router } from "expo-router";
+import React, { useEffect } from "react";
 
-const NoteCardGrid = memo(
+const NoteCardGrid = React.memo(
   ({
     note,
     index,
     viewMode,
-  }: {
-    note: NoteProps;
-    index?: number;
-    viewMode: "grid" | "list";
-  }) => {
+    isEditMode = false,
+    setEditMode,
+    selectedNotes,
+    handleSelectNote,
+  }: NoteCardProps) => {
     if (!note.id) {
       return <View style={gridStyles.innerContainer} />;
     }
 
+    console.log(note, index);
+
     const theme = useColorScheme();
 
-    const delay = index ? index * 50 : 0;
+    // const delay = index ? index * 50 : 0;
 
-    const handleRedirect = () => {
-      router.push(`./(notes)/${note.id}`);
-    };
+    const handlePress = React.useCallback(() => {
+      if (isEditMode) {
+        handleSelectNote(note.id);
+      } else {
+        router.push(`./(notes)/${note.id}`);
+      }
+    }, [isEditMode, handleSelectNote, note.id]);
+
+    const isSelected = React.useMemo(() => selectedNotes.includes(note.id), [
+      selectedNotes,
+      note.id,
+    ]);
+
+    const handleLongPress = React.useCallback(() => {
+      if (!isSelected) {
+        setEditMode(true);
+        handleSelectNote(note.id);
+      }
+    }, [setEditMode, handleSelectNote, note.id]);
+
+    // const animationProps = isEditMode
+    //   ? {}
+    //   : ({
+    //       from: { opacity: 0, translateY: 10 },
+    //       animate: { opacity: 1, translateY: 0 },
+    //       transition: {
+    //         type: "timing",
+    //         duration: 250,
+    //         delay,
+    //       },
+    //     } as any);
+
+    const animationProps = {};
 
     if (viewMode === "grid") {
       return (
         <TouchableOpacity
-          onPress={handleRedirect}
+          onPress={handlePress}
+          onLongPress={handleLongPress}
           style={gridStyles.outerContainer}
         >
-          <MotiView
-            from={{ opacity: 0, translateY: 10 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            transition={{
-              type: "timing",
-              duration: 250,
-              delay,
-            }}
-            style={gridStyles.innerContainer}
-          >
+          <MotiView {...animationProps} style={gridStyles.innerContainer}>
+            {isEditMode && (
+              <View
+                style={[
+                  gridStyles.selectIndicator,
+                  {
+                    backgroundColor: isSelected
+                      ? colors[theme].primary
+                      : colors[theme].text_muted,
+                  },
+                ]}
+              />
+            )}
+
             <View
               style={[
                 gridStyles.contentContainer,
@@ -86,17 +122,24 @@ const NoteCardGrid = memo(
     } else {
       return (
         <TouchableOpacity
-          onPress={handleRedirect}
+          onPress={handlePress}
           style={listStyles.outerContainer}
         >
+          {isEditMode && (
+            <View
+              style={[
+                listStyles.selectIndicator,
+                {
+                  backgroundColor: isSelected
+                    ? colors[theme].primary
+                    : colors[theme].text_muted,
+                },
+              ]}
+            />
+          )}
+
           <MotiView
-            from={{ opacity: 0, translateY: 10 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            transition={{
-              type: "timing",
-              duration: 250,
-              delay,
-            }}
+            {...animationProps}
             style={[
               listStyles.innerContainer,
               {
@@ -142,6 +185,8 @@ const gridStyles = StyleSheet.create({
   innerContainer: {
     flex: 1,
     gap: 8,
+    borderRadius: 8,
+    overflow: "hidden",
   },
   contentContainer: {
     padding: 12,
@@ -165,12 +210,19 @@ const gridStyles = StyleSheet.create({
     fontSize: 12,
     textAlign: "center",
   },
+  selectIndicator: {
+    position: "absolute",
+    height: 3,
+    width: "100%",
+  },
 });
 
 const listStyles = StyleSheet.create({
   outerContainer: {
     flex: 1,
     height: 140,
+    borderRadius: 8,
+    overflow: "hidden",
   },
   innerContainer: {
     flex: 1,
@@ -190,6 +242,12 @@ const listStyles = StyleSheet.create({
   date: {
     marginTop: "auto",
     fontSize: 12,
+  },
+  selectIndicator: {
+    position: "absolute",
+    right: 0,
+    height: "100%",
+    width: 3,
   },
 });
 

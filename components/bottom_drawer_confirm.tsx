@@ -16,6 +16,11 @@ const BottomDrawerConfirm = React.forwardRef<
 >(({ title, description, submitButtonText, onSubmit }, ref) => {
   const theme = useColorScheme();
 
+  const handleSubmit = () => {
+    onSubmit();
+    (ref as React.RefObject<BottomSheetModal>).current?.dismiss();
+  };
+
   return (
     <BottomSheetModalProvider>
       <BottomSheetModal
@@ -52,7 +57,7 @@ const BottomDrawerConfirm = React.forwardRef<
               style={styles.buttonsDivider}
               customBackgroundColor={colors[theme].foggy}
             />
-            <TouchableOpacity onPress={onSubmit} style={styles.button}>
+            <TouchableOpacity onPress={handleSubmit} style={styles.button}>
               <Text style={{ color: colors[theme].primary }}>
                 {submitButtonText}
               </Text>
