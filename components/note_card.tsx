@@ -4,7 +4,7 @@ import { MotiView, Text, TouchableOpacity, View } from "./themed";
 import colors from "@/constants/colors";
 import { formatLongDate, formatMediumDate } from "@/lib/format_date";
 import { router } from "expo-router";
-import React, { useEffect } from "react";
+import React from "react";
 
 const NoteCardGrid = React.memo(
   ({
@@ -20,43 +20,27 @@ const NoteCardGrid = React.memo(
       return <View style={gridStyles.innerContainer} />;
     }
 
-    console.log(note, index);
-
+    // Log to check if the component re-renders
+    console.log("Rendering NoteCardGrid:", note.id);
+    console.log("dependencies:", note.id, selectedNotes, viewMode, isEditMode);
     const theme = useColorScheme();
 
-    // const delay = index ? index * 50 : 0;
-
-    const handlePress = React.useCallback(() => {
+    const handlePress = () => {
       if (isEditMode) {
         handleSelectNote(note.id);
       } else {
         router.push(`./(notes)/${note.id}`);
       }
-    }, [isEditMode, handleSelectNote, note.id]);
+    };
 
-    const isSelected = React.useMemo(() => selectedNotes.includes(note.id), [
-      selectedNotes,
-      note.id,
-    ]);
+    const isSelected = selectedNotes.includes(note.id);
 
-    const handleLongPress = React.useCallback(() => {
+    const handleLongPress = () => {
       if (!isSelected) {
         setEditMode(true);
         handleSelectNote(note.id);
       }
-    }, [setEditMode, handleSelectNote, note.id]);
-
-    // const animationProps = isEditMode
-    //   ? {}
-    //   : ({
-    //       from: { opacity: 0, translateY: 10 },
-    //       animate: { opacity: 1, translateY: 0 },
-    //       transition: {
-    //         type: "timing",
-    //         duration: 250,
-    //         delay,
-    //       },
-    //     } as any);
+    };
 
     const animationProps = {};
 
@@ -174,6 +158,14 @@ const NoteCardGrid = React.memo(
         </TouchableOpacity>
       );
     }
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.note.id === nextProps.note.id &&
+      prevProps.selectedNotes === nextProps.selectedNotes &&
+      prevProps.viewMode === nextProps.viewMode &&
+      prevProps.isEditMode === nextProps.isEditMode
+    );
   }
 );
 

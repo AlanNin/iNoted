@@ -71,13 +71,24 @@ export default function HomeScreen() {
     return sorted;
   }, [notesData, sortBy]);
 
-  const notes = sortedNotes
-    ? [...sortedNotes, ...Array((3 - (sortedNotes.length % 3)) % 3).fill({})]
-    : [];
+  const filteredNotes = React.useMemo(() => {
+    return sortedNotes.filter((note) =>
+      note.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [sortedNotes, searchQuery]);
 
-  const handleToggleBottomSortDrawer = React.useCallback(() => {
+  const structuredNotes = React.useMemo(() => {
+    return viewMode === "grid"
+      ? [
+          ...filteredNotes,
+          ...Array((3 - (filteredNotes.length % 3)) % 3).fill({}),
+        ]
+      : filteredNotes;
+  }, [viewMode, filteredNotes]);
+
+  const handleToggleBottomSortDrawer = () => {
     sortBottomDrawerRef.current?.present();
-  }, []);
+  };
 
   const toggleSortOrder = (actionTitle: typeof sortTypes[number]) => {
     setSortBy((prevState) => ({
@@ -124,9 +135,9 @@ export default function HomeScreen() {
     [selectedNotes]
   );
 
-  const handleToggleBottomDeleteMultipleDrawer = React.useCallback(() => {
+  const handleToggleBottomDeleteMultipleDrawer = () => {
     bottomDeleteMultipleDrawerRef.current?.present();
-  }, []);
+  };
 
   const handleDeleteMultipleNotes = React.useCallback(async () => {
     try {
@@ -140,19 +151,17 @@ export default function HomeScreen() {
     }
   }, [selectedNotes]);
 
-  const renderItem = React.useCallback(
-    ({ item, index }: { item: NoteProps; index: number }) => (
-      <NoteCard
-        note={item}
-        index={index}
-        viewMode={viewMode}
-        isEditMode={isEditMode}
-        setEditMode={setIsEditMode}
-        selectedNotes={selectedNotes}
-        handleSelectNote={handleSelectNote}
-      />
-    ),
-    [viewMode, isEditMode, selectedNotes]
+  const renderItem = ({ item, index }: { item: NoteProps; index: number }) => (
+    <NoteCard
+      key={item.id}
+      note={item}
+      index={index}
+      viewMode={viewMode}
+      isEditMode={isEditMode}
+      setEditMode={setIsEditMode}
+      selectedNotes={selectedNotes}
+      handleSelectNote={handleSelectNote}
+    />
   );
 
   return (
@@ -252,7 +261,7 @@ export default function HomeScreen() {
             ref={listRef}
             key={viewMode}
             keyExtractor={(item) => item.id?.toString()}
-            data={notes}
+            data={structuredNotes}
             renderItem={renderItem}
             numColumns={viewMode === "grid" ? 3 : 1}
             style={styles.noteListContainer}
