@@ -9,11 +9,9 @@ import { useEditMode } from "@/hooks/useEditMode";
 
 const SelectedIndicator = ({
   noteId,
-  style,
   viewMode,
 }: {
   noteId: number;
-  style: any;
   viewMode: "grid" | "list";
 }) => {
   const {
@@ -51,7 +49,9 @@ const SelectedIndicator = ({
       onPress={handlePress}
       onLongPress={handleLongPress}
       style={[
-        style,
+        viewMode === "grid"
+          ? gridStyles.selectIndicator
+          : listStyles.selectIndicator,
         {
           [viewMode === "grid"
             ? "borderTopColor"
@@ -65,23 +65,29 @@ const SelectedIndicator = ({
 };
 
 const NoteCard = React.memo(
-  ({ note, viewMode }: NoteCardProps) => {
+  ({ note, index, viewMode }: NoteCardProps) => {
     if (!note.id) {
       return <View style={gridStyles.innerContainer} />;
     }
 
     const theme = useColorScheme();
 
-    const animationProps = {};
+    const delay = index ? index * 50 : 0;
+
+    const animationProps = {
+      from: { opacity: 0, translateY: 10 },
+      animate: { opacity: 1, translateY: 0 },
+      transition: {
+        type: "timing",
+        duration: 250,
+        delay,
+      },
+    } as any;
 
     if (viewMode === "grid") {
       return (
         <View style={gridStyles.outerContainer}>
-          <SelectedIndicator
-            noteId={note.id}
-            style={gridStyles.selectIndicator}
-            viewMode="grid"
-          />
+          <SelectedIndicator noteId={note.id} viewMode="grid" />
 
           <MotiView {...animationProps} style={gridStyles.innerContainer}>
             <View
@@ -125,11 +131,7 @@ const NoteCard = React.memo(
     } else {
       return (
         <TouchableOpacity style={listStyles.outerContainer}>
-          <SelectedIndicator
-            noteId={note.id}
-            style={listStyles.selectIndicator}
-            viewMode="list"
-          />
+          <SelectedIndicator noteId={note.id} viewMode="list" />
 
           <MotiView
             {...animationProps}

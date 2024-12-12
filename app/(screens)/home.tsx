@@ -131,11 +131,12 @@ export default function HomeScreen() {
     }
   }, [selectedNotes, toggleEditMode]);
 
-  const renderItem = ({ item }: { item: NoteProps; index: number }) => (
+  const renderItem = ({ item, index }: { item: NoteProps; index: number }) => (
     <NoteCard
       key={`${item.id}-${item.title}-${item.content}`}
       note={item}
       viewMode={viewMode}
+      index={index}
     />
   );
 
