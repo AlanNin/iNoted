@@ -42,24 +42,26 @@ const SelectedIndicator = ({
     }
   }, [selectedNotes, toggleEditMode, selectNote, noteId]);
 
-  if (!isEditMode) return null;
-
   return (
     <TouchableOpacity
       onPress={handlePress}
       onLongPress={handleLongPress}
-      style={[
-        viewMode === "grid"
-          ? gridStyles.selectIndicator
-          : listStyles.selectIndicator,
-        {
-          [viewMode === "grid"
-            ? "borderTopColor"
-            : "borderRightColor"]: isSelected
-            ? colors[theme].primary
-            : colors[theme].text_muted,
-        },
-      ]}
+      style={
+        isEditMode
+          ? [
+              viewMode === "grid"
+                ? gridStyles.selectIndicator
+                : listStyles.selectIndicator,
+              {
+                [viewMode === "grid"
+                  ? "borderTopColor"
+                  : "borderRightColor"]: isSelected
+                  ? colors[theme].primary
+                  : colors[theme].text_muted,
+              },
+            ]
+          : [neutralStyles.nonSelectIndicator]
+      }
     />
   );
 };
@@ -253,7 +255,14 @@ const listStyles = StyleSheet.create({
     inset: 0,
     zIndex: 10,
     borderRightWidth: 3,
-    borderRadius: 4,
+  },
+});
+
+const neutralStyles = StyleSheet.create({
+  nonSelectIndicator: {
+    position: "absolute",
+    inset: 0,
+    zIndex: 10,
   },
 });
 
