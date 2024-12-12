@@ -19,23 +19,22 @@ import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import BottomDrawerSort from "@/components/bottom_drawer_sort";
 import BottomDrawerConfirm from "@/components/bottom_drawer_confirm";
 import { toast } from "@backpackapp-io/react-native-toast";
+import { FlashList } from "@shopify/flash-list";
+import { useEditMode } from "@/hooks/useEditMode";
 
 export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
   const theme = useColorScheme();
   const sortBottomDrawerRef = React.useRef<BottomSheetModal>(null);
-  const listRef = React.useRef<FlatList<NoteProps> | null>(null);
   const sortTypes = ["Recently added", "A-Z"] as const;
   const [sortBy, setSortBy] = React.useState<{
     key: string;
     order: "asc" | "desc";
   }>({ key: sortTypes[0], order: "desc" });
-  const [isEditMode, setIsEditMode] = React.useState(false);
-  const [selectedNotes, setSelectedNotes] = React.useState<number[]>([]);
+  const { isEditMode, toggleEditMode, selectedNotes } = useEditMode();
   const bottomDeleteMultipleDrawerRef = React.useRef<BottomSheetModal>(null);
 
-  // notes data
   const {
     data: notesData,
     isLoading: isLoadingNotesData,
@@ -100,15 +99,10 @@ export default function HomeScreen() {
     }));
   };
 
-  const toggleEditMode = () => {
-    setIsEditMode((prevState) => !prevState);
-    setSelectedNotes([]);
-  };
-
   React.useEffect(() => {
     const backAction = () => {
       if (isEditMode) {
-        setIsEditMode(false);
+        toggleEditMode();
         return true;
       }
       return false;
@@ -122,19 +116,6 @@ export default function HomeScreen() {
     return () => backHandler.remove();
   }, [isEditMode]);
 
-  const handleSelectNote = React.useCallback(
-    (noteId: number) => {
-      if (selectedNotes.includes(noteId)) {
-        setSelectedNotes((prevState) =>
-          prevState.filter((id) => id !== noteId)
-        );
-      } else {
-        setSelectedNotes((prevState) => [...prevState, noteId]);
-      }
-    },
-    [selectedNotes]
-  );
-
   const handleToggleBottomDeleteMultipleDrawer = () => {
     bottomDeleteMultipleDrawerRef.current?.present();
   };
@@ -144,23 +125,17 @@ export default function HomeScreen() {
       await deleteNotes(selectedNotes);
       await refetchNotes();
       toast.success("Notes deleted successfully!");
-      setIsEditMode(false);
-      setSelectedNotes([]);
+      toggleEditMode();
     } catch (error) {
       toast.error("An error occurred. Please try again.");
     }
-  }, [selectedNotes]);
+  }, [selectedNotes, toggleEditMode]);
 
-  const renderItem = ({ item, index }: { item: NoteProps; index: number }) => (
+  const renderItem = ({ item }: { item: NoteProps; index: number }) => (
     <NoteCard
-      key={item.id}
+      key={`${item.id}-${item.title}-${item.content}`}
       note={item}
-      index={index}
       viewMode={viewMode}
-      isEditMode={isEditMode}
-      setEditMode={setIsEditMode}
-      selectedNotes={selectedNotes}
-      handleSelectNote={handleSelectNote}
     />
   );
 
@@ -257,19 +232,16 @@ export default function HomeScreen() {
             <Text style={styles.loadingText}>Loading notes...</Text>
           </View>
         ) : (
-          <FlatList
-            ref={listRef}
+          <FlashList
             key={viewMode}
-            keyExtractor={(item) => item.id?.toString()}
+            keyExtractor={(item, index) =>
+              item.id ? item.id?.toString() : `placeholder-${index}`
+            }
             data={structuredNotes}
             renderItem={renderItem}
             numColumns={viewMode === "grid" ? 3 : 1}
-            style={styles.noteListContainer}
-            contentContainerStyle={styles.notesListWrapper}
-            columnWrapperStyle={
-              viewMode === "grid" ? styles.notesListWrapper : null
-            }
             removeClippedSubviews={true}
+            estimatedItemSize={viewMode === "grid" ? 216 : 140}
           />
         )}
       </View>
@@ -444,13 +416,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-  },
-  noteListContainer: {
-    paddingHorizontal: 16,
-  },
-  notesListWrapper: {
-    gap: 20,
-    paddingBottom: 12,
   },
   emptyText: {
     letterSpacing: 0.5,

@@ -23,6 +23,11 @@ import { Toasts } from "@backpackapp-io/react-native-toast";
 
 SplashScreen.preventAutoHideAsync();
 
+SplashScreen.setOptions({
+  duration: 250,
+  fade: true,
+});
+
 export default function RootLayout() {
   const theme = useColorScheme();
 

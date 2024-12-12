@@ -5,66 +5,85 @@ import colors from "@/constants/colors";
 import { formatLongDate, formatMediumDate } from "@/lib/format_date";
 import { router } from "expo-router";
 import React from "react";
+import { useEditMode } from "@/hooks/useEditMode";
 
-const NoteCardGrid = React.memo(
-  ({
-    note,
-    index,
-    viewMode,
-    isEditMode = false,
-    setEditMode,
+const SelectedIndicator = ({
+  noteId,
+  style,
+  viewMode,
+}: {
+  noteId: number;
+  style: any;
+  viewMode: "grid" | "list";
+}) => {
+  const {
+    isEditMode,
+    selectNote,
+    toggleEditMode,
     selectedNotes,
-    handleSelectNote,
-  }: NoteCardProps) => {
+  } = useEditMode();
+
+  const theme = useColorScheme();
+
+  const isSelected = selectedNotes.includes(noteId);
+
+  const handlePress = React.useCallback(() => {
+    if (isEditMode) {
+      selectNote(noteId);
+    } else {
+      router.push(`./(notes)/${noteId}`);
+    }
+  }, [isEditMode, selectNote, noteId]);
+
+  const handleLongPress = React.useCallback(() => {
+    const isSelected = selectedNotes.includes(noteId);
+
+    if (!isSelected) {
+      toggleEditMode();
+      selectNote(noteId);
+    }
+  }, [selectedNotes, toggleEditMode, selectNote, noteId]);
+
+  if (!isEditMode) return null;
+
+  return (
+    <TouchableOpacity
+      onPress={handlePress}
+      onLongPress={handleLongPress}
+      style={[
+        style,
+        {
+          [viewMode === "grid"
+            ? "borderTopColor"
+            : "borderRightColor"]: isSelected
+            ? colors[theme].primary
+            : colors[theme].text_muted,
+        },
+      ]}
+    />
+  );
+};
+
+const NoteCard = React.memo(
+  ({ note, viewMode }: NoteCardProps) => {
     if (!note.id) {
       return <View style={gridStyles.innerContainer} />;
     }
 
-    // Log to check if the component re-renders
-    console.log("Rendering NoteCardGrid:", note.id);
-    console.log("dependencies:", note.id, selectedNotes, viewMode, isEditMode);
     const theme = useColorScheme();
-
-    const handlePress = () => {
-      if (isEditMode) {
-        handleSelectNote(note.id);
-      } else {
-        router.push(`./(notes)/${note.id}`);
-      }
-    };
-
-    const isSelected = selectedNotes.includes(note.id);
-
-    const handleLongPress = () => {
-      if (!isSelected) {
-        setEditMode(true);
-        handleSelectNote(note.id);
-      }
-    };
 
     const animationProps = {};
 
     if (viewMode === "grid") {
       return (
-        <TouchableOpacity
-          onPress={handlePress}
-          onLongPress={handleLongPress}
-          style={gridStyles.outerContainer}
-        >
-          <MotiView {...animationProps} style={gridStyles.innerContainer}>
-            {isEditMode && (
-              <View
-                style={[
-                  gridStyles.selectIndicator,
-                  {
-                    backgroundColor: isSelected
-                      ? colors[theme].primary
-                      : colors[theme].text_muted,
-                  },
-                ]}
-              />
-            )}
+        <View style={gridStyles.outerContainer}>
+          <SelectedIndicator
+            noteId={note.id}
+            style={gridStyles.selectIndicator}
+            viewMode="grid"
+          />
 
+          <MotiView {...animationProps} style={gridStyles.innerContainer}>
             <View
               style={[
                 gridStyles.contentContainer,
@@ -101,26 +120,16 @@ const NoteCardGrid = React.memo(
               </Text>
             </View>
           </MotiView>
-        </TouchableOpacity>
+        </View>
       );
     } else {
       return (
-        <TouchableOpacity
-          onPress={handlePress}
-          style={listStyles.outerContainer}
-        >
-          {isEditMode && (
-            <View
-              style={[
-                listStyles.selectIndicator,
-                {
-                  backgroundColor: isSelected
-                    ? colors[theme].primary
-                    : colors[theme].text_muted,
-                },
-              ]}
-            />
-          )}
+        <TouchableOpacity style={listStyles.outerContainer}>
+          <SelectedIndicator
+            noteId={note.id}
+            style={listStyles.selectIndicator}
+            viewMode="list"
+          />
 
           <MotiView
             {...animationProps}
@@ -162,9 +171,7 @@ const NoteCardGrid = React.memo(
   (prevProps, nextProps) => {
     return (
       prevProps.note.id === nextProps.note.id &&
-      prevProps.selectedNotes === nextProps.selectedNotes &&
-      prevProps.viewMode === nextProps.viewMode &&
-      prevProps.isEditMode === nextProps.isEditMode
+      prevProps.viewMode === nextProps.viewMode
     );
   }
 );
@@ -173,12 +180,12 @@ const gridStyles = StyleSheet.create({
   outerContainer: {
     flex: 1,
     height: 216,
+    marginHorizontal: 16,
+    marginBottom: 16,
   },
   innerContainer: {
     flex: 1,
     gap: 8,
-    borderRadius: 8,
-    overflow: "hidden",
   },
   contentContainer: {
     padding: 12,
@@ -204,8 +211,10 @@ const gridStyles = StyleSheet.create({
   },
   selectIndicator: {
     position: "absolute",
-    height: 3,
-    width: "100%",
+    inset: 0,
+    zIndex: 10,
+    borderTopWidth: 3,
+    borderRadius: 8,
   },
 });
 
@@ -215,6 +224,8 @@ const listStyles = StyleSheet.create({
     height: 140,
     borderRadius: 8,
     overflow: "hidden",
+    marginHorizontal: 16,
+    marginBottom: 16,
   },
   innerContainer: {
     flex: 1,
@@ -237,10 +248,11 @@ const listStyles = StyleSheet.create({
   },
   selectIndicator: {
     position: "absolute",
-    right: 0,
-    height: "100%",
-    width: 3,
+    inset: 0,
+    zIndex: 10,
+    borderRightWidth: 3,
+    borderRadius: 4,
   },
 });
 
-export default NoteCardGrid;
+export default NoteCard;

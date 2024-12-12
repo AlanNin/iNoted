@@ -2,20 +2,12 @@
   "expo": {
     "name": "iNoted",
     "slug": "iNoted",
-    "platforms": [
-      "ios",
-      "android"
-    ],
+    "platforms": ["ios", "android"],
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "ios": {
       "supportsTablet": true
     },
@@ -36,7 +28,19 @@
       "expo-router",
       "expo-sqlite",
       "react-native-edge-to-edge",
-      "expo-build-properties"
+      "expo-build-properties",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#f2f3f4",
+          "image": "./assets/splash.png",
+          "dark": {
+            "backgroundColor": "#0f0f0f",
+            "image": "./assets/splash_dark.png"
+          },
+          "imageWidth": 200
+        }
+      ]
     ],
     "extra": {
       "router": {
