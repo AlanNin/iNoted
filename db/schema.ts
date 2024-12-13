@@ -4,7 +4,7 @@ import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
 export const notebooks = sqliteTable("notebooks", {
   id: int().primaryKey({ autoIncrement: true }),
   name: text().notNull(),
-  color: text().notNull(),
+  background: text().notNull(),
   created_at: text("created_at")
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),

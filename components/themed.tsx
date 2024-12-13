@@ -1,6 +1,7 @@
 import {
   Text as DefaultText,
   View as DefaultView,
+  View as DefaultSafeAreaView,
   TouchableOpacity as DefaultTouchableOpacity,
   TextInput as DefaultTextInput,
 } from "react-native";
@@ -14,6 +15,7 @@ import {
   TextProps,
   TouchableOpacityProps,
   ViewProps,
+  SafeAreaViewProps,
   MarkdownTextInputProps,
 } from "@/types/themed";
 
@@ -55,6 +57,18 @@ export function View(props: ViewProps) {
   return <DefaultView style={[{ backgroundColor }, style]} {...otherProps} />;
 }
 
+export function SafeAreaView(props: SafeAreaViewProps) {
+  const { style, customBackgroundColor, ...otherProps } = props;
+  const backgroundColor = useThemeColor(
+    { light: customBackgroundColor, dark: customBackgroundColor },
+    "background"
+  );
+
+  return (
+    <DefaultSafeAreaView style={[{ backgroundColor }, style]} {...otherProps} />
+  );
+}
+
 export function TouchableOpacity(props: TouchableOpacityProps) {
   const { style, customBackgroundColor = "transparent", ...otherProps } = props;
   const backgroundColor = useThemeColor(
@@ -75,6 +89,7 @@ export function TextInput(props: TextInputProps) {
     style,
     customTextColor,
     customPlaceholderColor,
+    customBackgroundColor,
     ...otherProps
   } = props;
 
@@ -97,6 +112,7 @@ export function TextInput(props: TextInputProps) {
           color,
           fontFamily: "Geist-Regular",
           fontSize: 16,
+          backgroundColor: customBackgroundColor,
         },
         style,
       ]}

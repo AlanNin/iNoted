@@ -271,7 +271,6 @@ export default function NoteScreen() {
               onChangeText={(e) => handleInputChange("title", e)}
               style={[styles.noteTitle]}
               placeholder="Untitled note"
-              multiline={true}
               onPress={() => setIsMoreModalOpen(false)}
             />
             <MarkdownTextInput
@@ -359,6 +358,7 @@ const styles = StyleSheet.create({
     padding: 0,
     margin: 0,
     textAlignVertical: "top",
+    height: 32,
   },
   noteContent: {
     padding: 0,

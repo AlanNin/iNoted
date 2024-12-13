@@ -1,7 +1,7 @@
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
-import { useEffect } from "react";
+import React from "react";
 import {
   DarkTheme,
   DefaultTheme,
@@ -20,6 +20,7 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SheetProvider } from "react-native-actions-sheet";
 import { Toasts } from "@backpackapp-io/react-native-toast";
+import useAppConfig from "@/hooks/useAppConfig";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -40,13 +41,19 @@ export default function RootLayout() {
 
   const { success } = useMigrations(db_client, migrations);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (fontsLoaded || fontsError) {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded, fontsError]);
 
-  if ((!fontsLoaded && !fontsError) || !success) {
+  const [isFirstAppLaunch] = useAppConfig<boolean>("isFirstAppLaunch", true);
+
+  if (
+    (!fontsLoaded && !fontsError) ||
+    !success ||
+    isFirstAppLaunch === undefined
+  ) {
     return null;
   }
 
@@ -60,7 +67,11 @@ export default function RootLayout() {
             >
               <SheetProvider context="global">
                 <Stack>
-                  <Stack.Screen name="index" options={{ headerShown: false }} />
+                  <Stack.Screen
+                    name="index"
+                    options={{ headerShown: false }}
+                    redirect={!isFirstAppLaunch}
+                  />
                   <Stack.Screen
                     name="(screens)"
                     options={{ headerShown: false }}

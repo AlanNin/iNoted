@@ -1,7 +1,7 @@
 const colors: Colors = {
   light: {
     text: "#000",
-    text_muted: "rgba(0, 0, 0, 0.5)",
+    text_muted: "rgba(0, 0, 0, 0.7)",
     background: "#f2f3f4",
     tint: "#000",
     grayscale: "#333333",

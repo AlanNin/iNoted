@@ -5,7 +5,7 @@ import colors from "@/constants/colors";
 import { formatLongDate, formatMediumDate } from "@/lib/format_date";
 import { router } from "expo-router";
 import React from "react";
-import { useEditMode } from "@/hooks/useEditMode";
+import { useNotesEditMode } from "@/hooks/useNotesEditMode";
 
 const SelectedIndicator = ({
   noteId,
@@ -15,39 +15,39 @@ const SelectedIndicator = ({
   viewMode: "grid" | "list";
 }) => {
   const {
-    isEditMode,
+    isNotesEditMode,
     selectNote,
-    toggleEditMode,
+    toggleNotesEditMode,
     selectedNotes,
-  } = useEditMode();
+  } = useNotesEditMode();
 
   const theme = useColorScheme();
 
   const isSelected = selectedNotes.includes(noteId);
 
   const handlePress = React.useCallback(() => {
-    if (isEditMode) {
+    if (isNotesEditMode) {
       selectNote(noteId);
     } else {
       router.push(`./(notes)/${noteId}`);
     }
-  }, [isEditMode, selectNote, noteId]);
+  }, [isNotesEditMode, selectNote, noteId]);
 
   const handleLongPress = React.useCallback(() => {
     const isSelected = selectedNotes.includes(noteId);
 
     if (!isSelected) {
-      toggleEditMode();
+      toggleNotesEditMode();
       selectNote(noteId);
     }
-  }, [selectedNotes, toggleEditMode, selectNote, noteId]);
+  }, [selectedNotes, toggleNotesEditMode, selectNote, noteId]);
 
   return (
     <TouchableOpacity
       onPress={handlePress}
       onLongPress={handleLongPress}
       style={
-        isEditMode
+        isNotesEditMode
           ? [
               viewMode === "grid"
                 ? gridStyles.selectIndicator
@@ -96,10 +96,7 @@ const NoteCard = React.memo(
               style={[
                 gridStyles.contentContainer,
                 {
-                  backgroundColor:
-                    theme === "light"
-                      ? colors.light.foggiest
-                      : colors.dark.foggiest,
+                  backgroundColor: colors[theme].foggiest,
                 },
               ]}
             >
@@ -184,7 +181,7 @@ const gridStyles = StyleSheet.create({
   outerContainer: {
     flex: 1,
     height: 216,
-    marginHorizontal: 16,
+    marginHorizontal: 8,
     marginBottom: 16,
   },
   innerContainer: {
@@ -228,7 +225,7 @@ const listStyles = StyleSheet.create({
     height: 140,
     borderRadius: 8,
     overflow: "hidden",
-    marginHorizontal: 16,
+    marginHorizontal: 8,
     marginBottom: 16,
   },
   innerContainer: {

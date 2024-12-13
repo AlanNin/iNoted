@@ -5,6 +5,7 @@ import { MotiView, Text, TouchableOpacity, View } from "@/components/themed";
 import { ArrowRight, CircleCheckBig } from "lucide-react-native";
 import colors from "@/constants/colors";
 import { router } from "expo-router";
+import useAppConfig from "@/hooks/useAppConfig";
 
 const steps = [
   {
@@ -27,12 +28,17 @@ const steps = [
 export default function StartScreen() {
   const theme = useColorScheme();
   const [currentStep, setCurrentStep] = React.useState(0);
+  const [_isFirstAppLaunch, saveIsFirstAppLaunch] = useAppConfig<boolean>(
+    "isFirstAppLaunch",
+    true
+  );
 
   const handleNextStep = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      router.replace("./(screens)/home");
+      saveIsFirstAppLaunch(false);
+      router.replace("./(screens)/(notes)");
     }
   };
 

@@ -1,14 +1,15 @@
-import { StyleSheet, SafeAreaView, FlatList, BackHandler } from "react-native";
+import { StyleSheet, BackHandler } from "react-native";
 import React from "react";
 import {
   MotiView,
+  SafeAreaView,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from "@/components/themed";
 import colors from "@/constants/colors";
-import { router } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { deleteNotes, getAllNotes } from "@/queries/notes";
 import NoteCard from "@/components/note_card";
@@ -20,20 +21,34 @@ import BottomDrawerSort from "@/components/bottom_drawer_sort";
 import BottomDrawerConfirm from "@/components/bottom_drawer_confirm";
 import { toast } from "@backpackapp-io/react-native-toast";
 import { FlashList } from "@shopify/flash-list";
-import { useEditMode } from "@/hooks/useEditMode";
+import { useNotesEditMode } from "@/hooks/useNotesEditMode";
+import { DrawerActions } from "@react-navigation/native";
+import useAppConfig from "@/hooks/useAppConfig";
 
-export default function HomeScreen() {
+export default function NotesScreen() {
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
+  const navigation = useNavigation();
   const theme = useColorScheme();
   const sortBottomDrawerRef = React.useRef<BottomSheetModal>(null);
   const sortTypes = ["Recently added", "A-Z"] as const;
-  const [sortBy, setSortBy] = React.useState<{
-    key: string;
-    order: "asc" | "desc";
-  }>({ key: sortTypes[0], order: "desc" });
-  const { isEditMode, toggleEditMode, selectedNotes } = useEditMode();
+  const {
+    isNotesEditMode,
+    toggleNotesEditMode,
+    selectedNotes,
+  } = useNotesEditMode();
   const bottomDeleteMultipleDrawerRef = React.useRef<BottomSheetModal>(null);
+  const [notesViewMode, saveNotesViewMode] = useAppConfig<"grid" | "list">(
+    "notesViewMode",
+    "grid"
+  );
+  const [notesSortBy, saveNotesSortBy] = useAppConfig<{
+    key: typeof sortTypes[number];
+    order: "asc" | "desc";
+  }>("notesSortBy", { key: sortTypes[0], order: "desc" });
+
+  const openMenu = () => {
+    navigation.dispatch(DrawerActions.openDrawer());
+  };
 
   const {
     data: notesData,
@@ -52,7 +67,7 @@ export default function HomeScreen() {
     sorted.sort((a, b) => {
       let compareResult = 0;
 
-      switch (sortBy.key) {
+      switch (notesSortBy.key) {
         case sortTypes[0]:
           compareResult =
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
@@ -64,11 +79,11 @@ export default function HomeScreen() {
           compareResult = 0;
       }
 
-      return sortBy.order === "asc" ? compareResult : -compareResult;
+      return notesSortBy.order === "asc" ? compareResult : -compareResult;
     });
 
     return sorted;
-  }, [notesData, sortBy]);
+  }, [notesData, notesSortBy]);
 
   const filteredNotes = React.useMemo(() => {
     return sortedNotes.filter((note) =>
@@ -77,32 +92,34 @@ export default function HomeScreen() {
   }, [sortedNotes, searchQuery]);
 
   const structuredNotes = React.useMemo(() => {
-    return viewMode === "grid"
+    return notesViewMode === "grid"
       ? [
           ...filteredNotes,
           ...Array((3 - (filteredNotes.length % 3)) % 3).fill({}),
         ]
       : filteredNotes;
-  }, [viewMode, filteredNotes]);
+  }, [notesViewMode, filteredNotes]);
 
   const handleToggleBottomSortDrawer = () => {
     sortBottomDrawerRef.current?.present();
   };
 
   const toggleSortOrder = (actionTitle: typeof sortTypes[number]) => {
-    setSortBy((prevState) => ({
-      key: actionTitle,
-      order:
-        prevState.key === actionTitle && prevState.order === "desc"
-          ? "asc"
-          : "desc",
-    }));
+    saveNotesSortBy((prevState) => {
+      return {
+        key: actionTitle,
+        order:
+          prevState?.key === actionTitle && prevState?.order === "desc"
+            ? "asc"
+            : "desc",
+      };
+    });
   };
 
   React.useEffect(() => {
     const backAction = () => {
-      if (isEditMode) {
-        toggleEditMode();
+      if (isNotesEditMode) {
+        toggleNotesEditMode();
         return true;
       }
       return false;
@@ -114,7 +131,7 @@ export default function HomeScreen() {
     );
 
     return () => backHandler.remove();
-  }, [isEditMode]);
+  }, [isNotesEditMode]);
 
   const handleToggleBottomDeleteMultipleDrawer = () => {
     bottomDeleteMultipleDrawerRef.current?.present();
@@ -125,17 +142,17 @@ export default function HomeScreen() {
       await deleteNotes(selectedNotes);
       await refetchNotes();
       toast.success("Notes deleted successfully!");
-      toggleEditMode();
+      toggleNotesEditMode();
     } catch (error) {
       toast.error("An error occurred. Please try again.");
     }
-  }, [selectedNotes, toggleEditMode]);
+  }, [selectedNotes, toggleNotesEditMode]);
 
   const renderItem = ({ item, index }: { item: NoteProps; index: number }) => (
     <NoteCard
       key={`${item.id}-${item.title}-${item.content}`}
       note={item}
-      viewMode={viewMode}
+      viewMode={notesViewMode}
       index={index}
     />
   );
@@ -147,7 +164,7 @@ export default function HomeScreen() {
           style={styles.searchContainer}
           customBackgroundColor={colors[theme].foggier}
         >
-          <TouchableOpacity>
+          <TouchableOpacity onPress={openMenu}>
             <Icon name="Menu" strokeWidth={1.8} />
           </TouchableOpacity>
 
@@ -158,16 +175,16 @@ export default function HomeScreen() {
             onChangeText={setSearchQuery}
           />
 
-          {viewMode === "grid" ? (
+          {notesViewMode === "grid" ? (
             <TouchableOpacity
-              onPress={() => setViewMode("list")}
+              onPress={() => saveNotesViewMode("list")}
               disabled={notesData?.length === 0}
             >
               <Icon name="LayoutGrid" muted={notesData?.length === 0} />
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
-              onPress={() => setViewMode("grid")}
+              onPress={() => saveNotesViewMode("grid")}
               disabled={notesData?.length === 0}
             >
               <Icon name="Rows3" muted={notesData?.length === 0} />
@@ -176,12 +193,20 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.subHeader}>
-          <Text
-            style={styles.notesCount}
-            customTextColor={colors[theme].grayscale}
-          >
-            All Notes ({isLoadingNotesData ? "..." : notesData?.length})
-          </Text>
+          <TouchableOpacity style={styles.notesCountContainer}>
+            <Text
+              style={styles.notesCount}
+              customTextColor={colors[theme].grayscale}
+            >
+              All Notes ({isLoadingNotesData ? "..." : notesData?.length})
+            </Text>
+            <Icon
+              name="ChevronDown"
+              size={16}
+              customColor={colors[theme].grayscale}
+              style={styles.notesCountIcon}
+            />
+          </TouchableOpacity>
           <View style={styles.actions}>
             <TouchableOpacity
               style={styles.actionButton}
@@ -206,10 +231,10 @@ export default function HomeScreen() {
             <TouchableOpacity
               style={styles.actionButton}
               disabled={notesData?.length === 0}
-              onPress={toggleEditMode}
+              onPress={toggleNotesEditMode}
             >
               <Icon
-                name={isEditMode ? "PenOff" : "SquarePen"}
+                name={isNotesEditMode ? "PenOff" : "SquarePen"}
                 size={16}
                 grayscale
                 muted={notesData?.length === 0}
@@ -219,14 +244,16 @@ export default function HomeScreen() {
                 customTextColor={colors[theme].grayscale}
                 disabled={notesData?.length === 0}
               >
-                {isEditMode ? "Cancel Edit" : "Edit"}
+                {isNotesEditMode ? "Cancel Edit" : "Edit"}
               </Text>
             </TouchableOpacity>
           </View>
         </View>
       </View>
 
-      <View style={[styles.content, { paddingBottom: isEditMode ? 68 : 0 }]}>
+      <View
+        style={[styles.content, { paddingBottom: isNotesEditMode ? 68 : 0 }]}
+      >
         {isLoadingNotesData ? (
           <View style={styles.loadingContainer}>
             <Loader />
@@ -234,26 +261,29 @@ export default function HomeScreen() {
           </View>
         ) : (
           <FlashList
-            key={viewMode}
+            key={notesViewMode}
             keyExtractor={(item, index) =>
               item.id ? item.id?.toString() : `placeholder-${index}`
             }
             data={structuredNotes}
             renderItem={renderItem}
-            numColumns={viewMode === "grid" ? 3 : 1}
+            numColumns={notesViewMode === "grid" ? 3 : 1}
             removeClippedSubviews={true}
-            estimatedItemSize={viewMode === "grid" ? 216 : 140}
+            estimatedItemSize={notesViewMode === "grid" ? 216 : 140}
           />
         )}
       </View>
 
-      {!isLoadingNotesData && !isEditMode && (
+      {!isLoadingNotesData && !isNotesEditMode && (
         <View style={styles.addButtonContainer}>
           {notesData?.length === 0 && (
             <Text style={styles.emptyText}>
               Let's start by creating your first{" "}
               <Text
-                style={[styles.emptyText, { color: colors[theme].primary }]}
+                style={[
+                  styles.emptyTextHighlight,
+                  { color: colors[theme].primary },
+                ]}
               >
                 note
               </Text>
@@ -285,7 +315,7 @@ export default function HomeScreen() {
         </View>
       )}
 
-      {isEditMode && (
+      {isNotesEditMode && (
         <MotiView
           style={[
             styles.editMenuContainer,
@@ -349,8 +379,8 @@ export default function HomeScreen() {
         actions={sortTypes.map((type) => ({
           title: type,
           action: () => toggleSortOrder(type),
-          isSelected: sortBy.key === type,
-          order: sortBy.order,
+          isSelected: notesSortBy.key === type,
+          order: notesSortBy.order,
         }))}
       />
 
@@ -381,6 +411,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     gap: 12,
+    height: 48,
   },
 
   searchInput: {
@@ -399,8 +430,17 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
+  notesCountContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 4,
+  },
   notesCount: {
     fontSize: 14,
+  },
+  notesCountIcon: {
+    marginTop: 2,
   },
   actions: {
     flexDirection: "row",
@@ -417,10 +457,15 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    paddingHorizontal: 8,
   },
   emptyText: {
+    paddingHorizontal: 8,
     letterSpacing: 0.5,
-    width: "auto",
+    maxWidth: 320,
+  },
+  emptyTextHighlight: {
+    letterSpacing: 0.5,
   },
   addButtonContainer: {
     position: "absolute",

@@ -1,21 +1,23 @@
 import { create } from "zustand";
 
-type EditModeState = {
-  isEditMode: boolean;
+type NotesEditModeState = {
+  isNotesEditMode: boolean;
   selectedNotes: number[];
-  toggleEditMode: () => void;
+  toggleNotesEditMode: () => void;
+  setNotesEditMode: (isNotesEditMode: boolean) => void;
   selectNote: (noteId: number) => void;
   clearSelectedNotes: () => void;
 };
 
-export const useEditMode = create<EditModeState>((set, get) => ({
-  isEditMode: false,
+export const useNotesEditMode = create<NotesEditModeState>((set, get) => ({
+  isNotesEditMode: false,
   selectedNotes: [],
-  toggleEditMode: () =>
+  toggleNotesEditMode: () =>
     set((state) => ({
-      isEditMode: !state.isEditMode,
+      isNotesEditMode: !state.isNotesEditMode,
       selectedNotes: [],
     })),
+  setNotesEditMode: (isNotesEditMode) => set({ isNotesEditMode }),
   selectNote: (noteId) => {
     const { selectedNotes } = get();
     if (selectedNotes.includes(noteId)) {
