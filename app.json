@@ -44,7 +44,9 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "The app only accesses your photos to let you personalize and enjoy your notes as you wish."
+          "photosPermission": "The app only accesses your photos to let you personalize and enjoy your notes as you wish.",
+          "cameraPermission": "The app only accesses your camera to let you personalize and enjoy your notes as you wish.",
+          "microphonePermission": "The app only accesses your microphone to let you personalize and enjoy your notes as you wish."
         }
       ]
     ],

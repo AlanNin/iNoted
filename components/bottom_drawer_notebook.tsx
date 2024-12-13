@@ -14,8 +14,7 @@ import { BottomDrawerNotebookProps } from "@/types/bottom_drawer_notebook";
 import Icon from "./icon";
 import { LinearGradient } from "expo-linear-gradient";
 import ColorPickerComponent from "./color_picker";
-import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system";
+import { pickImage } from "@/lib/pick_image";
 
 const colorsOptions = ["#FF5781", "#E76F51", "#00838F"];
 
@@ -53,28 +52,9 @@ const BottomDrawerNotebook = React.forwardRef<
     };
 
     const handlePickImage = async () => {
-      let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ["images"],
-        allowsEditing: true,
-        aspect: [3, 4],
-        quality: 1,
+      await pickImage({
+        onPick: (uri) => setBackground(uri),
       });
-
-      if (!result.canceled) {
-        const uri = result.assets[0].uri;
-
-        const backgroundsDir = `${FileSystem.documentDirectory}notebook-backgrounds/`;
-        await FileSystem.makeDirectoryAsync(backgroundsDir, {
-          intermediates: true,
-        });
-
-        const fileName = `notebook_background_${Date.now()}.jpg`;
-        const newUri = `${backgroundsDir}${fileName}`;
-
-        await FileSystem.copyAsync({ from: uri, to: newUri });
-
-        setBackground(newUri);
-      }
     };
 
     const handleSubmit = () => {
