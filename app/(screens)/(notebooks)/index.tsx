@@ -9,9 +9,8 @@ import {
   View,
 } from "@/components/themed";
 import colors from "@/constants/colors";
-import { router, useNavigation } from "expo-router";
+import { useNavigation } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
-import NoteCard from "@/components/note_card";
 import Loader from "@/components/loading";
 import Icon from "@/components/icon";
 import useColorScheme from "@/hooks/useColorScheme";
@@ -23,34 +22,45 @@ import { FlashList } from "@shopify/flash-list";
 import { DrawerActions } from "@react-navigation/native";
 import {
   createNotebook,
+  deleteNotebook,
   deleteNotebooks,
   getAllNotebooks,
+  updateNotebook,
 } from "@/queries/notebooks";
 import useAppConfig from "@/hooks/useAppConfig";
 import { useNotebooksEditMode } from "@/hooks/useNotebooksEditMode";
-import BottomDrawerNotebook from "@/components/bottom_drawer_notebook";
+import BottomDrawerCreateNotebook from "@/components/bottom_drawer_create_notebook";
 import NotebookCard from "@/components/notebook_card";
+import BottomDrawerNotebook from "@/components/bottom_drawer_notebook";
 
 export default function NotebooksScreen() {
   const [searchQuery, setSearchQuery] = React.useState("");
   const navigation = useNavigation();
   const theme = useColorScheme();
   const sortBottomDrawerRef = React.useRef<BottomSheetModal>(null);
+  const createNotebookBottomDrawerRef = React.useRef<BottomSheetModal>(null);
   const notebookBottomDrawerRef = React.useRef<BottomSheetModal>(null);
+  const [selectedNotebook, setSelectedNotebook] = React.useState<number>();
   const sortTypes = ["Recently added", "A-Z"] as const;
   const bottomDeleteMultipleDrawerRef = React.useRef<BottomSheetModal>(null);
   const [notebooksSortBy, saveNotebooksSortBy] = useAppConfig<{
     key: typeof sortTypes[number];
     order: "asc" | "desc";
   }>("notebooksSortBy", { key: sortTypes[0], order: "desc" });
+  const [isFirstNotebook, saveIsFirstNotebook] = useAppConfig<boolean>(
+    "isFirstNotebook",
+    true
+  );
 
   const {
     isNotebooksEditMode,
     toggleNotebooksEditMode,
     selectedNotebooks,
+    setNotebooksEditMode,
   } = useNotebooksEditMode();
 
   const openMenu = () => {
+    setNotebooksEditMode(false);
     navigation.dispatch(DrawerActions.openDrawer());
   };
 
@@ -63,8 +73,40 @@ export default function NotebooksScreen() {
     queryFn: () => getAllNotebooks(),
   });
 
+  const sortedNotebooks = React.useMemo(() => {
+    if (!notebooksData) return [];
+
+    const sorted = [...notebooksData];
+
+    sorted.sort((a, b) => {
+      let compareResult = 0;
+
+      switch (notebooksSortBy.key) {
+        case sortTypes[0]:
+          compareResult =
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          break;
+        case sortTypes[1]:
+          compareResult = a.name.localeCompare(b.name);
+          break;
+        default:
+          compareResult = 0;
+      }
+
+      return notebooksSortBy.order === "asc" ? compareResult : -compareResult;
+    });
+
+    return sorted;
+  }, [notebooksData, notebooksSortBy]);
+
+  const filteredNoteboks = React.useMemo(() => {
+    return sortedNotebooks.filter((notebook) =>
+      notebook.name.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [sortedNotebooks, searchQuery]);
+
   const handleToggleBottomNotebookDrawer = () => {
-    notebookBottomDrawerRef.current?.present();
+    createNotebookBottomDrawerRef.current?.present();
   };
 
   const handleToggleBottomSortDrawer = () => {
@@ -104,25 +146,57 @@ export default function NotebooksScreen() {
     bottomDeleteMultipleDrawerRef.current?.present();
   };
 
-  // const handleDeleteMultipleNotebooks = React.useCallback(async () => {
-  //   try {
-  //     await deleteNotebooks(selectedNotebooks);
-  //     await refetchNotebooks();
-  //     toast.success("Notebooks deleted successfully!");
-  //     toggleNotebooksEditMode();
-  //   } catch (error) {
-  //     toast.error("An error occurred. Please try again.");
-  //   }
-  // }, [selectedNotebooks, toggleNotebooksEditMode]);
+  const handleDeleteMultipleNotebooks = React.useCallback(async () => {
+    try {
+      await deleteNotebooks(selectedNotebooks);
+      await refetchNotebooks();
+      toast.success("Notebooks deleted successfully!");
+      toggleNotebooksEditMode();
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+    }
+  }, [selectedNotebooks, toggleNotebooksEditMode]);
 
   async function handleCreateNotebook(notebook: NewNotebookProps) {
     try {
       await createNotebook(notebook);
+      if (isFirstNotebook) {
+        saveIsFirstNotebook(false);
+      }
       await refetchNotebooks();
       toast.success("Notebook created successfully!");
     } catch (error) {
       toast.error("An error occurred. Please try again.");
     }
+  }
+
+  async function handleUpdateNotebook(notebook: NewNotebookProps) {
+    const { id, ...notebookData } = notebook;
+
+    try {
+      await updateNotebook(id!, notebookData);
+      await refetchNotebooks();
+      toast.success("Notebook updated successfully!");
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+    }
+  }
+
+  async function handleDeleteNotebook(notebookId: number) {
+    try {
+      await deleteNotebook(notebookId);
+      await refetchNotebooks();
+      toast.success("Notebook deleted successfully!");
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+    }
+  }
+
+  function handleNotebookPress(notebookId: number) {
+    if (selectedNotebook !== notebookId) {
+      setSelectedNotebook(notebookId);
+    }
+    notebookBottomDrawerRef.current?.present();
   }
 
   const renderItem = ({
@@ -136,204 +210,198 @@ export default function NotebooksScreen() {
       key={`${item.id}-${item.name}-${item.background}`}
       notebook={item}
       index={index}
+      onPress={handleNotebookPress}
     />
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View
-          style={styles.searchContainer}
-          customBackgroundColor={colors[theme].foggier}
-        >
-          <TouchableOpacity onPress={openMenu}>
-            <Icon name="Menu" strokeWidth={1.8} />
-          </TouchableOpacity>
-
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Find your notebooks..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
-
-        <View style={styles.subHeader}>
-          <Text
-            style={styles.notebooksCount}
-            customTextColor={colors[theme].grayscale}
+    <>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <View
+            style={styles.searchContainer}
+            customBackgroundColor={colors[theme].foggier}
           >
-            All Notebooks (
-            {isLoadingNotebooksData ? "..." : notebooksData?.length})
-          </Text>
-          <View style={styles.actions}>
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={handleToggleBottomSortDrawer}
-              disabled={notebooksData?.length === 0}
-            >
-              <Icon
-                name="ArrowDownUp"
-                size={16}
-                grayscale
-                muted={notebooksData?.length === 0}
-              />
-              <Text
-                style={styles.actionText}
-                customTextColor={colors[theme].grayscale}
-                disabled={notebooksData?.length === 0}
-              >
-                Sort
-              </Text>
+            <TouchableOpacity onPress={openMenu}>
+              <Icon name="Menu" strokeWidth={1.8} />
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.actionButton}
-              disabled={notebooksData?.length === 0}
-              onPress={toggleNotebooksEditMode}
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Find your notebooks..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+
+          <View style={styles.subHeader}>
+            <Text
+              style={styles.notebooksCount}
+              customTextColor={colors[theme].grayscale}
             >
-              <Icon
-                name={isNotebooksEditMode ? "PenOff" : "SquarePen"}
-                size={16}
-                grayscale
-                muted={notebooksData?.length === 0}
-              />
-              <Text
-                style={styles.actionText}
-                customTextColor={colors[theme].grayscale}
+              All Notebooks (
+              {isLoadingNotebooksData ? "..." : notebooksData?.length})
+            </Text>
+            <View style={styles.actions}>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={handleToggleBottomSortDrawer}
                 disabled={notebooksData?.length === 0}
               >
-                {isNotebooksEditMode ? "Cancel Edit" : "Edit"}
-              </Text>
-            </TouchableOpacity>
+                <Icon
+                  name="ArrowDownUp"
+                  size={16}
+                  grayscale
+                  muted={notebooksData?.length === 0}
+                />
+                <Text
+                  style={styles.actionText}
+                  customTextColor={colors[theme].grayscale}
+                  disabled={notebooksData?.length === 0}
+                >
+                  Sort
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.actionButton}
+                disabled={notebooksData?.length === 0}
+                onPress={toggleNotebooksEditMode}
+              >
+                <Icon
+                  name={isNotebooksEditMode ? "PenOff" : "SquarePen"}
+                  size={16}
+                  grayscale
+                  muted={notebooksData?.length === 0}
+                />
+                <Text
+                  style={styles.actionText}
+                  customTextColor={colors[theme].grayscale}
+                  disabled={notebooksData?.length === 0}
+                >
+                  {isNotebooksEditMode ? "Cancel Edit" : "Edit"}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
 
-      <View
-        style={[
-          styles.content,
-          { paddingBottom: isNotebooksEditMode ? 68 : 0 },
-        ]}
-      >
-        {isLoadingNotebooksData ? (
-          <View style={styles.loadingContainer}>
-            <Loader />
-            <Text style={styles.loadingText}>Loading notes...</Text>
-          </View>
-        ) : (
-          <FlashList
-            keyExtractor={(item, index) =>
-              item.id ? item.id?.toString() : `placeholder-${index}`
-            }
-            data={notebooksData}
-            renderItem={renderItem}
-            numColumns={3}
-            removeClippedSubviews={true}
-            estimatedItemSize={216}
-          />
-        )}
-      </View>
-
-      {!isLoadingNotebooksData && !isNotebooksEditMode && (
-        <View style={styles.addButtonContainer}>
-          {notebooksData?.length === 0 && (
-            <Text style={styles.emptyText}>
-              Let's start by creating your first{" "}
-              <Text
-                style={[
-                  styles.emptyTextHighlight,
-                  { color: colors[theme].primary },
-                ]}
-              >
-                notebook
-              </Text>
-            </Text>
+        <View
+          style={[
+            styles.content,
+            { paddingBottom: isNotebooksEditMode ? 68 : 0 },
+          ]}
+        >
+          {isLoadingNotebooksData ? (
+            <View style={styles.loadingContainer}>
+              <Loader />
+              <Text style={styles.loadingText}>Loading notebooks...</Text>
+            </View>
+          ) : (
+            <>
+              {filteredNoteboks!.length > 0 ? (
+                <FlashList
+                  keyExtractor={(item, index) =>
+                    item.id ? item.id?.toString() : `placeholder-${index}`
+                  }
+                  data={filteredNoteboks}
+                  renderItem={renderItem}
+                  numColumns={3}
+                  removeClippedSubviews={true}
+                  estimatedItemSize={216}
+                />
+              ) : (
+                <View style={styles.noNotebooksContainer}>
+                  <Icon name="Microscope" size={24} strokeWidth={1} muted />
+                  <Text style={styles.noNotebooksText} disabled>
+                    No notebooks found
+                  </Text>
+                </View>
+              )}
+            </>
           )}
+        </View>
 
+        {!isLoadingNotebooksData && !isNotebooksEditMode && (
+          <View style={styles.addButtonContainer}>
+            {notebooksData?.length === 0 && isFirstNotebook && (
+              <Text style={styles.emptyText}>
+                Let's start by creating your first{" "}
+                <Text
+                  style={[
+                    styles.emptyTextHighlight,
+                    { color: colors[theme].primary },
+                  ]}
+                >
+                  notebook
+                </Text>
+              </Text>
+            )}
+
+            <MotiView
+              from={{ opacity: 0 }}
+              animate={{
+                opacity: 1,
+              }}
+              transition={{
+                type: "timing",
+                duration: 200,
+              }}
+              style={styles.fabContainer}
+            >
+              {notebooksData?.length === 0 && isFirstNotebook && (
+                <Icon name="Spline" themed size={36} style={styles.spline} />
+              )}
+              <TouchableOpacity
+                style={styles.fab}
+                customBackgroundColor={colors[theme].primary}
+                onPress={handleToggleBottomNotebookDrawer}
+              >
+                <Icon name="Plus" size={28} customColor={colors.dark.tint} />
+              </TouchableOpacity>
+            </MotiView>
+          </View>
+        )}
+
+        {isNotebooksEditMode && (
           <MotiView
-            from={{ opacity: 0 }}
+            style={[
+              styles.editMenuContainer,
+              { borderTopColor: colors[theme].foggier },
+            ]}
+            customBackgroundColor={colors[theme].background}
+            from={{ opacity: 0, translateY: 10 }}
             animate={{
               opacity: 1,
+              translateY: 0,
             }}
             transition={{
               type: "timing",
-              duration: 200,
+              duration: 250,
             }}
-            style={styles.fabContainer}
           >
-            {notebooksData?.length === 0 && (
-              <Icon name="Spline" themed size={36} style={styles.spline} />
-            )}
             <TouchableOpacity
-              style={styles.fab}
-              customBackgroundColor={colors[theme].primary}
-              onPress={handleToggleBottomNotebookDrawer}
+              style={styles.editMenuButton}
+              onPress={handleToggleBottomDeleteMultipleDrawer}
+              disabled={selectedNotebooks.length === 0}
             >
-              <Icon name="Plus" size={28} customColor={colors.dark.tint} />
+              <Icon
+                name="Eraser"
+                size={24}
+                strokeWidth={1}
+                muted={selectedNotebooks.length === 0}
+              />
+              <Text
+                style={styles.editMenuButtonText}
+                customTextColor={colors[theme].text}
+                disabled={selectedNotebooks.length === 0}
+              >
+                Delete
+              </Text>
             </TouchableOpacity>
           </MotiView>
-        </View>
-      )}
-
-      {isNotebooksEditMode && (
-        <MotiView
-          style={[
-            styles.editMenuContainer,
-            { borderTopColor: colors[theme].foggier },
-          ]}
-          customBackgroundColor={colors[theme].background}
-          from={{ opacity: 0, translateY: 10 }}
-          animate={{
-            opacity: 1,
-            translateY: 0,
-          }}
-          transition={{
-            type: "timing",
-            duration: 250,
-          }}
-        >
-          <TouchableOpacity
-            style={styles.editMenuButton}
-            onPress={handleToggleBottomDeleteMultipleDrawer}
-            disabled={selectedNotebooks.length === 0}
-          >
-            <Icon
-              name="Eraser"
-              size={24}
-              strokeWidth={1}
-              muted={selectedNotebooks.length === 0}
-            />
-            <Text
-              style={styles.editMenuButtonText}
-              customTextColor={colors[theme].text}
-              disabled={selectedNotebooks.length === 0}
-            >
-              Delete
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.editMenuButton}
-            onPress={() => {}}
-            disabled={selectedNotebooks.length === 0}
-          >
-            <Icon
-              name="NotebookPen"
-              size={24}
-              strokeWidth={1}
-              muted={selectedNotebooks.length === 0}
-            />
-            <Text
-              style={styles.editMenuButtonText}
-              customTextColor={colors[theme].text}
-              disabled={selectedNotebooks.length === 0}
-            >
-              Move
-            </Text>
-          </TouchableOpacity>
-        </MotiView>
-      )}
-
+        )}
+      </SafeAreaView>
       <BottomDrawerSort
         ref={sortBottomDrawerRef}
         title="Sort your notebooks"
@@ -345,27 +413,35 @@ export default function NotebooksScreen() {
         }))}
       />
 
-      <BottomDrawerNotebook
-        ref={notebookBottomDrawerRef}
-        title="New Notebook"
+      <BottomDrawerCreateNotebook
+        ref={createNotebookBottomDrawerRef}
+        title="New notebook"
         description="Create a notebook to organize your notes."
         onSubmit={handleCreateNotebook}
       />
 
-      {/* <BottomDrawerConfirm
+      <BottomDrawerNotebook
+        ref={notebookBottomDrawerRef}
+        notebookId={selectedNotebook}
+        onSubmit={handleUpdateNotebook}
+        onDelete={handleDeleteNotebook}
+      />
+
+      <BottomDrawerConfirm
         ref={bottomDeleteMultipleDrawerRef}
         title="Delete selected notebooks?"
         description={`This notebooks will be permanently deleted from this device. You have selected ${selectedNotebooks.length} notebooks.`}
         submitButtonText="Delete"
         onSubmit={handleDeleteMultipleNotebooks}
-      /> */}
-    </SafeAreaView>
+      />
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    minHeight: "100%",
   },
   header: {
     padding: 16,
@@ -467,11 +543,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     textAlign: "center",
     gap: 12,
+    marginBottom: "30%",
   },
   loadingText: {
     fontSize: 16,
     alignSelf: "center",
-    marginBottom: 56,
+  },
+  noNotebooksContainer: {
+    flex: 1,
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+    gap: 12,
+    marginBottom: "30%",
+  },
+  noNotebooksText: {
+    fontSize: 16,
+    alignSelf: "center",
   },
   scrollButtonContainer: {
     position: "absolute",

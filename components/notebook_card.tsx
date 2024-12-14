@@ -1,17 +1,84 @@
 import { Image, StyleSheet } from "react-native";
-import useColorScheme from "@/hooks/useColorScheme";
-import { MotiView, Text, View } from "./themed";
-
+import { MotiView, Text, TouchableOpacity, View } from "./themed";
 import React from "react";
+import { useNotebooksEditMode } from "@/hooks/useNotebooksEditMode";
+import useColorScheme from "@/hooks/useColorScheme";
+import colors from "@/constants/colors";
+
+// TODO: try to find a way to indicate long press
+const SelectedIndicator = ({
+  notebookId,
+  onPress,
+}: {
+  notebookId: number;
+  onPress: (notebookId: number) => void;
+}) => {
+  const {
+    isNotebooksEditMode,
+    selectNotebook,
+    toggleNotebooksEditMode,
+    selectedNotebooks,
+  } = useNotebooksEditMode();
+
+  const theme = useColorScheme();
+
+  const isSelected = selectedNotebooks.includes(notebookId);
+
+  const handlePress = React.useCallback(() => {
+    if (isNotebooksEditMode) {
+      selectNotebook(notebookId);
+    } else {
+      onPress(notebookId!);
+    }
+  }, [isNotebooksEditMode, selectNotebook, notebookId]);
+
+  const handleLongPress = React.useCallback(() => {
+    const isSelected = selectedNotebooks.includes(notebookId);
+
+    if (!isSelected) {
+      toggleNotebooksEditMode();
+      selectNotebook(notebookId);
+    }
+  }, [selectedNotebooks, toggleNotebooksEditMode, selectNotebook, notebookId]);
+
+  return (
+    <TouchableOpacity
+      onPress={handlePress}
+      onLongPress={handleLongPress}
+      style={styles.selectIndicatorContainer}
+    >
+      {isNotebooksEditMode && (
+        <View
+          style={[
+            styles.selectIndicator,
+            {
+              borderColor: isSelected
+                ? colors[theme].primary
+                : colors.dark.tint,
+            },
+          ]}
+        />
+      )}
+    </TouchableOpacity>
+  );
+};
 
 const NotebookCard = React.memo(
-  ({ notebook, index, isAdding = false }: NoteBookCardProps) => {
+  ({
+    notebook,
+    index,
+    isAdding = false,
+    numberOfLinesName = 1,
+    onPress,
+    isLoading = false,
+  }: NoteBookCardProps) => {
+    const theme = useColorScheme();
+
     const isBackgroundAColor =
       typeof notebook.background === "string" &&
       notebook.background.includes("#");
 
     const delay = index ? index * 50 : 0;
-
     const animationProps = {
       from: { opacity: 0, translateY: 10 },
       animate: { opacity: 1, translateY: 0 },
@@ -22,41 +89,47 @@ const NotebookCard = React.memo(
       },
     } as any;
 
+    const colorSource = isLoading
+      ? colors.dark.grayscale
+      : isBackgroundAColor
+      ? notebook.background
+      : "transparent";
+
+    const imageSource =
+      typeof notebook.background === "string" &&
+      notebook.background.startsWith("file:")
+        ? { uri: notebook.background }
+        : (notebook.background as any);
+
     return (
       <MotiView
         {...animationProps}
         style={[styles.container, isAdding && { width: 120 }]}
       >
+        <SelectedIndicator notebookId={notebook.id!} onPress={onPress!} />
+
         <View
           style={[
             styles.book,
             {
-              backgroundColor: isBackgroundAColor
-                ? notebook.background
-                : "transparent",
-              shadowColor: isBackgroundAColor
-                ? notebook.background
-                : "transparent",
+              backgroundColor: colorSource,
+              shadowColor: colorSource,
             },
           ]}
         >
           <View style={styles.nameContainer}>
-            <Text style={styles.name} customTextColor="white" numberOfLines={1}>
-              {notebook.name}
+            <Text
+              style={styles.name}
+              customTextColor="white"
+              numberOfLines={numberOfLinesName}
+            >
+              {isLoading ? "Loading..." : notebook.name}
             </Text>
           </View>
 
-          {!isBackgroundAColor && (
+          {!isBackgroundAColor && !isLoading && (
             <View style={styles.bookImageContainer}>
-              <Image
-                source={
-                  typeof notebook.background === "string" &&
-                  notebook.background.startsWith("file:")
-                    ? { uri: notebook.background }
-                    : (notebook.background as any)
-                }
-                style={styles.bookImage}
-              />
+              <Image source={imageSource} style={styles.bookImage} />
             </View>
           )}
           <View style={styles.bookBorder} />
@@ -66,8 +139,10 @@ const NotebookCard = React.memo(
   },
   (prevProps, nextProps) => {
     return (
+      prevProps.notebook.id === nextProps.notebook.id &&
       prevProps.notebook.name === nextProps.notebook.name &&
-      prevProps.notebook.background === nextProps.notebook.background
+      prevProps.notebook.background === nextProps.notebook.background &&
+      prevProps.isLoading === nextProps.isLoading
     );
   }
 );
@@ -143,6 +218,24 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     objectFit: "cover",
+  },
+  selectIndicatorContainer: {
+    position: "absolute",
+    inset: 0,
+    zIndex: 10,
+  },
+  selectIndicator: {
+    position: "absolute",
+    backgroundColor: "transparent",
+    bottom: 24,
+    right: -2,
+    width: "95%",
+    height: 30,
+    borderTopLeftRadius: 12,
+    borderBottomLeftRadius: 12,
+    borderTopRightRadius: 2,
+    borderBottomRightRadius: 2,
+    borderWidth: 2,
   },
 });
 

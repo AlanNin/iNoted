@@ -7,6 +7,7 @@ import { router } from "expo-router";
 import React from "react";
 import { useNotesEditMode } from "@/hooks/useNotesEditMode";
 
+// TODO: try to find a way to indicate long press
 const SelectedIndicator = ({
   noteId,
   viewMode,

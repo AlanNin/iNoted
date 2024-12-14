@@ -16,6 +16,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import Icon from "@/components/icon";
 import { parseExpensiMark } from "@expensify/react-native-live-markdown";
 import { toast } from "@backpackapp-io/react-native-toast";
+import useAppConfig from "@/hooks/useAppConfig";
 
 export default function NewNoteScreen() {
   const theme = useColorScheme();
@@ -28,6 +29,10 @@ export default function NewNoteScreen() {
     title: "",
     content: "",
   });
+  const [isFirstNote, saveIsFirstNote] = useAppConfig<boolean>(
+    "isFirstNote",
+    true
+  );
 
   function handleInputChange(name: keyof NewNoteProps, value: string) {
     if (undoStack.current.length > 0) {
@@ -80,8 +85,12 @@ export default function NewNoteScreen() {
         ...inputs,
         title: inputs.title.length === 0 ? "Untitled note" : inputs.title,
       });
+      if (isFirstNote) {
+        saveIsFirstNote(false);
+      }
       await refetchNotes();
       toast.success("Note created successfully!");
+
       router.back();
     } catch (error) {
       toast.error("An error occurred. Please try again.");

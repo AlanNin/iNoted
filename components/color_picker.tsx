@@ -1,5 +1,5 @@
 import React from "react";
-import { BackHandler, Modal, StyleSheet } from "react-native";
+import { Modal, StyleSheet } from "react-native";
 import ColorPicker, { Panel1, HueSlider } from "reanimated-color-picker";
 import { Text, TouchableOpacity, View } from "./themed";
 import colors from "@/constants/colors";
@@ -22,23 +22,6 @@ export default function ColorPickerComponent({
     setBackground(color);
     setShowModal(false);
   };
-
-  React.useEffect(() => {
-    const backAction = () => {
-      if (showModal) {
-        setShowModal(false);
-        return true;
-      }
-      return false;
-    };
-
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      backAction
-    );
-
-    return () => backHandler.remove();
-  }, [showModal, setShowModal]);
 
   return (
     <View style={styles.container}>

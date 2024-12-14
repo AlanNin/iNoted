@@ -67,7 +67,17 @@ export async function getNotebookById(id: number) {
       throw new Error("Notebook not found");
     }
 
-    return notebook[0];
+    const notesForNotebook = await db_client
+      .select()
+      .from(notes)
+      .where(eq(notes.notebook_id, id));
+
+    const notebookWithNotes = {
+      ...notebook[0],
+      notes: notesForNotebook,
+    };
+
+    return notebookWithNotes;
   } catch (error) {
     throw new Error("Could not fetch the notebook");
   }

@@ -24,19 +24,22 @@ import { FlashList } from "@shopify/flash-list";
 import { useNotesEditMode } from "@/hooks/useNotesEditMode";
 import { DrawerActions } from "@react-navigation/native";
 import useAppConfig from "@/hooks/useAppConfig";
+import BottomDrawerMoveNote from "@/components/bottom_drawer_move_note";
 
 export default function NotesScreen() {
   const [searchQuery, setSearchQuery] = React.useState("");
   const navigation = useNavigation();
   const theme = useColorScheme();
-  const sortBottomDrawerRef = React.useRef<BottomSheetModal>(null);
   const sortTypes = ["Recently added", "A-Z"] as const;
   const {
     isNotesEditMode,
     toggleNotesEditMode,
     selectedNotes,
+    setNotesEditMode,
   } = useNotesEditMode();
+  const sortBottomDrawerRef = React.useRef<BottomSheetModal>(null);
   const bottomDeleteMultipleDrawerRef = React.useRef<BottomSheetModal>(null);
+  const bottomMoveNoteDrawerRef = React.useRef<BottomSheetModal>(null);
   const [notesViewMode, saveNotesViewMode] = useAppConfig<"grid" | "list">(
     "notesViewMode",
     "grid"
@@ -45,8 +48,10 @@ export default function NotesScreen() {
     key: typeof sortTypes[number];
     order: "asc" | "desc";
   }>("notesSortBy", { key: sortTypes[0], order: "desc" });
+  const [isFirstNote] = useAppConfig<boolean>("isFirstNote", true);
 
   const openMenu = () => {
+    setNotesEditMode(false);
     navigation.dispatch(DrawerActions.openDrawer());
   };
 
@@ -91,15 +96,6 @@ export default function NotesScreen() {
     );
   }, [sortedNotes, searchQuery]);
 
-  const structuredNotes = React.useMemo(() => {
-    return notesViewMode === "grid"
-      ? [
-          ...filteredNotes,
-          ...Array((3 - (filteredNotes.length % 3)) % 3).fill({}),
-        ]
-      : filteredNotes;
-  }, [notesViewMode, filteredNotes]);
-
   const handleToggleBottomSortDrawer = () => {
     sortBottomDrawerRef.current?.present();
   };
@@ -137,6 +133,10 @@ export default function NotesScreen() {
     bottomDeleteMultipleDrawerRef.current?.present();
   };
 
+  const handleToggleBottomMoveNoteDrawer = () => {
+    bottomMoveNoteDrawerRef.current?.present();
+  };
+
   const handleDeleteMultipleNotes = React.useCallback(async () => {
     try {
       await deleteNotes(selectedNotes);
@@ -158,221 +158,233 @@ export default function NotesScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View
-          style={styles.searchContainer}
-          customBackgroundColor={colors[theme].foggier}
-        >
-          <TouchableOpacity onPress={openMenu}>
-            <Icon name="Menu" strokeWidth={1.8} />
-          </TouchableOpacity>
-
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Find your notes..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-
-          {notesViewMode === "grid" ? (
-            <TouchableOpacity
-              onPress={() => saveNotesViewMode("list")}
-              disabled={notesData?.length === 0}
-            >
-              <Icon name="LayoutGrid" muted={notesData?.length === 0} />
+    <>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <View
+            style={styles.searchContainer}
+            customBackgroundColor={colors[theme].foggier}
+          >
+            <TouchableOpacity onPress={openMenu}>
+              <Icon name="Menu" strokeWidth={1.8} />
             </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              onPress={() => saveNotesViewMode("grid")}
-              disabled={notesData?.length === 0}
-            >
-              <Icon name="Rows3" muted={notesData?.length === 0} />
-            </TouchableOpacity>
-          )}
-        </View>
 
-        <View style={styles.subHeader}>
-          <TouchableOpacity style={styles.notesCountContainer}>
-            <Text
-              style={styles.notesCount}
-              customTextColor={colors[theme].grayscale}
-            >
-              All Notes ({isLoadingNotesData ? "..." : notesData?.length})
-            </Text>
-            <Icon
-              name="ChevronDown"
-              size={16}
-              customColor={colors[theme].grayscale}
-              style={styles.notesCountIcon}
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Find your notes..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
             />
-          </TouchableOpacity>
-          <View style={styles.actions}>
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={handleToggleBottomSortDrawer}
-              disabled={notesData?.length === 0}
-            >
-              <Icon
-                name="ArrowDownUp"
-                size={16}
-                grayscale
-                muted={notesData?.length === 0}
-              />
-              <Text
-                style={styles.actionText}
-                customTextColor={colors[theme].grayscale}
-                disabled={notesData?.length === 0}
-              >
-                Sort
-              </Text>
-            </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.actionButton}
-              disabled={notesData?.length === 0}
-              onPress={toggleNotesEditMode}
-            >
-              <Icon
-                name={isNotesEditMode ? "PenOff" : "SquarePen"}
-                size={16}
-                grayscale
-                muted={notesData?.length === 0}
-              />
-              <Text
-                style={styles.actionText}
-                customTextColor={colors[theme].grayscale}
+            {notesViewMode === "grid" ? (
+              <TouchableOpacity
+                onPress={() => saveNotesViewMode("list")}
                 disabled={notesData?.length === 0}
               >
-                {isNotesEditMode ? "Cancel Edit" : "Edit"}
+                <Icon name="LayoutGrid" muted={notesData?.length === 0} />
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                onPress={() => saveNotesViewMode("grid")}
+                disabled={notesData?.length === 0}
+              >
+                <Icon name="Rows3" muted={notesData?.length === 0} />
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <View style={styles.subHeader}>
+            <TouchableOpacity style={styles.notesCountContainer}>
+              <Text
+                style={styles.notesCount}
+                customTextColor={colors[theme].grayscale}
+              >
+                All Notes ({isLoadingNotesData ? "..." : notesData?.length})
               </Text>
+              <Icon
+                name="ChevronDown"
+                size={16}
+                customColor={colors[theme].grayscale}
+                style={styles.notesCountIcon}
+              />
             </TouchableOpacity>
+            <View style={styles.actions}>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={handleToggleBottomSortDrawer}
+                disabled={notesData?.length === 0}
+              >
+                <Icon
+                  name="ArrowDownUp"
+                  size={16}
+                  grayscale
+                  muted={notesData?.length === 0}
+                />
+                <Text
+                  style={styles.actionText}
+                  customTextColor={colors[theme].grayscale}
+                  disabled={notesData?.length === 0}
+                >
+                  Sort
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.actionButton}
+                disabled={notesData?.length === 0}
+                onPress={toggleNotesEditMode}
+              >
+                <Icon
+                  name={isNotesEditMode ? "PenOff" : "SquarePen"}
+                  size={16}
+                  grayscale
+                  muted={notesData?.length === 0}
+                />
+                <Text
+                  style={styles.actionText}
+                  customTextColor={colors[theme].grayscale}
+                  disabled={notesData?.length === 0}
+                >
+                  {isNotesEditMode ? "Cancel Edit" : "Edit"}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
 
-      <View
-        style={[styles.content, { paddingBottom: isNotesEditMode ? 68 : 0 }]}
-      >
-        {isLoadingNotesData ? (
-          <View style={styles.loadingContainer}>
-            <Loader />
-            <Text style={styles.loadingText}>Loading notes...</Text>
-          </View>
-        ) : (
-          <FlashList
-            key={notesViewMode}
-            keyExtractor={(item, index) =>
-              item.id ? item.id?.toString() : `placeholder-${index}`
-            }
-            data={structuredNotes}
-            renderItem={renderItem}
-            numColumns={notesViewMode === "grid" ? 3 : 1}
-            removeClippedSubviews={true}
-            estimatedItemSize={notesViewMode === "grid" ? 216 : 140}
-          />
-        )}
-      </View>
-
-      {!isLoadingNotesData && !isNotesEditMode && (
-        <View style={styles.addButtonContainer}>
-          {notesData?.length === 0 && (
-            <Text style={styles.emptyText}>
-              Let's start by creating your first{" "}
-              <Text
-                style={[
-                  styles.emptyTextHighlight,
-                  { color: colors[theme].primary },
-                ]}
-              >
-                note
-              </Text>
-            </Text>
+        <View
+          style={[styles.content, { paddingBottom: isNotesEditMode ? 68 : 0 }]}
+        >
+          {isLoadingNotesData ? (
+            <View style={styles.loadingContainer}>
+              <Loader />
+              <Text style={styles.loadingText}>Loading notes...</Text>
+            </View>
+          ) : (
+            <>
+              {filteredNotes!.length > 0 ? (
+                <FlashList
+                  key={notesViewMode}
+                  keyExtractor={(item, index) =>
+                    item.id ? item.id?.toString() : `placeholder-${index}`
+                  }
+                  data={filteredNotes}
+                  renderItem={renderItem}
+                  numColumns={notesViewMode === "grid" ? 3 : 1}
+                  removeClippedSubviews={true}
+                  estimatedItemSize={notesViewMode === "grid" ? 216 : 140}
+                />
+              ) : (
+                <View style={styles.noNotesContainer}>
+                  <Icon name="Microscope" size={24} strokeWidth={1} muted />
+                  <Text style={styles.noNotesText} disabled>
+                    No notes found
+                  </Text>
+                </View>
+              )}
+            </>
           )}
+        </View>
 
+        {!isLoadingNotesData && !isNotesEditMode && (
+          <View style={styles.addButtonContainer}>
+            {notesData?.length === 0 && isFirstNote && (
+              <Text style={styles.emptyText}>
+                Let's start by creating your first{" "}
+                <Text
+                  style={[
+                    styles.emptyTextHighlight,
+                    { color: colors[theme].primary },
+                  ]}
+                >
+                  note
+                </Text>
+              </Text>
+            )}
+
+            <MotiView
+              from={{ opacity: 0 }}
+              animate={{
+                opacity: 1,
+              }}
+              transition={{
+                type: "timing",
+                duration: 200,
+              }}
+              style={styles.fabContainer}
+            >
+              {notesData?.length === 0 && isFirstNote && (
+                <Icon name="Spline" themed size={36} style={styles.spline} />
+              )}
+              <TouchableOpacity
+                style={styles.fab}
+                customBackgroundColor={colors[theme].primary}
+                onPress={() => router.push("./(notes)/new")}
+              >
+                <Icon name="Plus" size={28} customColor={colors.dark.tint} />
+              </TouchableOpacity>
+            </MotiView>
+          </View>
+        )}
+
+        {isNotesEditMode && (
           <MotiView
-            from={{ opacity: 0 }}
+            style={[
+              styles.editMenuContainer,
+              { borderTopColor: colors[theme].foggier },
+            ]}
+            customBackgroundColor={colors[theme].background}
+            from={{ opacity: 0, translateY: 10 }}
             animate={{
               opacity: 1,
+              translateY: 0,
             }}
             transition={{
               type: "timing",
-              duration: 200,
+              duration: 250,
             }}
-            style={styles.fabContainer}
           >
-            {notesData?.length === 0 && (
-              <Icon name="Spline" themed size={36} style={styles.spline} />
-            )}
             <TouchableOpacity
-              style={styles.fab}
-              customBackgroundColor={colors[theme].primary}
-              onPress={() => router.push("./(notes)/new")}
+              style={styles.editMenuButton}
+              onPress={handleToggleBottomDeleteMultipleDrawer}
+              disabled={selectedNotes.length === 0}
             >
-              <Icon name="Plus" size={28} customColor={colors.dark.tint} />
+              <Icon
+                name="Eraser"
+                size={24}
+                strokeWidth={1}
+                muted={selectedNotes.length === 0}
+              />
+              <Text
+                style={styles.editMenuButtonText}
+                customTextColor={colors[theme].text}
+                disabled={selectedNotes.length === 0}
+              >
+                Delete
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.editMenuButton}
+              onPress={handleToggleBottomMoveNoteDrawer}
+              disabled={selectedNotes.length === 0}
+            >
+              <Icon
+                name="NotebookPen"
+                size={24}
+                strokeWidth={1}
+                muted={selectedNotes.length === 0}
+              />
+              <Text
+                style={styles.editMenuButtonText}
+                customTextColor={colors[theme].text}
+                disabled={selectedNotes.length === 0}
+              >
+                Move
+              </Text>
             </TouchableOpacity>
           </MotiView>
-        </View>
-      )}
-
-      {isNotesEditMode && (
-        <MotiView
-          style={[
-            styles.editMenuContainer,
-            { borderTopColor: colors[theme].foggier },
-          ]}
-          customBackgroundColor={colors[theme].background}
-          from={{ opacity: 0, translateY: 10 }}
-          animate={{
-            opacity: 1,
-            translateY: 0,
-          }}
-          transition={{
-            type: "timing",
-            duration: 250,
-          }}
-        >
-          <TouchableOpacity
-            style={styles.editMenuButton}
-            onPress={handleToggleBottomDeleteMultipleDrawer}
-            disabled={selectedNotes.length === 0}
-          >
-            <Icon
-              name="Eraser"
-              size={24}
-              strokeWidth={1}
-              muted={selectedNotes.length === 0}
-            />
-            <Text
-              style={styles.editMenuButtonText}
-              customTextColor={colors[theme].text}
-              disabled={selectedNotes.length === 0}
-            >
-              Delete
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.editMenuButton}
-            onPress={() => {}}
-            disabled={selectedNotes.length === 0}
-          >
-            <Icon
-              name="NotebookPen"
-              size={24}
-              strokeWidth={1}
-              muted={selectedNotes.length === 0}
-            />
-            <Text
-              style={styles.editMenuButtonText}
-              customTextColor={colors[theme].text}
-              disabled={selectedNotes.length === 0}
-            >
-              Move
-            </Text>
-          </TouchableOpacity>
-        </MotiView>
-      )}
-
+        )}
+      </SafeAreaView>
       <BottomDrawerSort
         ref={sortBottomDrawerRef}
         title="Sort your notes"
@@ -391,13 +403,22 @@ export default function NotesScreen() {
         submitButtonText="Delete"
         onSubmit={handleDeleteMultipleNotes}
       />
-    </SafeAreaView>
+
+      <BottomDrawerMoveNote
+        ref={bottomMoveNoteDrawerRef}
+        title="Move notes"
+        description={`Make your selected notes part of a notebook.`}
+        onSubmit={() => {}}
+        noteId={selectedNotes[0]}
+      />
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    minHeight: "100%",
   },
   header: {
     padding: 16,
@@ -492,7 +513,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-    elevation: 4,
+    elevation: 2,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -508,11 +529,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     textAlign: "center",
     gap: 12,
+    marginBottom: "30%",
   },
   loadingText: {
     fontSize: 16,
     alignSelf: "center",
-    marginBottom: 56,
+  },
+  noNotesContainer: {
+    flex: 1,
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    textAlign: "center",
+    gap: 12,
+    marginBottom: "30%",
+  },
+  noNotesText: {
+    fontSize: 16,
+    alignSelf: "center",
   },
   scrollButtonContainer: {
     position: "absolute",

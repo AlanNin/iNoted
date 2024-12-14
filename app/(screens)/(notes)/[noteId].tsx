@@ -217,6 +217,7 @@ export default function NoteScreen() {
                   <Icon name="EllipsisVertical" />
                 </TouchableOpacity>
                 {isMoreModalOpen && (
+                  // TODO: add move to notebook
                   <TouchableWithoutFeedback>
                     <MotiView
                       style={styles.moreModal}

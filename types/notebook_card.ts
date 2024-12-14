@@ -1,5 +1,8 @@
 type NoteBookCardProps = {
   index?: number;
   isAdding?: boolean;
-  notebook: NewNotebookProps;
+  numberOfLinesName?: number;
+  notebook: NotebookProps;
+  onPress?: (notebookId: number) => void;
+  isLoading?: boolean;
 };

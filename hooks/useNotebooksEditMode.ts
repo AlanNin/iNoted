@@ -5,7 +5,7 @@ type NotebooksEditModeState = {
   selectedNotebooks: number[];
   toggleNotebooksEditMode: () => void;
   setNotebooksEditMode: (isNotebooksEditMode: boolean) => void;
-  selectNote: (noteId: number) => void;
+  selectNotebook: (noteId: number) => void;
   clearSelectedNotebooks: () => void;
 };
 
@@ -19,7 +19,7 @@ export const useNotebooksEditMode = create<NotebooksEditModeState>(
         selectedNotebooks: [],
       })),
     setNotebooksEditMode: (isNotebooksEditMode) => set({ isNotebooksEditMode }),
-    selectNote: (noteId) => {
+    selectNotebook: (noteId) => {
       const { selectedNotebooks } = get();
       if (selectedNotebooks.includes(noteId)) {
         set({
