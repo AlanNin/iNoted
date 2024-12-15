@@ -3,21 +3,21 @@ import {
   BottomSheetModal,
   BottomSheetView,
   BottomSheetModalProvider,
-  BottomSheetScrollView,
 } from "@gorhom/bottom-sheet";
 import { Text, TouchableOpacity, View } from "./themed";
-import { StyleSheet } from "react-native";
+import { BackHandler, StyleSheet } from "react-native";
 import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
 import NotebookCard from "./notebook_card";
 import { useQuery } from "@tanstack/react-query";
 import { getAllNotebooks } from "@/queries/notebooks";
 import { FlashList } from "@shopify/flash-list";
+import { useNotebooksSelectedToMoveMode } from "@/hooks/useNotebookSelectedToMove";
 
 const BottomDrawerMoveNote = React.forwardRef<
   BottomSheetModal,
   Omit<BottomDrawerMoveNoteProps, "ref">
->(({ noteId, title, description, onSubmit }, ref) => {
+>(({ title, description, onSubmit }, ref) => {
   const theme = useColorScheme();
 
   const { data: notebooks, isLoading: isLoadingNotebooks } = useQuery({
@@ -25,17 +25,46 @@ const BottomDrawerMoveNote = React.forwardRef<
     queryFn: () => getAllNotebooks(),
   });
 
+  const {
+    selectedNotebook,
+    clearSelectedNotebook,
+  } = useNotebooksSelectedToMoveMode();
+
   const closeDrawer = () => {
     (ref as React.RefObject<BottomSheetModal>).current?.dismiss();
+    clearSelectedNotebook();
   };
 
-  // TODO: manage notebook to move select state, do the actual functionality
   const handleSubmit = () => {
-    onSubmit();
+    if (!selectedNotebook) {
+      return;
+    }
+    onSubmit(selectedNotebook);
     closeDrawer();
   };
 
   const snapPoints = React.useMemo(() => ["60%"], []);
+
+  const [sheetStatus, setSheetStatus] = React.useState<"open" | "close">(
+    "close"
+  );
+
+  React.useEffect(() => {
+    const backAction = () => {
+      if (sheetStatus === "open") {
+        closeDrawer();
+        return true;
+      }
+      return false;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, [sheetStatus, setSheetStatus]);
 
   const renderNotebooks = ({
     item,
@@ -49,18 +78,23 @@ const BottomDrawerMoveNote = React.forwardRef<
       notebook={item}
       index={index}
       onPress={() => {}}
+      isToMove={true}
     />
   );
 
   return (
     <BottomSheetModalProvider>
       <BottomSheetModal
+        onChange={(status) => {
+          if (status === 0) {
+            setSheetStatus("open");
+          } else {
+            setSheetStatus("close");
+          }
+        }}
         snapPoints={snapPoints}
         enableDynamicSizing={false}
         enableContentPanningGesture={false}
-        // onAnimate={() =>
-        //   (ref as React.RefObject<BottomSheetModal>).current?.expand()
-        // }
         ref={ref}
         backdropComponent={() => (
           <TouchableOpacity
@@ -81,8 +115,20 @@ const BottomDrawerMoveNote = React.forwardRef<
             <TouchableOpacity style={styles.headerButton} onPress={closeDrawer}>
               <Text customTextColor={colors[theme].primary}>Cancel</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.headerButton}>
-              <Text customTextColor={colors[theme].primary}>Save</Text>
+            <TouchableOpacity
+              style={styles.headerButton}
+              disabled={!selectedNotebook}
+              onPress={handleSubmit}
+            >
+              <Text
+                customTextColor={
+                  selectedNotebook
+                    ? colors[theme].primary
+                    : colors[theme].primary_foggy
+                }
+              >
+                Save
+              </Text>
             </TouchableOpacity>
           </View>
           <View style={styles.header}>
@@ -95,7 +141,6 @@ const BottomDrawerMoveNote = React.forwardRef<
           </View>
 
           <View style={styles.notebooksContainer}>
-            {/* Wrap the list inside ScrollView */}
             <FlashList
               keyExtractor={(item) => item.id?.toString() || `${item.id}`}
               data={notebooks}

@@ -3,4 +3,5 @@ export type BottomDrawerConfirmProps = {
   description: string;
   submitButtonText: string;
   onSubmit: () => void;
+  onCancel?: () => void;
 };

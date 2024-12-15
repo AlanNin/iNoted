@@ -4,14 +4,17 @@ import React from "react";
 import { useNotebooksEditMode } from "@/hooks/useNotebooksEditMode";
 import useColorScheme from "@/hooks/useColorScheme";
 import colors from "@/constants/colors";
+import { useNotebooksSelectedToMoveMode } from "@/hooks/useNotebookSelectedToMove";
 
 // TODO: try to find a way to indicate long press
 const SelectedIndicator = ({
   notebookId,
   onPress,
+  disabled,
 }: {
   notebookId: number;
   onPress: (notebookId: number) => void;
+  disabled?: boolean;
 }) => {
   const {
     isNotebooksEditMode,
@@ -46,6 +49,7 @@ const SelectedIndicator = ({
       onPress={handlePress}
       onLongPress={handleLongPress}
       style={styles.selectIndicatorContainer}
+      disabled={disabled}
     >
       {isNotebooksEditMode && (
         <View
@@ -63,6 +67,46 @@ const SelectedIndicator = ({
   );
 };
 
+const SelectedIndicatorToMove = ({ notebookId }: { notebookId: number }) => {
+  const {
+    selectedNotebook,
+    toggleNotebooksSelectedToMoveMode,
+    selectNotebook,
+  } = useNotebooksSelectedToMoveMode();
+
+  const theme = useColorScheme();
+
+  const isSelected = selectedNotebook === notebookId;
+
+  const handlePress = () => {
+    selectNotebook(notebookId);
+  };
+
+  const handleLongPress = () => {
+    if (!isSelected) {
+      toggleNotebooksSelectedToMoveMode();
+      selectNotebook(notebookId);
+    }
+  };
+
+  return (
+    <TouchableOpacity
+      onPress={handlePress}
+      onLongPress={handleLongPress}
+      style={styles.selectIndicatorContainer}
+    >
+      <View
+        style={[
+          styles.selectIndicator,
+          {
+            borderColor: isSelected ? colors[theme].primary : colors.dark.tint,
+          },
+        ]}
+      />
+    </TouchableOpacity>
+  );
+};
+
 const NotebookCard = React.memo(
   ({
     notebook,
@@ -71,9 +115,9 @@ const NotebookCard = React.memo(
     numberOfLinesName = 1,
     onPress,
     isLoading = false,
+    isToMove = false,
+    disabled = false,
   }: NoteBookCardProps) => {
-    const theme = useColorScheme();
-
     const isBackgroundAColor =
       typeof notebook.background === "string" &&
       notebook.background.includes("#");
@@ -106,7 +150,15 @@ const NotebookCard = React.memo(
         {...animationProps}
         style={[styles.container, isAdding && { width: 120 }]}
       >
-        <SelectedIndicator notebookId={notebook.id!} onPress={onPress!} />
+        {isToMove ? (
+          <SelectedIndicatorToMove notebookId={notebook.id!} />
+        ) : (
+          <SelectedIndicator
+            notebookId={notebook.id!}
+            onPress={onPress!}
+            disabled={disabled}
+          />
+        )}
 
         <View
           style={[

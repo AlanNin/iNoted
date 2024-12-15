@@ -16,12 +16,18 @@ export async function createNotebook(notebook: NewNotebookProps) {
 
 export async function deleteNotebook(id: number) {
   try {
-    const result = await db_client
-      .delete(notebooks)
-      .where(eq(notebooks.id, id));
-    if (!result) {
-      throw new Error("Notebook not found");
-    }
+    await db_client.transaction(async (tx) => {
+      await tx
+        .update(notes)
+        .set({ notebook_id: null })
+        .where(eq(notes.notebook_id, id));
+
+      // Elimina el notebook
+      const result = await tx.delete(notebooks).where(eq(notebooks.id, id));
+      if (!result) {
+        throw new Error("Notebook not found");
+      }
+    });
   } catch (error) {
     throw new Error("Could not delete the notebook");
   }
@@ -29,12 +35,20 @@ export async function deleteNotebook(id: number) {
 
 export async function deleteNotebooks(ids: number[]) {
   try {
-    const result = await db_client
-      .delete(notebooks)
-      .where(inArray(notebooks.id, ids));
-    if (!result) {
-      throw new Error("Notebook not found");
-    }
+    await db_client.transaction(async (tx) => {
+      await tx
+        .update(notes)
+        .set({ notebook_id: null })
+        .where(inArray(notes.notebook_id, ids));
+
+      // Elimina los notebooks
+      const result = await tx
+        .delete(notebooks)
+        .where(inArray(notebooks.id, ids));
+      if (!result) {
+        throw new Error("Notebooks not found");
+      }
+    });
   } catch (error) {
     throw new Error("Could not delete the notebooks");
   }
@@ -85,44 +99,90 @@ export async function getNotebookById(id: number) {
 
 export async function getAllNotebooks() {
   try {
-    return await db_client.select().from(notebooks);
+    const notebooksList = await db_client.select().from(notebooks);
+
+    const notesList = await db_client.select().from(notes);
+
+    const notebooksWithNotes = notebooksList.map((notebook) => {
+      const notesForNotebook = notesList.filter(
+        (note) => note.notebook_id === notebook.id
+      );
+
+      return {
+        ...notebook,
+        notes: notesForNotebook,
+      };
+    });
+
+    return notebooksWithNotes;
   } catch (error) {
-    throw new Error("Could not fetch notebooks");
+    throw new Error("Could not fetch notebooks with their notes");
   }
 }
 
-export async function addNoteToNotebook({
-  noteId,
+export async function addNotesToNotebook({
+  noteIds,
   notebookId,
 }: {
-  noteId: number;
+  noteIds: number | number[];
   notebookId: number;
 }) {
   try {
-    const result = await db_client
-      .update(notes)
-      .set({ notebook_id: notebookId })
-      .where(eq(notes.id, noteId));
+    const notesToUpdate = Array.isArray(noteIds) ? noteIds : [noteIds];
 
-    if (!result) {
-      throw new Error("Note not found");
+    await Promise.all(
+      notesToUpdate.map((noteId) =>
+        db_client
+          .update(notes)
+          .set({ notebook_id: null })
+          .where(eq(notes.id, noteId))
+      )
+    );
+
+    const result = await Promise.all(
+      notesToUpdate.map((noteId) =>
+        db_client
+          .update(notes)
+          .set({ notebook_id: notebookId })
+          .where(eq(notes.id, noteId))
+      )
+    );
+
+    if (result.some((res) => !res)) {
+      throw new Error(
+        "One or more notes were not found or could not be updated"
+      );
     }
   } catch (error) {
-    throw new Error("Could not add the note to the notebook");
+    console.error(error);
+    throw new Error("Could not add notes to the notebook");
   }
 }
 
-export async function removeNoteFromNotebook({ noteId }: { noteId: number }) {
+export async function removeNoteFromNotebook({
+  noteIds,
+}: {
+  noteIds: number[];
+}) {
   try {
-    const result = await db_client
-      .update(notes)
-      .set({ notebook_id: null })
-      .where(eq(notes.id, noteId));
+    const notesToRemove = Array.isArray(noteIds) ? noteIds : [noteIds];
 
-    if (!result) {
-      throw new Error("Note not found");
+    const result = await Promise.all(
+      notesToRemove.map((noteId) =>
+        db_client
+          .update(notes)
+          .set({ notebook_id: null })
+          .where(eq(notes.id, noteId))
+      )
+    );
+
+    if (result.some((res) => !res)) {
+      throw new Error(
+        "One or more notes were not found or could not be removed"
+      );
     }
   } catch (error) {
-    throw new Error("Could not remove the note from the notebook");
+    console.error(error);
+    throw new Error("Could not remove notes from the notebook");
   }
 }

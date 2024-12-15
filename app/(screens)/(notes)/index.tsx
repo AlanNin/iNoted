@@ -10,7 +10,7 @@ import {
 } from "@/components/themed";
 import colors from "@/constants/colors";
 import { router, useNavigation } from "expo-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { deleteNotes, getAllNotes } from "@/queries/notes";
 import NoteCard from "@/components/note_card";
 import Loader from "@/components/loading";
@@ -25,8 +25,10 @@ import { useNotesEditMode } from "@/hooks/useNotesEditMode";
 import { DrawerActions } from "@react-navigation/native";
 import useAppConfig from "@/hooks/useAppConfig";
 import BottomDrawerMoveNote from "@/components/bottom_drawer_move_note";
+import { addNotesToNotebook } from "@/queries/notebooks";
 
 export default function NotesScreen() {
+  const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = React.useState("");
   const navigation = useNavigation();
   const theme = useColorScheme();
@@ -137,16 +139,36 @@ export default function NotesScreen() {
     bottomMoveNoteDrawerRef.current?.present();
   };
 
+  async function refetchNotebooks() {
+    await queryClient.refetchQueries({ queryKey: ["notebook"] });
+  }
+
   const handleDeleteMultipleNotes = React.useCallback(async () => {
     try {
       await deleteNotes(selectedNotes);
-      await refetchNotes();
+      refetchNotes();
+      refetchNotebooks();
       toast.success("Notes deleted successfully!");
       toggleNotesEditMode();
     } catch (error) {
       toast.error("An error occurred. Please try again.");
     }
   }, [selectedNotes, toggleNotesEditMode]);
+
+  const handleMoveMultipleNotes = React.useCallback(
+    async (notebookId: number) => {
+      try {
+        await addNotesToNotebook({ noteIds: selectedNotes, notebookId });
+        refetchNotes();
+        refetchNotebooks();
+        toast.success("Notes moved successfully!");
+        toggleNotesEditMode();
+      } catch (error) {
+        toast.error("An error occurred. Please try again.");
+      }
+    },
+    [selectedNotes]
+  );
 
   const renderItem = ({ item, index }: { item: NoteProps; index: number }) => (
     <NoteCard
@@ -408,8 +430,7 @@ export default function NotesScreen() {
         ref={bottomMoveNoteDrawerRef}
         title="Move notes"
         description={`Make your selected notes part of a notebook.`}
-        onSubmit={() => {}}
-        noteId={selectedNotes[0]}
+        onSubmit={handleMoveMultipleNotes}
       />
     </>
   );

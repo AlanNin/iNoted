@@ -4,10 +4,16 @@ import {
   BottomSheetView,
   BottomSheetModalProvider,
   BottomSheetTextInput,
-  BottomSheetFlashList,
+  BottomSheetScrollView,
 } from "@gorhom/bottom-sheet";
 import { Text, TouchableOpacity, View } from "./themed";
-import { BackHandler, Image, Keyboard, StyleSheet } from "react-native";
+import {
+  BackHandler,
+  Dimensions,
+  Image,
+  Keyboard,
+  StyleSheet,
+} from "react-native";
 import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
 import NotebookCard from "./notebook_card";
@@ -16,9 +22,17 @@ import { LinearGradient } from "expo-linear-gradient";
 import ColorPickerComponent from "./color_picker";
 import { pickImage } from "@/lib/pick_image";
 import { useQuery } from "@tanstack/react-query";
-import { getNotebookById } from "@/queries/notebooks";
+import {
+  deleteNotebook,
+  getNotebookById,
+  removeNoteFromNotebook,
+} from "@/queries/notebooks";
 import NoteCard from "./note_card";
 import Loader from "./loading";
+import { FlashList } from "@shopify/flash-list";
+import BottomDrawerConfirm from "./bottom_drawer_confirm";
+import { useNotesEditMode } from "@/hooks/useNotesEditMode";
+import { toast } from "@backpackapp-io/react-native-toast";
 
 const colorsOptions = ["#FF5781", "#E76F51", "#00838F"];
 
@@ -34,15 +48,27 @@ const BottomDrawerNotebook = React.forwardRef<
 >(({ notebookId, onSubmit, onDelete }, ref) => {
   const theme = useColorScheme();
   const [background, setBackground] = React.useState(colors.dark.grayscale);
+  // TODO: take a second look on input value change
   const [name, setName] = React.useState("Loading...");
   const [showColorPickerModal, setShowColorPickerModal] = React.useState(false);
   const [isEditing, setIsEditing] = React.useState(false);
+  const bottomDeleteDrawerRef = React.useRef<BottomSheetModal>(null);
+  const bottomRemoveNotesDrawerRef = React.useRef<BottomSheetModal>(null);
+  const {
+    isNotesEditMode,
+    setNotesEditMode,
+    selectedNotes,
+  } = useNotesEditMode();
 
   function toggleEditing() {
     setIsEditing(!isEditing);
   }
 
-  const { data: notebook, isLoading: isLoadingNotebook } = useQuery({
+  const {
+    data: notebook,
+    isLoading: isLoadingNotebook,
+    refetch: refetchNotebook,
+  } = useQuery({
     queryKey: ["notebook", notebookId],
     queryFn: () => getNotebookById(notebookId!),
   });
@@ -56,12 +82,30 @@ const BottomDrawerNotebook = React.forwardRef<
 
   const closeDrawer = () => {
     (ref as React.RefObject<BottomSheetModal>).current?.dismiss();
+    if (notebook) {
+      setName(notebook.name);
+      setBackground(notebook.background);
+    }
+    setIsEditing(false);
+    setNotesEditMode(false);
+  };
+
+  const handleDeleteNotebook = () => {
+    onDelete(notebook!.id);
+    closeDrawer();
   };
 
   const handlePickImage = async () => {
     await pickImage({
       onPick: (uri) => setBackground(uri),
     });
+  };
+
+  const handleRemoveNoteFromNotebook = async () => {
+    await removeNoteFromNotebook({ noteIds: selectedNotes });
+    refetchNotebook();
+    toast.success("Note removed successfully!");
+    closeDrawer();
   };
 
   const handleSubmit = () => {
@@ -71,12 +115,20 @@ const BottomDrawerNotebook = React.forwardRef<
       background: background,
     });
     closeDrawer();
+    refetchNotebook();
   };
 
-  const handleDeleteNotebook = () => {
-    // onDelete(notebook!.id); // TODO: Ask confirmation first
-    closeDrawer();
+  const handleToggleBottomDeleteDrawer = () => {
+    bottomDeleteDrawerRef.current?.present();
   };
+
+  const handleToggleBottomRemoveNotesDrawer = () => {
+    bottomRemoveNotesDrawerRef.current?.present();
+  };
+
+  const [sheetStatus, setSheetStatus] = React.useState<"open" | "close">(
+    "close"
+  );
 
   React.useEffect(() => {
     const keyboardListener = Keyboard.addListener("keyboardDidHide", () => {
@@ -90,11 +142,19 @@ const BottomDrawerNotebook = React.forwardRef<
 
   React.useEffect(() => {
     const backAction = () => {
+      if (isNotesEditMode) {
+        setNotesEditMode(false);
+        return true;
+      }
+
       if (showColorPickerModal) {
         setShowColorPickerModal(false);
         return true;
       }
-      closeDrawer();
+      if (sheetStatus === "open") {
+        closeDrawer();
+        return true;
+      }
       return false;
     };
 
@@ -104,7 +164,12 @@ const BottomDrawerNotebook = React.forwardRef<
     );
 
     return () => backHandler.remove();
-  }, [showColorPickerModal, setShowColorPickerModal]);
+  }, [
+    showColorPickerModal,
+    setShowColorPickerModal,
+    sheetStatus,
+    setSheetStatus,
+  ]);
 
   const renderNote = ({ item, index }: { item: NoteProps; index: number }) => (
     <NoteCard
@@ -112,188 +177,247 @@ const BottomDrawerNotebook = React.forwardRef<
       note={item}
       viewMode={"grid"}
       index={index}
+      onPress={() => closeDrawer()}
     />
   );
 
   return (
-    <BottomSheetModalProvider>
-      <BottomSheetModal
-        ref={ref}
-        backdropComponent={() => (
-          <TouchableOpacity
-            style={[styles.backdrop]}
-            activeOpacity={1}
-            onPress={() => closeDrawer()}
-          />
-        )}
-        backgroundStyle={{
-          backgroundColor: colors[theme].background,
-        }}
-        handleIndicatorStyle={{
-          backgroundColor: colors[theme].grayscale,
-        }}
-      >
-        <BottomSheetView style={styles.container}>
-          <View style={styles.header}>
+    <>
+      <BottomSheetModalProvider>
+        <BottomSheetModal
+          stackBehavior="push"
+          onChange={(status) => {
+            if (status === 0) {
+              setSheetStatus("open");
+            } else {
+              setSheetStatus("close");
+            }
+          }}
+          enableContentPanningGesture={false}
+          ref={ref}
+          backdropComponent={() => (
             <TouchableOpacity
-              style={styles.headerButton}
-              onPress={handleDeleteNotebook}
-            >
-              <Text customTextColor={colors[theme].primary}>Delete</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.headerButton}
-              onPress={toggleEditing}
-            >
-              <Text customTextColor={colors[theme].primary}>
-                {isEditing ? "Cancel" : "Edit"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.bookContainer}>
-            <NotebookCard
-              notebook={{ name: name || "Untitled", background: background }}
-              isAdding
-              isLoading={isLoadingNotebook}
+              style={[styles.backdrop]}
+              activeOpacity={1}
+              onPress={() => closeDrawer()}
             />
-          </View>
-
-          {isEditing ? (
-            <>
-              <View style={styles.backgroundsContainer}>
-                {colorsOptions.map((color) => (
-                  <TouchableOpacity
-                    key={color}
-                    style={styles.color}
-                    customBackgroundColor={color}
-                    onPress={() => setBackground(color)}
-                  />
-                ))}
-                <TouchableOpacity
-                  key="select-color"
-                  style={styles.selectContainer}
-                  onPress={() => setShowColorPickerModal(true)}
-                >
-                  <LinearGradient
-                    colors={["#4A00E0", "#8E2DE2"]}
-                    style={styles.selectContainer}
-                  />
-                  <Icon
-                    name="Palette"
-                    size={12}
-                    customColor={colors[theme].tint}
-                    style={styles.selectIcon}
-                  />
-                </TouchableOpacity>
-
-                {imageOptions.map((image) => (
-                  <TouchableOpacity
-                    key={image}
-                    style={styles.imageContainer}
-                    onPress={() => setBackground(image)}
-                  >
-                    <Image source={image} style={styles.image} />
-                  </TouchableOpacity>
-                ))}
-                <TouchableOpacity
-                  key="select-image"
-                  style={styles.selectContainer}
-                  onPress={handlePickImage}
-                >
-                  <Image
-                    source={require("@/assets/notebooks/notebook_select.png")}
-                    style={styles.image}
-                  />
-                  <Icon
-                    name="Image"
-                    size={12}
-                    customColor={colors[theme].tint}
-                    style={styles.selectIcon}
-                  />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.inputContainer}>
-                <BottomSheetTextInput
-                  onChange={(e) => setName(e.nativeEvent.text)}
-                  defaultValue={name}
-                  style={[
-                    styles.input,
-                    { backgroundColor: colors[theme].foggier },
-                  ]}
-                  placeholder="Type a name for your notebook..."
-                />
-              </View>
-
-              <View style={styles.buttonsContainer}>
-                <TouchableOpacity
-                  onPress={() => closeDrawer()}
-                  style={styles.button}
-                >
-                  <Text>Cancel</Text>
-                </TouchableOpacity>
-                <View
-                  style={styles.buttonsDivider}
-                  customBackgroundColor={colors[theme].foggy}
-                />
-                <TouchableOpacity onPress={handleSubmit} style={styles.button}>
-                  <Text style={{ color: colors[theme].primary }}>Save</Text>
-                </TouchableOpacity>
-              </View>
-            </>
-          ) : (
-            <>
-              {isLoadingNotebook ? (
-                <View style={styles.loadingContainer}>
-                  <Loader />
-                  <Text style={styles.loadingText}>Loading notes...</Text>
-                </View>
-              ) : (
-                <>
-                  {/* TODO: show notebooks notes, test */}
-                  {notebook?.notes && notebook.notes.length > 0 ? (
-                    <>
-                      <Text style={styles.notesLabel} disabled>
-                        Your notes
-                      </Text>
-                      <View style={styles.notesContainer}>
-                        <BottomSheetFlashList
-                          keyExtractor={(item) => item.id?.toString()}
-                          data={notebook?.notes || []}
-                          renderItem={renderNote}
-                          numColumns={3}
-                          removeClippedSubviews={true}
-                          estimatedItemSize={216}
-                        />
-                        {/* <FlashList
-                      keyExtractor={(item) => item.id?.toString()}
-                      data={notebook?.notes}
-                      renderItem={renderNote}
-                      numColumns={3}
-                      removeClippedSubviews={true}
-                      estimatedItemSize={216}
-                    /> */}
-                      </View>
-                    </>
-                  ) : (
-                    <View style={styles.noNotesContainer}>
-                      <Icon name="Microscope" size={24} strokeWidth={1} muted />
-                      <Text style={styles.noNotesText} disabled>
-                        No notes found
-                      </Text>
-                    </View>
-                  )}
-                </>
-              )}
-            </>
           )}
-        </BottomSheetView>
-      </BottomSheetModal>
-      <ColorPickerComponent
-        showModal={showColorPickerModal}
-        setShowModal={setShowColorPickerModal}
-        setBackground={setBackground}
+          backgroundStyle={{
+            backgroundColor: colors[theme].background,
+          }}
+          handleIndicatorStyle={{
+            backgroundColor: colors[theme].grayscale,
+          }}
+        >
+          <BottomSheetView
+            style={[
+              styles.container,
+              notebook &&
+              notebook.notes &&
+              notebook.notes.length > 0 &&
+              !isEditing
+                ? { minHeight: 564 }
+                : { minHeight: 0 },
+            ]}
+          >
+            {isNotesEditMode ? (
+              <View style={styles.header}>
+                <TouchableOpacity
+                  style={styles.headerButton}
+                  onPress={handleToggleBottomRemoveNotesDrawer}
+                >
+                  <Text customTextColor={colors[theme].primary}>Remove</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.headerButton}
+                  onPress={() => setNotesEditMode(false)}
+                >
+                  <Text customTextColor={colors[theme].primary}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles.header}>
+                <TouchableOpacity
+                  style={styles.headerButton}
+                  onPress={handleToggleBottomDeleteDrawer}
+                >
+                  <Text customTextColor={colors[theme].primary}>Delete</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.headerButton}
+                  onPress={toggleEditing}
+                >
+                  <Text customTextColor={colors[theme].primary}>
+                    {isEditing ? "Cancel" : "Edit"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+
+            <View style={styles.bookContainer}>
+              <NotebookCard
+                notebook={{ name: name || "Untitled", background: background }}
+                isAdding
+                isLoading={isLoadingNotebook}
+                onPress={() => {}}
+                disabled={true}
+              />
+            </View>
+
+            {isEditing ? (
+              <>
+                <View style={styles.backgroundsContainer}>
+                  {colorsOptions.map((color) => (
+                    <TouchableOpacity
+                      key={color}
+                      style={styles.color}
+                      customBackgroundColor={color}
+                      onPress={() => setBackground(color)}
+                    />
+                  ))}
+                  <TouchableOpacity
+                    key="select-color"
+                    style={styles.selectContainer}
+                    onPress={() => setShowColorPickerModal(true)}
+                  >
+                    <LinearGradient
+                      colors={["#4A00E0", "#8E2DE2"]}
+                      style={styles.selectContainer}
+                    />
+                    <Icon
+                      name="Palette"
+                      size={12}
+                      customColor={colors[theme].tint}
+                      style={styles.selectIcon}
+                    />
+                  </TouchableOpacity>
+
+                  {imageOptions.map((image) => (
+                    <TouchableOpacity
+                      key={image}
+                      style={styles.imageContainer}
+                      onPress={() => setBackground(image)}
+                    >
+                      <Image source={image} style={styles.image} />
+                    </TouchableOpacity>
+                  ))}
+                  <TouchableOpacity
+                    key="select-image"
+                    style={styles.selectContainer}
+                    onPress={handlePickImage}
+                  >
+                    <Image
+                      source={require("@/assets/notebooks/notebook_select.png")}
+                      style={styles.image}
+                    />
+                    <Icon
+                      name="Image"
+                      size={12}
+                      customColor={colors[theme].tint}
+                      style={styles.selectIcon}
+                    />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.inputContainer}>
+                  <BottomSheetTextInput
+                    onChange={(e) => setName(e.nativeEvent.text)}
+                    defaultValue={name}
+                    style={[
+                      styles.input,
+                      {
+                        backgroundColor: colors[theme].foggier,
+                        color: colors[theme].text,
+                      },
+                    ]}
+                    placeholder="Type a name for your notebook..."
+                  />
+                </View>
+
+                <View style={styles.buttonsContainer}>
+                  <TouchableOpacity
+                    onPress={() => closeDrawer()}
+                    style={styles.button}
+                  >
+                    <Text>Cancel</Text>
+                  </TouchableOpacity>
+                  <View
+                    style={styles.buttonsDivider}
+                    customBackgroundColor={colors[theme].foggy}
+                  />
+                  <TouchableOpacity
+                    onPress={handleSubmit}
+                    style={styles.button}
+                  >
+                    <Text style={{ color: colors[theme].primary }}>Save</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            ) : (
+              <>
+                {isLoadingNotebook ? (
+                  <View style={styles.loadingContainer}>
+                    <Loader />
+                    <Text style={styles.loadingText}>Loading notes...</Text>
+                  </View>
+                ) : (
+                  <>
+                    {notebook?.notes && notebook.notes.length > 0 ? (
+                      <>
+                        <Text style={styles.notesLabel} disabled>
+                          Your notes
+                        </Text>
+                        <View style={styles.notesContainer}>
+                          <FlashList
+                            keyExtractor={(item) => item.id?.toString()}
+                            data={notebook?.notes || []}
+                            renderItem={renderNote}
+                            numColumns={3}
+                            estimatedItemSize={180}
+                            removeClippedSubviews={true}
+                          />
+                        </View>
+                      </>
+                    ) : (
+                      <View style={styles.noNotesContainer}>
+                        <Icon
+                          name="Microscope"
+                          size={24}
+                          strokeWidth={1}
+                          muted
+                        />
+                        <Text style={styles.noNotesText} disabled>
+                          No notes found
+                        </Text>
+                      </View>
+                    )}
+                  </>
+                )}
+              </>
+            )}
+          </BottomSheetView>
+        </BottomSheetModal>
+        <ColorPickerComponent
+          showModal={showColorPickerModal}
+          setShowModal={setShowColorPickerModal}
+          setBackground={setBackground}
+        />
+      </BottomSheetModalProvider>
+      <BottomDrawerConfirm
+        ref={bottomDeleteDrawerRef}
+        title="Delete this notebook?"
+        description="This notebook will be permanently deleted from this device."
+        submitButtonText="Delete"
+        onSubmit={handleDeleteNotebook}
       />
-    </BottomSheetModalProvider>
+      <BottomDrawerConfirm
+        ref={bottomRemoveNotesDrawerRef}
+        title="Remove selected notes from this notebook?"
+        description={`The selected notes will be removed from this notebook. You have selected ${selectedNotes.length} notes.`}
+        submitButtonText="Remove"
+        onSubmit={handleRemoveNoteFromNotebook}
+        onCancel={() => setNotesEditMode(false)}
+      />
+    </>
   );
 });
 
@@ -309,6 +433,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 16,
     gap: 20,
+    flex: 0,
   },
   header: {
     flexDirection: "row",

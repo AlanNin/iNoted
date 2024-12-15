@@ -5,7 +5,7 @@ import {
   BottomSheetModalProvider,
 } from "@gorhom/bottom-sheet";
 import { Text, TouchableOpacity, View } from "./themed";
-import { StyleSheet } from "react-native";
+import { BackHandler, StyleSheet } from "react-native";
 import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
 import { BottomDrawerConfirmProps } from "@/types/bottom_drawer_confirm";
@@ -13,17 +13,54 @@ import { BottomDrawerConfirmProps } from "@/types/bottom_drawer_confirm";
 const BottomDrawerConfirm = React.forwardRef<
   BottomSheetModal,
   Omit<BottomDrawerConfirmProps, "ref">
->(({ title, description, submitButtonText, onSubmit }, ref) => {
+>(({ title, description, submitButtonText, onSubmit, onCancel }, ref) => {
   const theme = useColorScheme();
+
+  const closeDrawer = () => {
+    (ref as React.RefObject<BottomSheetModal>).current?.dismiss();
+  };
+
+  const handleCancel = () => {
+    onCancel?.();
+    closeDrawer();
+  };
 
   const handleSubmit = () => {
     onSubmit();
-    (ref as React.RefObject<BottomSheetModal>).current?.dismiss();
+    closeDrawer();
   };
+
+  const [sheetStatus, setSheetStatus] = React.useState<"open" | "close">(
+    "close"
+  );
+
+  React.useEffect(() => {
+    const backAction = () => {
+      if (sheetStatus === "open") {
+        closeDrawer();
+        return true;
+      }
+      return false;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, [sheetStatus, setSheetStatus]);
 
   return (
     <BottomSheetModalProvider>
       <BottomSheetModal
+        onChange={(status) => {
+          if (status === 0) {
+            setSheetStatus("open");
+          } else {
+            setSheetStatus("close");
+          }
+        }}
         ref={ref}
         backdropComponent={() => (
           <TouchableOpacity
@@ -45,12 +82,7 @@ const BottomDrawerConfirm = React.forwardRef<
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.description}>{description}</Text>
           <View style={styles.buttonsContainer}>
-            <TouchableOpacity
-              onPress={() =>
-                (ref as React.RefObject<BottomSheetModal>).current?.dismiss()
-              }
-              style={styles.button}
-            >
+            <TouchableOpacity onPress={handleCancel} style={styles.button}>
               <Text>Cancel</Text>
             </TouchableOpacity>
             <View

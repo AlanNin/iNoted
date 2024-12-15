@@ -5,4 +5,6 @@ type NoteBookCardProps = {
   notebook: NotebookProps;
   onPress?: (notebookId: number) => void;
   isLoading?: boolean;
+  isToMove?: boolean;
+  disabled?: boolean;
 };

@@ -37,6 +37,7 @@
     "expo-sqlite": "~15.0.3",
     "expo-status-bar": "~2.0.0",
     "expo-system-ui": "~4.0.6",
+    "lodash": "^4.17.21",
     "lucide-react-native": "^0.460.0",
     "moti": "^0.29.0",
     "react": "18.3.1",
@@ -58,6 +59,7 @@
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "@tanstack/eslint-plugin-query": "^5.61.6",
+    "@types/lodash": "^4.17.13",
     "@types/react": "~18.3.12",
     "babel-plugin-inline-import": "^3.0.0",
     "drizzle-kit": "^0.28.1",

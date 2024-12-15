@@ -126,15 +126,6 @@ export default function NewNoteScreen() {
             >
               <Icon name="Save" muted={inputs.content.length === 0} />
             </TouchableOpacity>
-
-            {/* <TouchableOpacity
-              style={styles.button}
-              onPress={() => {
-                console.log("TODO: Dots -> More");
-              }}
-            >
-              <Icon name="EllipsisVertical" />
-            </TouchableOpacity> */}
           </View>
         </View>
         <View style={styles.content}>

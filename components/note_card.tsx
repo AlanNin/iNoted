@@ -6,14 +6,17 @@ import { formatLongDate, formatMediumDate } from "@/lib/format_date";
 import { router } from "expo-router";
 import React from "react";
 import { useNotesEditMode } from "@/hooks/useNotesEditMode";
+import { debounce } from "lodash";
 
 // TODO: try to find a way to indicate long press
 const SelectedIndicator = ({
   noteId,
   viewMode,
+  onPress,
 }: {
   noteId: number;
   viewMode: "grid" | "list";
+  onPress?: () => void;
 }) => {
   const {
     isNotesEditMode,
@@ -27,6 +30,8 @@ const SelectedIndicator = ({
   const isSelected = selectedNotes.includes(noteId);
 
   const handlePress = React.useCallback(() => {
+    onPress?.();
+
     if (isNotesEditMode) {
       selectNote(noteId);
     } else {
@@ -68,7 +73,7 @@ const SelectedIndicator = ({
 };
 
 const NoteCard = React.memo(
-  ({ note, index, viewMode }: NoteCardProps) => {
+  ({ note, index, viewMode, onPress }: NoteCardProps) => {
     if (!note.id) {
       return <View style={gridStyles.innerContainer} />;
     }
@@ -90,7 +95,11 @@ const NoteCard = React.memo(
     if (viewMode === "grid") {
       return (
         <View style={gridStyles.outerContainer}>
-          <SelectedIndicator noteId={note.id} viewMode="grid" />
+          <SelectedIndicator
+            noteId={note.id}
+            viewMode="grid"
+            onPress={onPress!}
+          />
 
           <MotiView {...animationProps} style={gridStyles.innerContainer}>
             <View

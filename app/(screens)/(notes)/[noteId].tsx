@@ -26,6 +26,8 @@ import { parseExpensiMark } from "@expensify/react-native-live-markdown";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { toast } from "@backpackapp-io/react-native-toast";
 import BottomDrawerConfirm from "@/components/bottom_drawer_confirm";
+import BottomDrawerMoveNote from "@/components/bottom_drawer_move_note";
+import { addNotesToNotebook } from "@/queries/notebooks";
 
 export default function NoteScreen() {
   const note = useLocalSearchParams();
@@ -40,6 +42,7 @@ export default function NoteScreen() {
   });
   const [isMoreModalOpen, setIsMoreModalOpen] = React.useState(false);
   const bottomDrawerRef = React.useRef<BottomSheetModal>(null);
+  const bottomMoveNoteDrawerRef = React.useRef<BottomSheetModal>(null);
 
   const { data: noteData, isLoading: isLoadingNoteData } = useQuery({
     queryKey: ["note", Number(note.noteId)],
@@ -92,6 +95,10 @@ export default function NoteScreen() {
     await queryClient.refetchQueries({ queryKey: ["notes"] });
   }
 
+  async function refetchNotebooks() {
+    await queryClient.refetchQueries({ queryKey: ["notebook"] });
+  }
+
   const isUpdateDisabled =
     inputs.content.length === 0 ||
     (inputs.title === noteData?.title && inputs.content === noteData?.content);
@@ -106,7 +113,7 @@ export default function NoteScreen() {
         ...inputs,
         title: inputs.title.length === 0 ? "Untitled note" : inputs.title,
       });
-      await refetchNotes();
+      refetchNotes();
       toast.success("Note updated successfully!");
       router.back();
     } catch (error) {
@@ -123,7 +130,8 @@ export default function NoteScreen() {
   async function handleDeleteNote() {
     try {
       await deleteNote(Number(note.noteId));
-      await refetchNotes();
+      refetchNotes();
+      refetchNotebooks();
       toast.success("Note deleted successfully!");
       router.back();
     } catch (error) {
@@ -145,6 +153,25 @@ export default function NoteScreen() {
       toast.error("An error occurred. Please try again.");
     }
   }
+
+  const handleToggleBottomMoveNoteDrawer = () => {
+    bottomMoveNoteDrawerRef.current?.present();
+  };
+
+  const handleMoveNote = async (notebookId: number) => {
+    try {
+      await addNotesToNotebook({ noteIds: [Number(note.noteId)], notebookId });
+      refetchNotebooks();
+      refetchNotes();
+      setIsMoreModalOpen(false);
+      toast.success("Notes moved successfully!");
+    } catch (error) {
+      console.error("Error moving notes:", error);
+      toast.error(
+        "An error occurred while moving the notes. Please try again."
+      );
+    }
+  };
 
   React.useEffect(() => {
     const backAction = () => {
@@ -172,128 +199,150 @@ export default function NoteScreen() {
     );
   }
   return (
-    <TouchableWithoutFeedback
-      style={styles.container}
-      onPress={() => setIsMoreModalOpen(false)}
-    >
-      <View style={styles.container}>
-        <View style={styles.wrapper}>
-          <View style={styles.header}>
-            <TouchableOpacity
-              style={styles.button}
-              onPress={() => router.back()}
-            >
-              <Icon name="ArrowLeft" />
-            </TouchableOpacity>
-            <View style={styles.headerSecton}>
+    <>
+      <TouchableWithoutFeedback
+        style={styles.container}
+        onPress={() => setIsMoreModalOpen(false)}
+      >
+        <View style={styles.container}>
+          <View style={styles.wrapper}>
+            <View style={styles.header}>
               <TouchableOpacity
                 style={styles.button}
-                onPress={handleUndo}
-                disabled={undoStack.current.length === 0}
+                onPress={() => router.back()}
               >
-                <Icon name="Undo2" muted={undoStack.current.length === 0} />
+                <Icon name="ArrowLeft" />
               </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={handleRedo}
-                disabled={redoStack.current.length === 0}
-              >
-                <Icon name="Redo2" muted={redoStack.current.length === 0} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={handleUpdateNote}
-                disabled={isUpdateDisabled}
-              >
-                <Icon name="Save" muted={isUpdateDisabled} />
-              </TouchableOpacity>
-              <View style={styles.moreContainer}>
+              <View style={styles.headerSecton}>
                 <TouchableOpacity
                   style={styles.button}
-                  onPress={() => {
-                    setIsMoreModalOpen(!isMoreModalOpen);
-                  }}
+                  onPress={handleUndo}
+                  disabled={undoStack.current.length === 0}
                 >
-                  <Icon name="EllipsisVertical" />
+                  <Icon name="Undo2" muted={undoStack.current.length === 0} />
                 </TouchableOpacity>
-                {isMoreModalOpen && (
-                  // TODO: add move to notebook
-                  <TouchableWithoutFeedback>
-                    <MotiView
-                      style={styles.moreModal}
-                      customBackgroundColor={colors[theme].grayscale_light}
-                      from={{ opacity: 0, translateY: -10 }}
-                      animate={{ opacity: 1, translateY: 0 }}
-                      transition={{
-                        type: "timing",
-                        duration: 150,
-                      }}
-                    >
-                      <TouchableOpacity
-                        style={styles.moreModalButton}
-                        onPress={handleShareNote}
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={handleRedo}
+                  disabled={redoStack.current.length === 0}
+                >
+                  <Icon name="Redo2" muted={redoStack.current.length === 0} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={handleUpdateNote}
+                  disabled={isUpdateDisabled}
+                >
+                  <Icon name="Save" muted={isUpdateDisabled} />
+                </TouchableOpacity>
+                <View style={styles.moreContainer}>
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => {
+                      setIsMoreModalOpen(!isMoreModalOpen);
+                    }}
+                  >
+                    <Icon name="EllipsisVertical" />
+                  </TouchableOpacity>
+                  {isMoreModalOpen && (
+                    <TouchableWithoutFeedback>
+                      <MotiView
+                        style={styles.moreModal}
+                        customBackgroundColor={colors[theme].grayscale_light}
+                        from={{ opacity: 0, translateY: -10 }}
+                        animate={{ opacity: 1, translateY: 0 }}
+                        transition={{
+                          type: "timing",
+                          duration: 150,
+                        }}
                       >
-                        <Icon name="Share2" strokeWidth={1.2} size={18} />
-                        <Text>Share</Text>
-                      </TouchableOpacity>
-                      <View
-                        style={styles.moreModalDivider}
-                        customBackgroundColor={colors[theme].foggiest}
-                      />
-                      <TouchableOpacity
-                        style={styles.moreModalButton}
-                        onPress={handlePresentModalPress}
-                      >
-                        <Icon
-                          name="Eraser"
-                          strokeWidth={1.2}
-                          size={18}
-                          customColor={colors[theme].primary}
+                        <TouchableOpacity
+                          style={styles.moreModalButton}
+                          onPress={handleShareNote}
+                        >
+                          <Icon name="Share2" strokeWidth={1.2} size={18} />
+                          <Text>Share</Text>
+                        </TouchableOpacity>
+                        <View
+                          style={styles.moreModalDivider}
+                          customBackgroundColor={colors[theme].foggiest}
                         />
-                        <Text customTextColor={colors[theme].primary}>
-                          Delete
-                        </Text>
-                      </TouchableOpacity>
-                    </MotiView>
-                  </TouchableWithoutFeedback>
-                )}
+                        <TouchableOpacity
+                          style={styles.moreModalButton}
+                          onPress={handleToggleBottomMoveNoteDrawer}
+                        >
+                          <Icon
+                            name="NotebookPen"
+                            strokeWidth={1.2}
+                            size={18}
+                          />
+                          <Text>Move</Text>
+                        </TouchableOpacity>
+                        <View
+                          style={styles.moreModalDivider}
+                          customBackgroundColor={colors[theme].foggiest}
+                        />
+                        <TouchableOpacity
+                          style={styles.moreModalButton}
+                          onPress={handlePresentModalPress}
+                        >
+                          <Icon
+                            name="Eraser"
+                            strokeWidth={1.2}
+                            size={18}
+                            customColor={colors[theme].primary}
+                          />
+                          <Text customTextColor={colors[theme].primary}>
+                            Delete
+                          </Text>
+                        </TouchableOpacity>
+                      </MotiView>
+                    </TouchableWithoutFeedback>
+                  )}
+                </View>
               </View>
             </View>
-          </View>
-          <View style={styles.content}>
-            <Text
-              style={styles.lastEditedText}
-              customTextColor={colors[theme].grayscale}
-            >
-              Last edited on {formatLongDate(noteData?.updated_at!)}
-            </Text>
-            <TextInput
-              value={inputs.title}
-              onChangeText={(e) => handleInputChange("title", e)}
-              style={[styles.noteTitle]}
-              placeholder="Untitled note"
-              onPress={() => setIsMoreModalOpen(false)}
-            />
-            <MarkdownTextInput
-              value={inputs.content}
-              onChangeText={(e) => handleInputChange("content", e)}
-              multiline={true}
-              style={[styles.noteContent]}
-              placeholder="Capture your thoughts..."
-              parser={parseExpensiMark}
-              onPress={() => setIsMoreModalOpen(false)}
-            />
+            <View style={styles.content}>
+              <Text
+                style={styles.lastEditedText}
+                customTextColor={colors[theme].grayscale}
+              >
+                Last edited on {formatLongDate(noteData?.updated_at!)}
+              </Text>
+              <TextInput
+                value={inputs.title}
+                onChangeText={(e) => handleInputChange("title", e)}
+                style={[styles.noteTitle]}
+                placeholder="Untitled note"
+                onPress={() => setIsMoreModalOpen(false)}
+              />
+              <MarkdownTextInput
+                value={inputs.content}
+                onChangeText={(e) => handleInputChange("content", e)}
+                multiline={true}
+                style={[styles.noteContent]}
+                placeholder="Capture your thoughts..."
+                parser={parseExpensiMark}
+                onPress={() => setIsMoreModalOpen(false)}
+              />
+            </View>
           </View>
         </View>
-        <BottomDrawerConfirm
-          ref={bottomDrawerRef}
-          title="Delete this note?"
-          description="This note will be permanently deleted from this device."
-          submitButtonText="Delete"
-          onSubmit={() => handleDeleteNote()}
-        />
-      </View>
-    </TouchableWithoutFeedback>
+      </TouchableWithoutFeedback>
+      <BottomDrawerConfirm
+        ref={bottomDrawerRef}
+        title="Delete this note?"
+        description="This note will be permanently deleted from this device."
+        submitButtonText="Delete"
+        onSubmit={() => handleDeleteNote()}
+      />
+      <BottomDrawerMoveNote
+        ref={bottomMoveNoteDrawerRef}
+        title="Move note"
+        description="Make this note part of a notebook."
+        onSubmit={handleMoveNote}
+      />
+    </>
   );
 }
 

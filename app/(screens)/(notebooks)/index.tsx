@@ -193,9 +193,7 @@ export default function NotebooksScreen() {
   }
 
   function handleNotebookPress(notebookId: number) {
-    if (selectedNotebook !== notebookId) {
-      setSelectedNotebook(notebookId);
-    }
+    setSelectedNotebook(notebookId);
     notebookBottomDrawerRef.current?.present();
   }
 

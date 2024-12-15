@@ -17,7 +17,11 @@ export const useNotesEditMode = create<NotesEditModeState>((set, get) => ({
       isNotesEditMode: !state.isNotesEditMode,
       selectedNotes: [],
     })),
-  setNotesEditMode: (isNotesEditMode) => set({ isNotesEditMode }),
+  setNotesEditMode: (isNotesEditMode) =>
+    set((state) => ({
+      isNotesEditMode,
+      selectedNotes: isNotesEditMode ? state.selectedNotes : [],
+    })),
   selectNote: (noteId) => {
     const { selectedNotes } = get();
     if (selectedNotes.includes(noteId)) {

@@ -59,13 +59,20 @@ const BottomDrawerCreateNotebook = React.forwardRef<
     };
   }, []);
 
+  const [sheetStatus, setSheetStatus] = React.useState<"open" | "close">(
+    "close"
+  );
+
   React.useEffect(() => {
     const backAction = () => {
       if (showColorPickerModal) {
         setShowColorPickerModal(false);
         return true;
       }
-      closeDrawer();
+      if (sheetStatus === "open") {
+        closeDrawer();
+        return true;
+      }
       return false;
     };
 
@@ -75,11 +82,23 @@ const BottomDrawerCreateNotebook = React.forwardRef<
     );
 
     return () => backHandler.remove();
-  }, [showColorPickerModal, setShowColorPickerModal]);
+  }, [
+    showColorPickerModal,
+    setShowColorPickerModal,
+    sheetStatus,
+    setSheetStatus,
+  ]);
 
   return (
     <BottomSheetModalProvider>
       <BottomSheetModal
+        onChange={(status) => {
+          if (status === 0) {
+            setSheetStatus("open");
+          } else {
+            setSheetStatus("close");
+          }
+        }}
         ref={ref}
         backdropComponent={() => (
           <TouchableOpacity
