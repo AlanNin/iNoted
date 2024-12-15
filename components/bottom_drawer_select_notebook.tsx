@@ -16,10 +16,10 @@ import { useNotebooksSelectedToMoveMode } from "@/hooks/useNotebookSelectedToMov
 import Icon from "./icon";
 import Loader from "./loading";
 
-const BottomDrawerMoveNote = React.forwardRef<
+const BottomDrawerSelectNotebook = React.forwardRef<
   BottomSheetModal,
-  Omit<BottomDrawerMoveNoteProps, "ref">
->(({ title, description, onSubmit }, ref) => {
+  Omit<BottomDrawerSelectNotebookProps, "ref">
+>(({ title, description, setSelectedNotebook, isNotebookSelected }, ref) => {
   const theme = useColorScheme();
 
   const { data: notebooks, isLoading: isLoadingNotebooks } = useQuery({
@@ -37,11 +37,19 @@ const BottomDrawerMoveNote = React.forwardRef<
     clearSelectedNotebook();
   };
 
-  const handleSubmit = () => {
-    if (!selectedNotebook) {
+  const isButtonDisabled = !isNotebookSelected && selectedNotebook === null;
+
+  const handleSelectNotebook = () => {
+    if (isButtonDisabled) {
       return;
     }
-    onSubmit(selectedNotebook);
+
+    if (isNotebookSelected && !selectedNotebook) {
+      setSelectedNotebook(null);
+      closeDrawer();
+      return;
+    }
+    setSelectedNotebook(selectedNotebook!);
     closeDrawer();
   };
 
@@ -126,17 +134,19 @@ const BottomDrawerMoveNote = React.forwardRef<
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.headerButton}
-              disabled={!selectedNotebook}
-              onPress={handleSubmit}
+              disabled={isButtonDisabled}
+              onPress={handleSelectNotebook}
             >
               <Text
                 customTextColor={
-                  selectedNotebook
+                  !isButtonDisabled
                     ? colors[theme].primary
                     : colors[theme].primary_foggy
                 }
               >
-                Save
+                {isNotebookSelected && !selectedNotebook
+                  ? "Show All"
+                  : "Confirm"}
               </Text>
             </TouchableOpacity>
           </View>
@@ -251,4 +261,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BottomDrawerMoveNote;
+export default BottomDrawerSelectNotebook;

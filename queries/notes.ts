@@ -1,5 +1,5 @@
 import { db_client } from "@/db/client";
-import { notes } from "@/db/schema";
+import { notebooks, notes } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
 
 export async function createNote(note: NewNoteProps) {
@@ -9,7 +9,6 @@ export async function createNote(note: NewNoteProps) {
       content: note.content,
     });
   } catch (error) {
-    console.log(error);
     throw new Error("Could not create the note");
   }
 }
@@ -73,6 +72,36 @@ export async function getAllNotes() {
   try {
     return await db_client.select().from(notes);
   } catch (error) {
+    throw new Error("Could not fetch notes");
+  }
+}
+
+export async function getAllNotesCustom(notebookId?: number) {
+  try {
+    if (notebookId !== undefined) {
+      const result = await db_client
+        .select({
+          notebookName: notebooks.name,
+          notes: notes,
+        })
+        .from(notes)
+        .leftJoin(notebooks, eq(notes.notebook_id, notebooks.id))
+        .where(eq(notes.notebook_id, notebookId));
+
+      return {
+        notebookName: result[0]?.notebookName || null,
+        notes: result.map((r) => r.notes),
+      };
+    } else {
+      const allNotes = await db_client.select().from(notes);
+
+      return {
+        notebookName: null,
+        notes: allNotes,
+      };
+    }
+  } catch (error) {
+    console.error("Error fetching notes:", error);
     throw new Error("Could not fetch notes");
   }
 }

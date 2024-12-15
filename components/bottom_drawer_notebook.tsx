@@ -171,6 +171,8 @@ const BottomDrawerNotebook = React.forwardRef<
     setSheetStatus,
   ]);
 
+  const { width } = Dimensions.get("screen");
+
   const renderNote = ({ item, index }: { item: NoteProps; index: number }) => (
     <NoteCard
       key={`${item.id}-${item.title}-${item.content}`}
@@ -372,7 +374,7 @@ const BottomDrawerNotebook = React.forwardRef<
                             data={notebook?.notes || []}
                             renderItem={renderNote}
                             numColumns={3}
-                            estimatedItemSize={180}
+                            estimatedItemSize={width > 400 ? 180 : 156}
                             removeClippedSubviews={true}
                           />
                         </View>

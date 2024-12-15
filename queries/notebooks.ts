@@ -9,7 +9,6 @@ export async function createNotebook(notebook: NewNotebookProps) {
       background: notebook.background,
     });
   } catch (error) {
-    console.log(error);
     throw new Error("Could not create the notebook");
   }
 }

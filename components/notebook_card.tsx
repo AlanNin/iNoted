@@ -1,4 +1,4 @@
-import { Image, StyleSheet } from "react-native";
+import { Dimensions, Image, StyleSheet } from "react-native";
 import { MotiView, Text, TouchableOpacity, View } from "./themed";
 import React from "react";
 import { useNotebooksEditMode } from "@/hooks/useNotebooksEditMode";
@@ -145,10 +145,16 @@ const NotebookCard = React.memo(
         ? { uri: notebook.background }
         : (notebook.background as any);
 
+    const { width } = Dimensions.get("screen");
+
     return (
       <MotiView
         {...animationProps}
-        style={[styles.container, isAdding && { width: 120 }]}
+        style={[
+          styles.container,
+          isAdding && { width: 120 },
+          { height: width > 400 ? 180 : 156 },
+        ]}
       >
         {isToMove ? (
           <SelectedIndicatorToMove notebookId={notebook.id!} />
@@ -202,7 +208,7 @@ const NotebookCard = React.memo(
 const styles = StyleSheet.create({
   container: {
     // height: 216,
-    height: 180,
+    // height: 180,
     flexGrow: 1,
     flexDirection: "column",
     gap: 8,
