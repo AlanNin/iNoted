@@ -48,6 +48,17 @@
           "cameraPermission": "The app only accesses your camera to let you personalize and enjoy your notes as you wish.",
           "microphonePermission": "The app only accesses your microphone to let you personalize and enjoy your notes as you wish."
         }
+      ],
+      [
+        "expo-asset",
+        {
+          "assets": [
+            "./assets/notebooks/notebook_1.png",
+            "./assets/notebooks/notebook_2.png",
+            "./assets/notebooks/notebook_3.png",
+            "./assets/notebooks/notebook_select.png"
+          ]
+        }
       ]
     ],
     "extra": {

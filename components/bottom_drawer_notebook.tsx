@@ -48,7 +48,6 @@ const BottomDrawerNotebook = React.forwardRef<
 >(({ notebookId, onSubmit, onDelete }, ref) => {
   const theme = useColorScheme();
   const [background, setBackground] = React.useState(colors.dark.grayscale);
-  // TODO: take a second look on input value change
   const [name, setName] = React.useState("Loading...");
   const [showColorPickerModal, setShowColorPickerModal] = React.useState(false);
   const [isEditing, setIsEditing] = React.useState(false);

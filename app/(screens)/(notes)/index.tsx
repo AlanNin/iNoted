@@ -1,4 +1,4 @@
-import { StyleSheet, BackHandler } from "react-native";
+import { StyleSheet, BackHandler, ScrollView } from "react-native";
 import React from "react";
 import {
   MotiView,
@@ -363,7 +363,7 @@ export default function NotesScreen() {
               <TouchableOpacity
                 style={styles.fab}
                 customBackgroundColor={colors[theme].primary}
-                onPress={() => router.push("./(notes)/new")}
+                onPress={() => router.push("./new")}
               >
                 <Icon name="Plus" size={28} customColor={colors.dark.tint} />
               </TouchableOpacity>

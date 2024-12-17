@@ -55,7 +55,7 @@ export default function ScreensLayout() {
       />
 
       <Drawer.Screen
-        name="settings"
+        name="(settings)"
         options={{
           headerShown: false,
           drawerItemStyle: { display: "none" },

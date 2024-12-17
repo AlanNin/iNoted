@@ -21,6 +21,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SheetProvider } from "react-native-actions-sheet";
 import { Toasts } from "@backpackapp-io/react-native-toast";
 import useAppConfig from "@/hooks/useAppConfig";
+import { setStatusBarStyle } from "expo-status-bar";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -31,6 +32,8 @@ SplashScreen.setOptions({
 
 export default function RootLayout() {
   const theme = useColorScheme();
+
+  setStatusBarStyle(theme === "light" ? "dark" : "light");
 
   const [fontsLoaded, fontsError] = useFonts({
     "Geist-Regular": require("@/assets/fonts/Geist-Regular.otf"),

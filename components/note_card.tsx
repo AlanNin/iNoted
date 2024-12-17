@@ -6,9 +6,7 @@ import { formatLongDate, formatMediumDate } from "@/lib/format_date";
 import { router } from "expo-router";
 import React from "react";
 import { useNotesEditMode } from "@/hooks/useNotesEditMode";
-import { debounce } from "lodash";
 
-// TODO: try to find a way to indicate long press
 const SelectedIndicator = ({
   noteId,
   viewMode,
@@ -35,7 +33,7 @@ const SelectedIndicator = ({
     if (isNotesEditMode) {
       selectNote(noteId);
     } else {
-      router.push(`./(notes)/${noteId}`);
+      router.push(`./${noteId}`);
     }
   }, [isNotesEditMode, selectNote, noteId]);
 
@@ -52,23 +50,26 @@ const SelectedIndicator = ({
     <TouchableOpacity
       onPress={handlePress}
       onLongPress={handleLongPress}
-      style={
-        isNotesEditMode
-          ? [
-              viewMode === "grid"
-                ? gridStyles.selectIndicator
-                : listStyles.selectIndicator,
-              {
-                [viewMode === "grid"
-                  ? "borderTopColor"
-                  : "borderRightColor"]: isSelected
-                  ? colors[theme].primary
-                  : colors[theme].text_muted,
-              },
-            ]
-          : [neutralStyles.nonSelectIndicator]
-      }
-    />
+      style={{
+        position: "absolute",
+        inset: 0,
+        zIndex: 10,
+      }}
+    >
+      <View
+        style={[
+          {
+            backgroundColor: colors[theme].foggiest,
+          },
+          neutralStyles.nonSelectIndicator,
+          isNotesEditMode && viewMode === "grid" && { borderTopWidth: 3 },
+          isNotesEditMode && viewMode === "list" && { borderRightWidth: 3 },
+          isNotesEditMode && isSelected
+            ? { borderColor: colors[theme].primary }
+            : { borderColor: colors[theme].text_muted },
+        ]}
+      />
+    </TouchableOpacity>
   );
 };
 
@@ -95,21 +96,13 @@ const NoteCard = React.memo(
     if (viewMode === "grid") {
       return (
         <View style={gridStyles.outerContainer}>
-          <SelectedIndicator
-            noteId={note.id}
-            viewMode="grid"
-            onPress={onPress!}
-          />
-
           <MotiView {...animationProps} style={gridStyles.innerContainer}>
-            <View
-              style={[
-                gridStyles.contentContainer,
-                {
-                  backgroundColor: colors[theme].foggiest,
-                },
-              ]}
-            >
+            <SelectedIndicator
+              noteId={note.id}
+              viewMode="grid"
+              onPress={onPress!}
+            />
+            <View style={gridStyles.contentContainer}>
               <Text style={gridStyles.content} numberOfLines={8}>
                 {note.content}
               </Text>
@@ -140,20 +133,9 @@ const NoteCard = React.memo(
     } else {
       return (
         <TouchableOpacity style={listStyles.outerContainer}>
-          <SelectedIndicator noteId={note.id} viewMode="list" />
+          <MotiView {...animationProps} style={listStyles.innerContainer}>
+            <SelectedIndicator noteId={note.id} viewMode="list" />
 
-          <MotiView
-            {...animationProps}
-            style={[
-              listStyles.innerContainer,
-              {
-                backgroundColor:
-                  theme === "light"
-                    ? colors.light.foggiest
-                    : colors.dark.foggiest,
-              },
-            ]}
-          >
             <Text style={listStyles.title} numberOfLines={1}>
               {note.title}
             </Text>
@@ -197,6 +179,8 @@ const gridStyles = StyleSheet.create({
   innerContainer: {
     flex: 1,
     gap: 8,
+    borderRadius: 8,
+    overflow: "hidden",
   },
   contentContainer: {
     padding: 12,
@@ -245,6 +229,7 @@ const listStyles = StyleSheet.create({
     display: "flex",
     flexDirection: "column",
     gap: 12,
+    overflow: "hidden",
   },
   title: {
     fontWeight: "bold",
@@ -269,7 +254,8 @@ const neutralStyles = StyleSheet.create({
   nonSelectIndicator: {
     position: "absolute",
     inset: 0,
-    zIndex: 10,
+    borderRadius: 0,
+    maxHeight: 168,
   },
 });
 

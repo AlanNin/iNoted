@@ -1,20 +1,26 @@
-import { Dimensions, Image, StyleSheet } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
 import { MotiView, Text, TouchableOpacity, View } from "./themed";
 import React from "react";
 import { useNotebooksEditMode } from "@/hooks/useNotebooksEditMode";
 import useColorScheme from "@/hooks/useColorScheme";
 import colors from "@/constants/colors";
 import { useNotebooksSelectedToMoveMode } from "@/hooks/useNotebookSelectedToMove";
+import { Image } from "expo-image";
 
-// TODO: try to find a way to indicate long press
 const SelectedIndicator = ({
   notebookId,
   onPress,
   disabled,
+  name,
+  numberOfLinesName,
+  isLoading,
 }: {
   notebookId: number;
   onPress: (notebookId: number) => void;
   disabled?: boolean;
+  name: string;
+  numberOfLinesName: number;
+  isLoading: boolean;
 }) => {
   const {
     isNotebooksEditMode,
@@ -51,23 +57,40 @@ const SelectedIndicator = ({
       style={styles.selectIndicatorContainer}
       disabled={disabled}
     >
-      {isNotebooksEditMode && (
-        <View
+      <View
+        style={[styles.nameContainer, isNotebooksEditMode && { bottom: 22 }]}
+      >
+        <Text
           style={[
-            styles.selectIndicator,
-            {
+            styles.name,
+            isNotebooksEditMode && {
+              borderWidth: 2,
               borderColor: isSelected
                 ? colors[theme].primary
                 : colors.dark.tint,
             },
           ]}
-        />
-      )}
+          customTextColor="white"
+          numberOfLines={numberOfLinesName}
+        >
+          {isLoading ? "Loading..." : name}
+        </Text>
+      </View>
     </TouchableOpacity>
   );
 };
 
-const SelectedIndicatorToMove = ({ notebookId }: { notebookId: number }) => {
+const SelectedIndicatorToMove = ({
+  notebookId,
+  name,
+  numberOfLinesName,
+  isLoading,
+}: {
+  notebookId: number;
+  name: string;
+  numberOfLinesName: number;
+  isLoading: boolean;
+}) => {
   const {
     selectedNotebook,
     toggleNotebooksSelectedToMoveMode,
@@ -95,14 +118,23 @@ const SelectedIndicatorToMove = ({ notebookId }: { notebookId: number }) => {
       onLongPress={handleLongPress}
       style={styles.selectIndicatorContainer}
     >
-      <View
-        style={[
-          styles.selectIndicator,
-          {
-            borderColor: isSelected ? colors[theme].primary : colors.dark.tint,
-          },
-        ]}
-      />
+      <View style={[styles.nameContainer, { bottom: 22 }]}>
+        <Text
+          style={[
+            styles.name,
+            {
+              borderWidth: 2,
+              borderColor: isSelected
+                ? colors[theme].primary
+                : colors.dark.tint,
+            },
+          ]}
+          customTextColor="white"
+          numberOfLines={numberOfLinesName}
+        >
+          {isLoading ? "Loading..." : name}
+        </Text>
+      </View>
     </TouchableOpacity>
   );
 };
@@ -157,12 +189,20 @@ const NotebookCard = React.memo(
         ]}
       >
         {isToMove ? (
-          <SelectedIndicatorToMove notebookId={notebook.id!} />
+          <SelectedIndicatorToMove
+            notebookId={notebook.id!}
+            name={notebook.name}
+            numberOfLinesName={numberOfLinesName}
+            isLoading={isLoading}
+          />
         ) : (
           <SelectedIndicator
             notebookId={notebook.id!}
             onPress={onPress!}
             disabled={disabled}
+            name={notebook.name}
+            numberOfLinesName={numberOfLinesName}
+            isLoading={isLoading}
           />
         )}
 
@@ -175,16 +215,6 @@ const NotebookCard = React.memo(
             },
           ]}
         >
-          <View style={styles.nameContainer}>
-            <Text
-              style={styles.name}
-              customTextColor="white"
-              numberOfLines={numberOfLinesName}
-            >
-              {isLoading ? "Loading..." : notebook.name}
-            </Text>
-          </View>
-
           {!isBackgroundAColor && !isLoading && (
             <View style={styles.bookImageContainer}>
               <Image source={imageSource} style={styles.bookImage} />
@@ -207,8 +237,6 @@ const NotebookCard = React.memo(
 
 const styles = StyleSheet.create({
   container: {
-    // height: 216,
-    // height: 180,
     flexGrow: 1,
     flexDirection: "column",
     gap: 8,
@@ -248,6 +276,10 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     overflow: "hidden",
     width: "95%",
+    borderTopLeftRadius: 12,
+    borderBottomLeftRadius: 12,
+    borderTopRightRadius: 2,
+    borderBottomRightRadius: 2,
   },
   name: {
     fontWeight: "bold",
@@ -281,19 +313,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     inset: 0,
     zIndex: 10,
-  },
-  selectIndicator: {
-    position: "absolute",
-    backgroundColor: "transparent",
-    bottom: 24,
-    right: -2,
-    width: "95%",
-    height: 30,
-    borderTopLeftRadius: 12,
-    borderBottomLeftRadius: 12,
-    borderTopRightRadius: 2,
-    borderBottomRightRadius: 2,
-    borderWidth: 2,
   },
 });
 

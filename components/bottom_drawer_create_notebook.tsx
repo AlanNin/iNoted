@@ -6,7 +6,7 @@ import {
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
 import { Text, TouchableOpacity, View } from "./themed";
-import { BackHandler, Image, Keyboard, StyleSheet } from "react-native";
+import { BackHandler, Keyboard, StyleSheet } from "react-native";
 import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
 import NotebookCard from "./notebook_card";
@@ -14,14 +14,11 @@ import Icon from "./icon";
 import { LinearGradient } from "expo-linear-gradient";
 import ColorPickerComponent from "./color_picker";
 import { pickImage } from "@/lib/pick_image";
+import { Image } from "expo-image";
 
 const colorsOptions = ["#FF5781", "#E76F51", "#00838F"];
 
-const imageOptions = [
-  require("@/assets/notebooks/notebook_1.png"),
-  require("@/assets/notebooks/notebook_2.png"),
-  require("@/assets/notebooks/notebook_3.png"),
-];
+const localImageOptions = ["notebook_1", "notebook_2", "notebook_3"];
 
 const BottomDrawerCreateNotebook = React.forwardRef<
   BottomSheetModal,
@@ -156,9 +153,9 @@ const BottomDrawerCreateNotebook = React.forwardRef<
               />
             </TouchableOpacity>
 
-            {imageOptions.map((image) => (
+            {localImageOptions.map((image, index) => (
               <TouchableOpacity
-                key={image}
+                key={index}
                 style={styles.imageContainer}
                 onPress={() => setBackground(image)}
               >
@@ -170,10 +167,7 @@ const BottomDrawerCreateNotebook = React.forwardRef<
               style={styles.selectContainer}
               onPress={handlePickImage}
             >
-              <Image
-                source={require("@/assets/notebooks/notebook_select.png")}
-                style={styles.image}
-              />
+              <Image source={"notebook_select"} style={styles.image} />
               <Icon
                 name="Image"
                 size={12}
@@ -185,7 +179,14 @@ const BottomDrawerCreateNotebook = React.forwardRef<
           <View style={styles.inputContainer}>
             <BottomSheetTextInput
               onChange={(e) => setName(e.nativeEvent.text)}
-              style={[styles.input, { backgroundColor: colors[theme].foggier }]}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: colors[theme].foggier,
+                  color: colors[theme].text,
+                },
+              ]}
+              placeholderTextColor={colors[theme].text_muted}
               placeholder="Type a name for your notebook..."
             />
           </View>
