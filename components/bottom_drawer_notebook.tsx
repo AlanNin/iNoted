@@ -369,6 +369,7 @@ const BottomDrawerNotebook = React.forwardRef<
                         </Text>
                         <View style={styles.notesContainer}>
                           <FlashList
+                            showsVerticalScrollIndicator={false}
                             keyExtractor={(item) => item.id?.toString()}
                             data={notebook?.notes || []}
                             renderItem={renderNote}

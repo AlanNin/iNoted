@@ -36,7 +36,7 @@ const Icon = ({
   grayscale = false,
   themed = false,
 }: IconProps) => {
-  const theme: "light" | "dark" = useColorScheme() || "dark";
+  const theme = useColorScheme();
 
   const LucideIcon = (icons as Record<
     string,

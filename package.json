@@ -26,6 +26,7 @@
     "drizzle-orm": "^0.36.4",
     "expo": "~52.0.18",
     "expo-application": "~6.0.1",
+    "expo-asset": "~11.0.1",
     "expo-build-properties": "~0.13.1",
     "expo-dev-client": "~5.0.6",
     "expo-drizzle-studio-plugin": "^0.1.1",
@@ -35,6 +36,7 @@
     "expo-linear-gradient": "~14.0.1",
     "expo-navigation-bar": "~4.0.6",
     "expo-router": "~4.0.11",
+    "expo-sharing": "^13.0.0",
     "expo-splash-screen": "~0.29.18",
     "expo-sqlite": "~15.0.3",
     "expo-status-bar": "~2.0.0",
@@ -57,7 +59,7 @@
     "react-native-webview": "13.12.5",
     "reanimated-color-picker": "^3.0.6",
     "zustand": "^5.0.2",
-    "expo-asset": "~11.0.1"
+    "expo-document-picker": "~13.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

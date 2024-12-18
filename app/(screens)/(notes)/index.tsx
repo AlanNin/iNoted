@@ -308,6 +308,7 @@ export default function NotesScreen() {
             <>
               {filteredNotes!.length > 0 ? (
                 <FlashList
+                  showsVerticalScrollIndicator={false}
                   key={notesViewMode}
                   keyExtractor={(item, index) =>
                     item.id ? item.id?.toString() : `placeholder-${index}`

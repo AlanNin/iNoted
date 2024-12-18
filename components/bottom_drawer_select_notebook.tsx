@@ -168,6 +168,7 @@ const BottomDrawerSelectNotebook = React.forwardRef<
               {notebooks && notebooks.length > 0 ? (
                 <View style={styles.notebooksContainer}>
                   <FlashList
+                    showsVerticalScrollIndicator={false}
                     keyExtractor={(item) => item.id?.toString() || `${item.id}`}
                     data={notebooks}
                     renderItem={renderNotebooks}

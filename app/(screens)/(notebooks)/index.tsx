@@ -299,6 +299,7 @@ export default function NotebooksScreen() {
             <>
               {filteredNoteboks!.length > 0 ? (
                 <FlashList
+                  showsVerticalScrollIndicator={false}
                   keyExtractor={(item, index) =>
                     item.id ? item.id?.toString() : `placeholder-${index}`
                   }

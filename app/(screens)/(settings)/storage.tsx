@@ -8,12 +8,63 @@ import {
 } from "@/components/themed";
 import { router } from "expo-router";
 import Icon from "@/components/icon";
-
-const themeOptions = ["system", "light", "dark"] as const;
-
-export type ThemeProps = typeof themeOptions[number];
+import * as DocumentPicker from "expo-document-picker";
+import AppBackupManager from "@/lib/backup";
+import { expo_db } from "@/db/client";
+import { reloadAppAsync } from "expo";
+import { toast } from "@backpackapp-io/react-native-toast";
+import BottomDrawerConfirm from "@/components/bottom_drawer_confirm";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
 
 const StorageScreen = () => {
+  const bottomConfirmRestoreDrawerRef = React.useRef<BottomSheetModal>(null);
+  const backupManager = new AppBackupManager(expo_db);
+  const [result, setResult] = React.useState<any>();
+
+  const handleToggleBottomConfirmRestoreDrawer = () => {
+    bottomConfirmRestoreDrawerRef.current?.present();
+  };
+
+  const handleCreateBackup = async () => {
+    try {
+      const backupPath = await backupManager.createBackup();
+
+      await backupManager.shareBackup(backupPath);
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+    }
+  };
+
+  const handleRestoreBackupConfirmation = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "application/json",
+        copyToCacheDirectory: true,
+      });
+
+      if (result.canceled) {
+        return;
+      }
+      setResult(result);
+
+      handleToggleBottomConfirmRestoreDrawer();
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+    }
+  };
+
+  const handleRestoreBackup = async () => {
+    try {
+      const backupFilePath = await backupManager.importBackup(
+        result.assets[0].uri
+      );
+      await backupManager.restoreBackup(backupFilePath);
+
+      reloadAppAsync();
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+    }
+  };
   return (
     <>
       <SafeAreaView style={styles.container}>
@@ -27,7 +78,10 @@ const StorageScreen = () => {
             </View>
           </View>
           <View style={styles.contentContainer}>
-            <TouchableOpacity style={styles.itemsButton}>
+            <TouchableOpacity
+              style={styles.itemsButton}
+              onPress={handleCreateBackup}
+            >
               <View style={styles.itemButtonDetails}>
                 <Text>Create backup</Text>
                 <Text style={styles.itemButtonDetailsDescription} disabled>
@@ -35,7 +89,10 @@ const StorageScreen = () => {
                 </Text>
               </View>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.itemsButton}>
+            <TouchableOpacity
+              style={styles.itemsButton}
+              onPress={handleRestoreBackupConfirmation}
+            >
               <View style={styles.itemButtonDetails}>
                 <Text>Restore backup</Text>
                 <Text style={styles.itemButtonDetailsDescription} disabled>
@@ -47,6 +104,13 @@ const StorageScreen = () => {
           </View>
         </View>
       </SafeAreaView>
+      <BottomDrawerConfirm
+        ref={bottomConfirmRestoreDrawerRef}
+        title="Restore data from backup"
+        description={`Are you sure you want to restore your data from this backup? This action will replace all existing data.`}
+        submitButtonText="Restore"
+        onSubmit={handleRestoreBackup}
+      />
     </>
   );
 };
