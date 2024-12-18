@@ -4,16 +4,9 @@ import {
   BottomSheetView,
   BottomSheetModalProvider,
   BottomSheetTextInput,
-  BottomSheetScrollView,
 } from "@gorhom/bottom-sheet";
 import { Text, TouchableOpacity, View } from "./themed";
-import {
-  BackHandler,
-  Dimensions,
-  Image,
-  Keyboard,
-  StyleSheet,
-} from "react-native";
+import { BackHandler, Dimensions, Keyboard, StyleSheet } from "react-native";
 import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
 import NotebookCard from "./notebook_card";
@@ -22,25 +15,18 @@ import { LinearGradient } from "expo-linear-gradient";
 import ColorPickerComponent from "./color_picker";
 import { pickImage } from "@/lib/pick_image";
 import { useQuery } from "@tanstack/react-query";
-import {
-  deleteNotebook,
-  getNotebookById,
-  removeNoteFromNotebook,
-} from "@/queries/notebooks";
+import { getNotebookById, removeNoteFromNotebook } from "@/queries/notebooks";
 import NoteCard from "./note_card";
 import Loader from "./loading";
 import { FlashList } from "@shopify/flash-list";
 import BottomDrawerConfirm from "./bottom_drawer_confirm";
 import { useNotesEditMode } from "@/hooks/useNotesEditMode";
 import { toast } from "@backpackapp-io/react-native-toast";
+import { Image } from "expo-image";
 
 const colorsOptions = ["#FF5781", "#E76F51", "#00838F"];
 
-const imageOptions = [
-  require("@/assets/notebooks/notebook_1.png"),
-  require("@/assets/notebooks/notebook_2.png"),
-  require("@/assets/notebooks/notebook_3.png"),
-];
+const imageOptions = ["notebook_1", "notebook_2", "notebook_3"];
 
 const BottomDrawerNotebook = React.forwardRef<
   BottomSheetModal,
@@ -307,10 +293,7 @@ const BottomDrawerNotebook = React.forwardRef<
                     style={styles.selectContainer}
                     onPress={handlePickImage}
                   >
-                    <Image
-                      source={require("@/assets/notebooks/notebook_select.png")}
-                      style={styles.image}
-                    />
+                    <Image source={"notebook_select"} style={styles.image} />
                     <Icon
                       name="Image"
                       size={12}

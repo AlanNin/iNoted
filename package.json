@@ -7,8 +7,9 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "eas-build-android": "npx drizzle-kit generate && npx expo prebuild -p android --clean && eas build --profile development --platform android",
-    "local-build-android": "npx drizzle-kit generate && npx expo prebuild -p android --clean && npx expo run:android"
+    "eas-dev-build-android": "npx drizzle-kit generate && npx expo prebuild -p android --clean && eas build --profile development --platform android",
+    "local-dev-build-android": "npx drizzle-kit generate && npx expo prebuild -p android --clean && npx expo run:android",
+    "local-prod-build-android": "npx drizzle-kit generate && npx expo prebuild -p android --clean && npx expo run:android --variant release"
   },
   "dependencies": {
     "@backpackapp-io/react-native-toast": "^0.13.0",

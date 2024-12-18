@@ -28,7 +28,6 @@
       "expo-router",
       "expo-sqlite",
       "react-native-edge-to-edge",
-      "expo-build-properties",
       [
         "expo-splash-screen",
         {
@@ -53,11 +52,27 @@
         "expo-asset",
         {
           "assets": [
+            "./assets/icons/app.png",
+            "./assets/splash.png",
+            "./assets/splash_dark.png",
+            "./assets/showcase/light_showcase_1.png",
+            "./assets/showcase/light_showcase_2.png",
+            "./assets/showcase/dark_showcase_1.png",
+            "./assets/showcase/dark_showcase_2.png",
             "./assets/notebooks/notebook_1.png",
             "./assets/notebooks/notebook_2.png",
             "./assets/notebooks/notebook_3.png",
             "./assets/notebooks/notebook_select.png"
           ]
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableProguardInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true
+          }
         }
       ]
     ],

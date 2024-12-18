@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     flexDirection: "column",
-    gap: 8,
+    gap: 16,
     paddingHorizontal: 8,
   },
   itemsButton: {

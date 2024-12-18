@@ -7,25 +7,23 @@ import { Text, View } from "./themed";
 import Icon from "./icon";
 import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
-import { Image, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import { router } from "expo-router";
 import { Route } from "@react-navigation/native";
+import { Image } from "expo-image";
 
 export default function CustomDrawerContent(props: any) {
   const theme = useColorScheme();
-  const splashImage =
-    theme === "light"
-      ? require("@/assets/splash.png")
-      : require("@/assets/splash_dark.png");
+  const image = theme === "light" ? "splash" : "splash_dark";
 
   return (
     <View style={{ flex: 1 }}>
       <DrawerContentScrollView {...props}>
         <View style={styles.drawerHeader}>
           <Image
-            source={splashImage}
+            source={image}
             style={styles.drawerHeaderImage}
-            resizeMode="contain"
+            contentFit="contain"
           />
         </View>
         <DrawerItemList {...props} />

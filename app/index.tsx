@@ -1,32 +1,36 @@
 import * as React from "react";
-import { StyleSheet, Image } from "react-native";
+import { StyleSheet } from "react-native";
 import useColorScheme from "@/hooks/useColorScheme";
 import { MotiView, Text, TouchableOpacity, View } from "@/components/themed";
 import { ArrowRight, CircleCheckBig } from "lucide-react-native";
 import colors from "@/constants/colors";
 import { router } from "expo-router";
 import useAppConfig from "@/hooks/useAppConfig";
-
-const steps = [
-  {
-    title: "Welcome to iNoted",
-    subtitle: "Capture your thoughts, anytime, anywhere.",
-    image: require("@/assets/icons/AppWOBG.png"),
-  },
-  {
-    title: "Organize your ideas",
-    subtitle: "Create notebooks, tags, and categories.",
-    image: require("@/assets/images/placeholder1.png"),
-  },
-  {
-    title: "Safe and secure",
-    subtitle: "All your information only accessible through your device.",
-    image: require("@/assets/images/placeholder2.png"),
-  },
-];
+import { Image } from "expo-image";
 
 export default function StartScreen() {
   const theme = useColorScheme();
+
+  const steps = [
+    {
+      title: "Welcome to iNoted",
+      subtitle: "Capture your thoughts, anytime, anywhere.",
+      image: "app",
+    },
+    {
+      title: "Bring Your Ideas to Life",
+      subtitle:
+        "Capture every thought and neatly organize them in notebooks that fit your style.",
+      image: theme === "light" ? "light_showcase_1" : "dark_showcase_1",
+    },
+    {
+      title: "Your Data, Your Control",
+      subtitle:
+        "Keep your information secure and accessible only on your device.",
+      image: theme === "light" ? "light_showcase_2" : "dark_showcase_2",
+    },
+  ];
+
   const [currentStep, setCurrentStep] = React.useState(0);
   const [_isFirstAppLaunch, saveIsFirstAppLaunch] = useAppConfig<boolean>(
     "isFirstAppLaunch",
@@ -81,15 +85,17 @@ export default function StartScreen() {
               tintColor: colors[theme].tint,
             },
             currentStep === 1 && {
-              height: 400,
+              height: 450,
+              marginBottom: -8,
             },
             currentStep === 2 && {
-              height: 225,
-              marginBottom: 12,
+              height: 350,
+              marginBottom: 52,
+              objectFit: "cover",
             },
           ]}
           accessibilityLabel={`Step ${currentStep + 1} Image`}
-          resizeMode="contain"
+          contentFit="contain"
         />
         <Text style={styles.title}>{currentStepData.title}</Text>
         <Text style={styles.subtitle}>{currentStepData.subtitle}</Text>

@@ -184,7 +184,7 @@ const NotebookCard = React.memo(
         {...animationProps}
         style={[
           styles.container,
-          isAdding && { width: 120 },
+          isAdding && { minWidth: width > 400 ? 120 : 104 },
           { height: width > 400 ? 180 : 156 },
         ]}
       >

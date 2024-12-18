@@ -108,7 +108,7 @@ const NoteCard = React.memo(
               </Text>
             </View>
             <View style={gridStyles.detailsContainer}>
-              <Text style={gridStyles.title} numberOfLines={2}>
+              <Text style={gridStyles.title} numberOfLines={1}>
                 {note.title}
               </Text>
 
@@ -254,7 +254,7 @@ const neutralStyles = StyleSheet.create({
   nonSelectIndicator: {
     position: "absolute",
     inset: 0,
-    borderRadius: 0,
+    borderRadius: 8,
     maxHeight: 168,
   },
 });

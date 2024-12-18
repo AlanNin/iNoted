@@ -1,4 +1,4 @@
-import { Image, Linking, StyleSheet } from "react-native";
+import { Linking, StyleSheet } from "react-native";
 import React from "react";
 import {
   SafeAreaView,
@@ -11,6 +11,7 @@ import Icon from "@/components/icon";
 import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
 import * as Application from "expo-application";
+import { Image } from "expo-image";
 
 const aboutItems = [
   {
@@ -30,10 +31,7 @@ const aboutItems = [
 const AboutScreen = () => {
   const theme = useColorScheme();
 
-  const image =
-    theme === "light"
-      ? require("@/assets/splash.png")
-      : require("@/assets/splash_dark.png");
+  const image = theme === "light" ? "splash" : "splash_dark";
 
   return (
     <SafeAreaView style={styles.container}>
