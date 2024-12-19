@@ -53,12 +53,10 @@
         {
           "assets": [
             "./assets/icons/app.png",
-            "./assets/splash.png",
-            "./assets/splash_dark.png",
-            "./assets/showcase/light_showcase_1.png",
-            "./assets/showcase/light_showcase_2.png",
-            "./assets/showcase/dark_showcase_1.png",
-            "./assets/showcase/dark_showcase_2.png",
+            "./assets/icons/app_long.png",
+            "./assets/icons/dark_app_long.png",
+            "./assets/showcase/showcase_1.png",
+            "./assets/showcase/showcase_2.png",
             "./assets/notebooks/notebook_1.png",
             "./assets/notebooks/notebook_2.png",
             "./assets/notebooks/notebook_3.png",

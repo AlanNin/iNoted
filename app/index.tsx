@@ -21,13 +21,13 @@ export default function StartScreen() {
       title: "Bring Your Ideas to Life",
       subtitle:
         "Capture every thought and neatly organize them in notebooks that fit your style.",
-      image: theme === "light" ? "light_showcase_1" : "dark_showcase_1",
+      image: "showcase_1",
     },
     {
       title: "Your Data, Your Control",
       subtitle:
         "Keep your information secure and accessible only on your device.",
-      image: theme === "light" ? "light_showcase_2" : "dark_showcase_2",
+      image: "showcase_2",
     },
   ];
 
@@ -85,20 +85,26 @@ export default function StartScreen() {
               tintColor: colors[theme].tint,
             },
             currentStep === 1 && {
-              height: 450,
-              marginBottom: -8,
+              height: 350,
+              marginBottom: theme === "light" ? -12 : -32,
+              marginLeft: theme === "light" ? 0 : -20,
+              marginTop: 28,
             },
             currentStep === 2 && {
-              height: 350,
-              marginBottom: 52,
-              objectFit: "cover",
+              height: 275,
+              marginBottom: 36,
+              marginTop: 28,
             },
           ]}
           accessibilityLabel={`Step ${currentStep + 1} Image`}
           contentFit="contain"
         />
-        <Text style={styles.title}>{currentStepData.title}</Text>
-        <Text style={styles.subtitle}>{currentStepData.subtitle}</Text>
+        <Text style={[styles.title, currentStep > 0 && { fontSize: 24 }]}>
+          {currentStepData.title}
+        </Text>
+        <Text style={[styles.subtitle, currentStep > 0 && { fontSize: 12 }]}>
+          {currentStepData.subtitle}
+        </Text>
       </MotiView>
 
       <View style={styles.dotsContainer}>
@@ -157,8 +163,6 @@ const styles = StyleSheet.create({
   imageShowCase: {
     width: "100%",
     height: 350,
-    marginBottom: 24,
-    objectFit: "contain",
   },
   title: {
     fontFamily: "Geist-SemiBold",

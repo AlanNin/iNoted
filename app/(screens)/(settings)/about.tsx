@@ -31,7 +31,7 @@ const aboutItems = [
 const AboutScreen = () => {
   const theme = useColorScheme();
 
-  const image = theme === "light" ? "splash" : "splash_dark";
+  const image = theme === "light" ? "app_long" : "dark_app_long";
 
   return (
     <SafeAreaView style={styles.container}>
@@ -135,6 +135,7 @@ const styles = StyleSheet.create({
   itemButtonDetails: {
     flexDirection: "column",
     gap: 4,
+    flex: 1,
   },
   itemButtonDetailsDescription: {
     fontSize: 12,

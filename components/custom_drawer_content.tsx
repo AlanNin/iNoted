@@ -14,7 +14,7 @@ import { Image } from "expo-image";
 
 export default function CustomDrawerContent(props: any) {
   const theme = useColorScheme();
-  const image = theme === "light" ? "splash" : "splash_dark";
+  const image = theme === "light" ? "app_long" : "dark_app_long";
 
   return (
     <View style={{ flex: 1 }}>

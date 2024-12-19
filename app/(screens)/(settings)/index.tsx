@@ -124,6 +124,7 @@ const styles = StyleSheet.create({
   settingsButtonDetails: {
     flexDirection: "column",
     gap: 4,
+    flex: 1,
   },
   settingsButtonDetailsDescription: {
     fontSize: 12,
