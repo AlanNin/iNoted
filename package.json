@@ -9,6 +9,8 @@
     "web": "expo start --web",
     "clean-eas-dev-build-android": "npx drizzle-kit generate && npx expo prebuild -p android --clean && eas build --profile development --platform android",
     "eas-dev-build-android": "eas build --profile development --platform android",
+    "clean-eas-prod-build-android": "npx drizzle-kit generate && npx expo prebuild -p android --clean && eas build --platform android",
+    "eas-prod-build-android": "eas build --platform android",
     "clean-local-dev-build-android": "npx drizzle-kit generate && npx expo prebuild -p android --clean && npx expo run:android",
     "clean-local-prod-build-android": "npx drizzle-kit generate && npx expo prebuild -p android --clean && npx expo run:android --variant release",
     "local-dev-build-android": "npx expo run:android",

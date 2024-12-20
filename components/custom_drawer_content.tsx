@@ -60,7 +60,7 @@ export default function CustomDrawerContent(props: any) {
         ]}
       >
         <Text style={styles.versionText} disabled>
-          Version: 1.0.0 - © 2024 Alan Nin
+          Version: 1.0.0 - © 2024 NinCloud
         </Text>
       </View>
     </View>

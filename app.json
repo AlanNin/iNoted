@@ -16,7 +16,8 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anonymous.iNoted"
+      "package": "com.NinCloud.iNoted",
+      "permissions": ["android.permission.RECORD_AUDIO"]
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -79,9 +80,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": "66e41cc9-cdfe-486b-bdd9-bc9154cc52c9"
+        "projectId": "b74a4997-ad2d-41fd-99be-05777273a364"
       }
     },
-    "owner": "alandevnin"
+    "owner": "nincloud"
   }
 }
