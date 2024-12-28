@@ -11,7 +11,7 @@ import {
 import colors from "@/constants/colors";
 import { router, useNavigation } from "expo-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { deleteNotes, getAllNotesCustom } from "@/queries/notes";
+import { createNote, deleteNotes, getAllNotesCustom } from "@/queries/notes";
 import NoteCard from "@/components/note_card";
 import Loader from "@/components/loading";
 import Icon from "@/components/icon";
@@ -161,7 +161,6 @@ export default function NotesScreen() {
       await deleteNotes(selectedNotes);
       refetchNotes();
       refetchNotebooks();
-      toast.success("Notes deleted successfully!");
       toggleNotesEditMode();
     } catch (error) {
       toast.error("An error occurred. Please try again.");
@@ -174,7 +173,7 @@ export default function NotesScreen() {
         await addNotesToNotebook({ noteIds: selectedNotes, notebookId });
         refetchNotes();
         refetchNotebooks();
-        toast.success("Notes moved successfully!");
+        toast.success("Moved successfully");
         toggleNotesEditMode();
       } catch (error) {
         toast.error("An error occurred. Please try again.");
@@ -182,6 +181,15 @@ export default function NotesScreen() {
     },
     [selectedNotes]
   );
+
+  const handleCreateNote = async () => {
+    const newNote = await createNote({
+      title: "",
+      content: "",
+    });
+
+    router.push(`./${newNote[0].id}`);
+  };
 
   const renderItem = ({ item, index }: { item: NoteProps; index: number }) => (
     <NoteCard
@@ -364,7 +372,7 @@ export default function NotesScreen() {
               <TouchableOpacity
                 style={styles.fab}
                 customBackgroundColor={colors[theme].primary}
-                onPress={() => router.push("./new")}
+                onPress={handleCreateNote}
               >
                 <Icon name="Plus" size={28} customColor={colors.dark.tint} />
               </TouchableOpacity>

@@ -4,10 +4,15 @@ import { eq, inArray } from "drizzle-orm";
 
 export async function createNote(note: NewNoteProps) {
   try {
-    await db_client.insert(notes).values({
-      title: note.title,
-      content: note.content,
-    });
+    const response = await db_client
+      .insert(notes)
+      .values({
+        title: note.title,
+        content: note.content,
+      })
+      .returning();
+
+    return response;
   } catch (error) {
     throw new Error("Could not create the note");
   }
@@ -47,6 +52,36 @@ export async function updateNote(id: number, note: NewNoteProps) {
     }
   } catch (error) {
     throw new Error("Could not update the note");
+  }
+}
+
+export async function upsertNote(id: number | null, note: NewNoteProps) {
+  try {
+    if (id === null) {
+      const response = await db_client
+        .insert(notes)
+        .values({
+          title: note.title,
+          content: note.content,
+        })
+        .returning();
+
+      return response;
+    } else {
+      const response = await db_client
+        .update(notes)
+        .set({ title: note.title, content: note.content })
+        .where(eq(notes.id, id))
+        .returning();
+
+      if (!response) {
+        throw new Error("Note not found");
+      }
+
+      return response;
+    }
+  } catch (error) {
+    throw new Error("Could not upsert the note");
   }
 }
 

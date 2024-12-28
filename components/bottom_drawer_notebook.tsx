@@ -39,6 +39,7 @@ const BottomDrawerNotebook = React.forwardRef<
   const [isEditing, setIsEditing] = React.useState(false);
   const bottomDeleteDrawerRef = React.useRef<BottomSheetModal>(null);
   const bottomRemoveNotesDrawerRef = React.useRef<BottomSheetModal>(null);
+  const nameMaxLength = 14;
   const {
     isNotesEditMode,
     setNotesEditMode,
@@ -89,7 +90,6 @@ const BottomDrawerNotebook = React.forwardRef<
   const handleRemoveNoteFromNotebook = async () => {
     await removeNoteFromNotebook({ noteIds: selectedNotes });
     refetchNotebook();
-    toast.success("Note removed successfully!");
     closeDrawer();
   };
 
@@ -248,6 +248,7 @@ const BottomDrawerNotebook = React.forwardRef<
                 isLoading={isLoadingNotebook}
                 onPress={() => {}}
                 disabled={true}
+                numberOfLinesName={2}
               />
             </View>
 
@@ -313,8 +314,13 @@ const BottomDrawerNotebook = React.forwardRef<
                         color: colors[theme].text,
                       },
                     ]}
+                    maxLength={nameMaxLength}
+                    placeholderTextColor={colors[theme].text_muted}
                     placeholder="Type a name for your notebook..."
                   />
+                  <Text style={styles.inputCounter}>
+                    {name.length}/{nameMaxLength}
+                  </Text>
                 </View>
 
                 <View style={styles.buttonsContainer}>
@@ -416,14 +422,14 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   container: {
-    padding: 16,
+    paddingVertical: 16,
     gap: 20,
     flex: 0,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
+    paddingHorizontal: 32,
   },
   headerButton: {
     padding: 4,
@@ -479,11 +485,12 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     display: "flex",
-    flexDirection: "row",
-    flexWrap: "wrap",
     gap: 8,
     paddingHorizontal: 20,
-    justifyContent: "center",
+    alignSelf: "center",
+    position: "relative",
+    width: 280,
+    marginBottom: 8,
   },
   input: {
     width: "100%",
@@ -492,6 +499,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: 8,
     paddingHorizontal: 16,
+  },
+  inputCounter: {
+    position: "absolute",
+    right: 20,
+    bottom: -20,
+    fontSize: 12,
   },
   buttonsContainer: {
     flexDirection: "row",

@@ -4,6 +4,10 @@ import {
   BackHandler,
   Share,
   Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  AppStateStatus,
+  AppState,
 } from "react-native";
 import useColorScheme from "@/hooks/useColorScheme";
 import React from "react";
@@ -18,7 +22,12 @@ import {
 import colors from "@/constants/colors";
 import { router, useLocalSearchParams } from "expo-router";
 import { formatLongDate } from "@/lib/format_date";
-import { deleteNote, getNoteById, updateNote } from "@/queries/notes";
+import {
+  deleteNote,
+  getNoteById,
+  updateNote,
+  upsertNote,
+} from "@/queries/notes";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Icon from "@/components/icon";
 import Loader from "@/components/loading";
@@ -28,13 +37,13 @@ import { toast } from "@backpackapp-io/react-native-toast";
 import BottomDrawerConfirm from "@/components/bottom_drawer_confirm";
 import BottomDrawerMoveNote from "@/components/bottom_drawer_move_note";
 import { addNotesToNotebook } from "@/queries/notebooks";
+import { debounce } from "lodash";
 
 export default function NoteScreen() {
   const note = useLocalSearchParams();
   const theme = useColorScheme();
   const undoStack = React.useRef<NewNoteProps[]>([]);
   const redoStack = React.useRef<NewNoteProps[]>([]);
-  const debounceTimer = React.useRef<NodeJS.Timeout | null>(null);
   const queryClient = useQueryClient();
   const [inputs, setInputs] = React.useState<NewNoteProps>({
     title: "",
@@ -43,12 +52,15 @@ export default function NoteScreen() {
   const [isMoreModalOpen, setIsMoreModalOpen] = React.useState(false);
   const bottomDrawerRef = React.useRef<BottomSheetModal>(null);
   const bottomMoveNoteDrawerRef = React.useRef<BottomSheetModal>(null);
+  const [isKeyboardVisible, setIsKeyboardVisible] = React.useState(false);
 
   const { data: noteData, isLoading: isLoadingNoteData } = useQuery({
     queryKey: ["note", Number(note.noteId)],
     queryFn: () => getNoteById(Number(note.noteId)),
-    enabled: note.noteId !== undefined,
+    enabled: !!note.noteId,
   });
+
+  const noteDate = noteData?.updated_at;
 
   React.useEffect(() => {
     setInputs({
@@ -57,16 +69,36 @@ export default function NoteScreen() {
     });
   }, [noteData]);
 
-  function handleInputChange(name: keyof NewNoteProps, value: string) {
-    if (undoStack.current.length > 0) {
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-      }
+  React.useEffect(() => {
+    const keyboardShowListener = Keyboard.addListener("keyboardDidShow", () => {
+      setIsKeyboardVisible(true);
+    });
 
-      debounceTimer.current = setTimeout(() => {
-        undoStack.current.push({ ...inputs });
-        redoStack.current = [];
-      }, 500);
+    const keyboardHideListener = Keyboard.addListener("keyboardDidHide", () => {
+      setIsKeyboardVisible(false);
+    });
+
+    return () => {
+      keyboardShowListener.remove();
+      keyboardHideListener.remove();
+    };
+  }, []);
+
+  const handleHideKeyboard = () => {
+    if (isMoreModalOpen) {
+      setIsMoreModalOpen(false);
+    }
+    Keyboard.dismiss();
+  };
+
+  function handleInputChange(name: keyof NewNoteProps, value: string) {
+    const saveToUndoStack = debounce(() => {
+      undoStack.current.push({ ...inputs });
+      redoStack.current = [];
+    }, 500);
+
+    if (undoStack.current.length > 0) {
+      saveToUndoStack();
     } else {
       undoStack.current.push({ ...inputs });
       redoStack.current = [];
@@ -76,6 +108,9 @@ export default function NoteScreen() {
   }
 
   function handleUndo() {
+    if (isMoreModalOpen) {
+      setIsMoreModalOpen(false);
+    }
     if (undoStack.current.length > 0) {
       const previousState = undoStack.current.pop()!;
       redoStack.current.push({ ...inputs });
@@ -84,6 +119,10 @@ export default function NoteScreen() {
   }
 
   function handleRedo() {
+    if (isMoreModalOpen) {
+      setIsMoreModalOpen(false);
+    }
+
     if (redoStack.current.length > 0) {
       const nextState = redoStack.current.pop()!;
       undoStack.current.push({ ...inputs });
@@ -99,27 +138,8 @@ export default function NoteScreen() {
     await queryClient.refetchQueries({ queryKey: ["notebook"] });
   }
 
-  const isUpdateDisabled =
-    inputs.content.length === 0 ||
-    (inputs.title === noteData?.title && inputs.content === noteData?.content);
-
-  async function handleUpdateNote() {
-    if (isUpdateDisabled) {
-      return;
-    }
-
-    try {
-      await updateNote(Number(note.noteId), {
-        ...inputs,
-        title: inputs.title.length === 0 ? "Untitled note" : inputs.title,
-      });
-      refetchNotes();
-      toast.success("Note updated successfully!");
-      router.back();
-    } catch (error) {
-      toast.error("An error occurred. Please try again.");
-    }
-  }
+  const noChanges =
+    inputs.title === noteData?.title && inputs.content === noteData?.content;
 
   const handlePresentModalPress = React.useCallback(() => {
     Keyboard.dismiss();
@@ -132,7 +152,30 @@ export default function NoteScreen() {
       await deleteNote(Number(note.noteId));
       refetchNotes();
       refetchNotebooks();
-      toast.success("Note deleted successfully!");
+      router.back();
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+    }
+  }
+
+  async function handleUpdateNote() {
+    if (inputs.content.length === 0) {
+      handleDeleteNote();
+      return;
+    }
+
+    if (noChanges) {
+      router.back();
+      return;
+    }
+
+    try {
+      await updateNote(Number(note.noteId), {
+        ...inputs,
+        title: inputs.title.length === 0 ? "Untitled note" : inputs.title,
+      });
+
+      refetchNotes();
       router.back();
     } catch (error) {
       toast.error("An error occurred. Please try again.");
@@ -143,7 +186,7 @@ export default function NoteScreen() {
     try {
       setIsMoreModalOpen(false);
 
-      const message = `${inputs.title}\n\n${inputs.content}`;
+      const message = `${inputs.title || "Untitled Note"}\n\n${inputs.content}`;
 
       await Share.share({
         title: inputs.title || "Untitled Note",
@@ -155,6 +198,8 @@ export default function NoteScreen() {
   }
 
   const handleToggleBottomMoveNoteDrawer = () => {
+    Keyboard.dismiss();
+    setIsMoreModalOpen(false);
     bottomMoveNoteDrawerRef.current?.present();
   };
 
@@ -164,7 +209,7 @@ export default function NoteScreen() {
       refetchNotebooks();
       refetchNotes();
       setIsMoreModalOpen(false);
-      toast.success("Notes moved successfully!");
+      toast.success("Moved successfully");
     } catch (error) {
       console.error("Error moving notes:", error);
       toast.error(
@@ -173,22 +218,65 @@ export default function NoteScreen() {
     }
   };
 
+  // save note on back press button
+  async function handleBack() {
+    if (isMoreModalOpen) {
+      setIsMoreModalOpen(false);
+    }
+    await handleUpdateNote();
+  }
+
+  // save note on back press
   React.useEffect(() => {
-    const backAction = () => {
+    const backAction = async () => {
       if (isMoreModalOpen) {
         setIsMoreModalOpen(false);
         return true;
       }
-      return false;
+
+      if (inputs.content.length === 0) {
+        router.back();
+        return true;
+      }
+
+      try {
+        await handleUpdateNote();
+        return true;
+      } catch (error) {
+        toast.error("Failed to save note. Please try again.");
+        return true;
+      }
     };
 
     const backHandler = BackHandler.addEventListener(
       "hardwareBackPress",
-      backAction
+      () => {
+        backAction();
+        return true;
+      }
     );
 
     return () => backHandler.remove();
-  }, [isMoreModalOpen]);
+  }, [inputs, isMoreModalOpen]);
+
+  React.useEffect(() => {
+    const handleAppStateChange = async (nextAppState: AppStateStatus) => {
+      if (nextAppState === "background" || nextAppState === "inactive") {
+        if (inputs.content.length > 0) {
+          await handleUpdateNote();
+        }
+      }
+    };
+
+    const subscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, [inputs]);
 
   if (isLoadingNoteData) {
     return (
@@ -204,13 +292,14 @@ export default function NoteScreen() {
         style={styles.container}
         onPress={() => setIsMoreModalOpen(false)}
       >
-        <View style={styles.container}>
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 40}
+        >
           <View style={styles.wrapper}>
             <View style={styles.header}>
-              <TouchableOpacity
-                style={styles.button}
-                onPress={() => router.back()}
-              >
+              <TouchableOpacity style={styles.button} onPress={handleBack}>
                 <Icon name="ArrowLeft" />
               </TouchableOpacity>
               <View style={styles.headerSecton}>
@@ -228,13 +317,14 @@ export default function NoteScreen() {
                 >
                   <Icon name="Redo2" muted={redoStack.current.length === 0} />
                 </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={handleUpdateNote}
-                  disabled={isUpdateDisabled}
-                >
-                  <Icon name="Save" muted={isUpdateDisabled} />
-                </TouchableOpacity>
+                {isKeyboardVisible && (
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={handleHideKeyboard}
+                  >
+                    <Icon name="Check" />
+                  </TouchableOpacity>
+                )}
                 <View style={styles.moreContainer}>
                   <TouchableOpacity
                     style={styles.button}
@@ -259,9 +349,17 @@ export default function NoteScreen() {
                         <TouchableOpacity
                           style={styles.moreModalButton}
                           onPress={handleShareNote}
+                          disabled={inputs.content.length === 0}
                         >
-                          <Icon name="Share2" strokeWidth={1.2} size={18} />
-                          <Text>Share</Text>
+                          <Icon
+                            name="Share2"
+                            strokeWidth={1.2}
+                            size={18}
+                            muted={inputs.content.length === 0}
+                          />
+                          <Text disabled={inputs.content.length === 0}>
+                            Share
+                          </Text>
                         </TouchableOpacity>
                         <View
                           style={styles.moreModalDivider}
@@ -270,20 +368,27 @@ export default function NoteScreen() {
                         <TouchableOpacity
                           style={styles.moreModalButton}
                           onPress={handleToggleBottomMoveNoteDrawer}
+                          disabled={inputs.content.length === 0}
                         >
                           <Icon
                             name="NotebookPen"
                             strokeWidth={1.2}
                             size={18}
+                            muted={inputs.content.length === 0}
                           />
-                          <Text>Move</Text>
+                          <Text disabled={inputs.content.length === 0}>
+                            Move
+                          </Text>
                         </TouchableOpacity>
                         <View
                           style={styles.moreModalDivider}
                           customBackgroundColor={colors[theme].foggiest}
                         />
                         <TouchableOpacity
-                          style={styles.moreModalButton}
+                          style={[
+                            styles.moreModalButton,
+                            inputs.content.length === 0 && { display: "none" },
+                          ]}
                           onPress={handlePresentModalPress}
                         >
                           <Icon
@@ -307,7 +412,7 @@ export default function NoteScreen() {
                 style={styles.lastEditedText}
                 customTextColor={colors[theme].grayscale}
               >
-                Last edited on {formatLongDate(noteData?.updated_at!)}
+                Last edited on {formatLongDate(noteDate!)}
               </Text>
               <TextInput
                 value={inputs.title}
@@ -324,10 +429,11 @@ export default function NoteScreen() {
                 placeholder="Capture your thoughts..."
                 parser={parseExpensiMark}
                 onPress={() => setIsMoreModalOpen(false)}
+                autoFocus={noteData?.content.length === 0}
               />
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
       <BottomDrawerConfirm
         ref={bottomDrawerRef}

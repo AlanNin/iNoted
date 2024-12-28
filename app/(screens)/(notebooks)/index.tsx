@@ -150,7 +150,6 @@ export default function NotebooksScreen() {
     try {
       await deleteNotebooks(selectedNotebooks);
       await refetchNotebooks();
-      toast.success("Notebooks deleted successfully!");
       toggleNotebooksEditMode();
     } catch (error) {
       toast.error("An error occurred. Please try again.");
@@ -164,7 +163,6 @@ export default function NotebooksScreen() {
         saveIsFirstNotebook(false);
       }
       await refetchNotebooks();
-      toast.success("Notebook created successfully!");
     } catch (error) {
       toast.error("An error occurred. Please try again.");
     }
@@ -176,7 +174,6 @@ export default function NotebooksScreen() {
     try {
       await updateNotebook(id!, notebookData);
       await refetchNotebooks();
-      toast.success("Notebook updated successfully!");
     } catch (error) {
       toast.error("An error occurred. Please try again.");
     }
@@ -186,7 +183,6 @@ export default function NotebooksScreen() {
     try {
       await deleteNotebook(notebookId);
       await refetchNotebooks();
-      toast.success("Notebook deleted successfully!");
     } catch (error) {
       toast.error("An error occurred. Please try again.");
     }
