@@ -134,6 +134,10 @@ export default function NoteScreen() {
     await queryClient.refetchQueries({ queryKey: ["notes"] });
   }
 
+  async function refetchCalendar() {
+    await queryClient.refetchQueries({ queryKey: ["notes_calendar"] });
+  }
+
   async function refetchNotebooks() {
     await queryClient.refetchQueries({ queryKey: ["notebook"] });
   }
@@ -151,6 +155,7 @@ export default function NoteScreen() {
     try {
       await deleteNote(Number(note.noteId));
       refetchNotes();
+      refetchCalendar();
       refetchNotebooks();
       router.back();
     } catch (error) {
@@ -176,6 +181,7 @@ export default function NoteScreen() {
       });
 
       refetchNotes();
+      refetchCalendar();
       router.back();
     } catch (error) {
       toast.error("An error occurred. Please try again.");
@@ -208,6 +214,7 @@ export default function NoteScreen() {
       await addNotesToNotebook({ noteIds: [Number(note.noteId)], notebookId });
       refetchNotebooks();
       refetchNotes();
+      refetchCalendar();
       setIsMoreModalOpen(false);
       toast.success("Moved successfully");
     } catch (error) {

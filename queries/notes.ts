@@ -140,3 +140,38 @@ export async function getAllNotesCustom(notebookId?: number) {
     throw new Error("Could not fetch notes");
   }
 }
+
+export async function getAllNotesCalendar() {
+  try {
+    const allNotes: NoteProps[] = await db_client.select().from(notes);
+
+    const groupedNotes = allNotes.reduce(
+      (acc: Record<string, NoteProps[]>, note: NoteProps) => {
+        const date = note.created_at.split(" ")[0];
+        if (!acc[date]) {
+          acc[date] = [];
+        }
+        acc[date].push(note);
+        return acc;
+      },
+      {} as Record<string, NoteProps[]>
+    );
+
+    const result = Object.keys(groupedNotes)
+      .sort((a, b) => (b > a ? 1 : -1))
+      .map((date) => ({
+        date,
+        notes: groupedNotes[date].map((note) => ({
+          id: note.id,
+          title: note.title,
+          content: note.content,
+          created_at: note.created_at,
+          updated_at: note.updated_at,
+        })),
+      }));
+
+    return result;
+  } catch (error) {
+    throw new Error("Could not fetch notes");
+  }
+}

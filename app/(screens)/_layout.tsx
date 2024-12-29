@@ -55,6 +55,23 @@ export default function ScreensLayout() {
       />
 
       <Drawer.Screen
+        name="(calendar)"
+        options={{
+          headerShown: false,
+          drawerLabel: "Calendar",
+          drawerIcon: ({ size, focused }) => (
+            <Icon
+              name="Calendar"
+              size={size}
+              customColor={
+                focused ? colors.dark.tint : colors[theme].text_muted
+              }
+            />
+          ),
+        }}
+      />
+
+      <Drawer.Screen
         name="(settings)"
         options={{
           headerShown: false,

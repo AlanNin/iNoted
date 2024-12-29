@@ -303,7 +303,7 @@ export default function NotebooksScreen() {
                   renderItem={renderItem}
                   numColumns={3}
                   removeClippedSubviews={true}
-                  estimatedItemSize={216}
+                  estimatedItemSize={212}
                 />
               ) : (
                 <View style={styles.noNotebooksContainer}>

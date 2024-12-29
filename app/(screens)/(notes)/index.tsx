@@ -1,4 +1,4 @@
-import { StyleSheet, BackHandler, ScrollView } from "react-native";
+import { StyleSheet, BackHandler } from "react-native";
 import React from "react";
 import {
   MotiView,
@@ -75,8 +75,13 @@ export default function NotesScreen() {
     queryFn: () => getAllNotesCustom(selectedNotebook || undefined),
   });
 
+  async function refetchCalendar() {
+    await queryClient.refetchQueries({ queryKey: ["notes_calendar"] });
+  }
+
   React.useEffect(() => {
     refetchNotes();
+    refetchCalendar();
   }, [selectedNotebook]);
 
   const sortedNotes = React.useMemo(() => {
@@ -160,6 +165,7 @@ export default function NotesScreen() {
     try {
       await deleteNotes(selectedNotes);
       refetchNotes();
+      refetchCalendar();
       refetchNotebooks();
       toggleNotesEditMode();
     } catch (error) {
@@ -172,6 +178,7 @@ export default function NotesScreen() {
       try {
         await addNotesToNotebook({ noteIds: selectedNotes, notebookId });
         refetchNotes();
+        refetchCalendar();
         refetchNotebooks();
         toast.success("Moved successfully");
         toggleNotesEditMode();
@@ -325,7 +332,7 @@ export default function NotesScreen() {
                   renderItem={renderItem}
                   numColumns={notesViewMode === "grid" ? 3 : 1}
                   removeClippedSubviews={true}
-                  estimatedItemSize={notesViewMode === "grid" ? 216 : 140}
+                  estimatedItemSize={notesViewMode === "grid" ? 212 : 140}
                 />
               ) : (
                 <View style={styles.noNotesContainer}>

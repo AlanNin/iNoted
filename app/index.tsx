@@ -32,9 +32,9 @@ export default function StartScreen() {
   ];
 
   const [currentStep, setCurrentStep] = React.useState(0);
-  const [_isFirstAppLaunch, saveIsFirstAppLaunch] = useAppConfig<boolean>(
+  const [isFirstAppLaunch, saveIsFirstAppLaunch] = useAppConfig<boolean>(
     "isFirstAppLaunch",
-    true
+    false
   );
 
   const handleNextStep = () => {
@@ -64,6 +64,10 @@ export default function StartScreen() {
   }
 
   const currentStepData = steps[currentStep] || steps[0];
+
+  if (!isFirstAppLaunch) {
+    return null;
+  }
 
   return (
     <View style={styles.container}>
