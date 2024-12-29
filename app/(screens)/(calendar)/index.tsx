@@ -105,8 +105,14 @@ export default function CalendarScreen() {
             <TouchableOpacity
               onPress={() => setIsCalendarModalOpen(true)}
               style={styles.headerButton}
+              disabled={notesData?.length === 0}
             >
-              <Icon name="Filter" size={16} strokeWidth={2} />
+              <Icon
+                name="Filter"
+                size={16}
+                strokeWidth={2}
+                muted={notesData?.length === 0}
+              />
             </TouchableOpacity>
           </View>
           <View style={styles.content}>
