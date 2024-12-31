@@ -56,7 +56,10 @@ export default function NotesScreen() {
     key: typeof sortTypes[number];
     order: "asc" | "desc";
   }>("notesSortBy", { key: sortTypes[0], order: "desc" });
-  const [isFirstNote] = useAppConfig<boolean>("isFirstNote", true);
+  const [isFirstNote, saveIsFirstNote] = useAppConfig<boolean>(
+    "isFirstNote",
+    true
+  );
 
   const openMenu = () => {
     setNotesEditMode(false);
@@ -199,6 +202,10 @@ export default function NotesScreen() {
       title: "",
       content: "",
     });
+
+    if (isFirstNote) {
+      saveIsFirstNote(false);
+    }
 
     router.push(`./${newNote[0].id}`);
   };
