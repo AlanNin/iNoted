@@ -228,7 +228,12 @@ export default function NotesScreen() {
             customBackgroundColor={colors[theme].foggier}
           >
             <TouchableOpacity onPress={openMenu}>
-              <Icon name="Menu" strokeWidth={1.8} />
+              <Icon
+                name="Menu"
+                strokeWidth={1.8}
+                size={20}
+                style={{ marginTop: 1 }}
+              />
             </TouchableOpacity>
 
             <TextInput
@@ -246,6 +251,8 @@ export default function NotesScreen() {
                 <Icon
                   name="LayoutGrid"
                   muted={notesData?.notes?.length === 0}
+                  size={20}
+                  style={{ marginTop: 1 }}
                 />
               </TouchableOpacity>
             ) : (
@@ -253,7 +260,12 @@ export default function NotesScreen() {
                 onPress={() => saveNotesViewMode("grid")}
                 disabled={notesData?.notes?.length === 0}
               >
-                <Icon name="Rows3" muted={notesData?.notes?.length === 0} />
+                <Icon
+                  name="Rows3"
+                  muted={notesData?.notes?.length === 0}
+                  size={20}
+                  style={{ marginTop: 1 }}
+                />
               </TouchableOpacity>
             )}
           </View>

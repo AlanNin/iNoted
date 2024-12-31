@@ -217,7 +217,12 @@ export default function NotebooksScreen() {
             customBackgroundColor={colors[theme].foggier}
           >
             <TouchableOpacity onPress={openMenu}>
-              <Icon name="Menu" strokeWidth={1.8} />
+              <Icon
+                name="Menu"
+                strokeWidth={1.8}
+                size={20}
+                style={{ marginTop: 1 }}
+              />
             </TouchableOpacity>
 
             <TextInput

@@ -107,22 +107,27 @@ export default function CalendarScreen() {
               { borderBottomColor: colors[theme].foggier },
             ]}
           >
-            <TouchableOpacity onPress={openMenu} style={styles.headerButton}>
-              <Icon name="Menu" size={16} strokeWidth={2} />
+            <TouchableOpacity onPress={openMenu}>
+              <Icon
+                name="Menu"
+                size={20}
+                strokeWidth={1.8}
+                style={{ marginTop: 2 }}
+              />
             </TouchableOpacity>
             <View style={styles.titleContainer}>
               <Text style={styles.title}>Calendar</Text>
             </View>
             <TouchableOpacity
               onPress={() => setIsCalendarModalOpen(true)}
-              style={styles.headerButton}
               disabled={notesData?.length === 0}
             >
               <Icon
                 name="Filter"
-                size={16}
-                strokeWidth={2}
+                size={20}
+                strokeWidth={1.8}
                 muted={notesData?.length === 0}
+                style={{ marginTop: 2 }}
               />
             </TouchableOpacity>
           </View>
@@ -241,9 +246,6 @@ const styles = StyleSheet.create({
     padding: 16,
     borderBottomWidth: 1,
     gap: 16,
-  },
-  headerButton: {
-    marginTop: 2,
   },
   titleContainer: {
     flex: 1,
