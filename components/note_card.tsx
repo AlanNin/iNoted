@@ -11,10 +11,12 @@ const SelectedIndicator = ({
   noteId,
   viewMode,
   onPress,
+  selectDisabled = false,
 }: {
   noteId: number;
   viewMode: "grid" | "list";
   onPress?: () => void;
+  selectDisabled?: boolean;
 }) => {
   const {
     isNotesEditMode,
@@ -30,7 +32,7 @@ const SelectedIndicator = ({
   const handlePress = React.useCallback(() => {
     onPress?.();
 
-    if (isNotesEditMode) {
+    if (isNotesEditMode && !selectDisabled) {
       selectNote(noteId);
     } else {
       router.push(`./${noteId}`);
@@ -38,6 +40,10 @@ const SelectedIndicator = ({
   }, [isNotesEditMode, selectNote, noteId]);
 
   const handleLongPress = React.useCallback(() => {
+    if (selectDisabled) {
+      return;
+    }
+
     const isSelected = selectedNotes.includes(noteId);
 
     if (!isSelected) {
@@ -74,7 +80,14 @@ const SelectedIndicator = ({
 };
 
 const NoteCard = React.memo(
-  ({ note, index, viewMode, onPress, animated = true }: NoteCardProps) => {
+  ({
+    note,
+    index,
+    viewMode,
+    onPress,
+    animated = true,
+    selectDisabled = false,
+  }: NoteCardProps) => {
     if (!note.id) {
       return <View style={gridStyles.innerContainer} />;
     }
@@ -103,6 +116,7 @@ const NoteCard = React.memo(
               noteId={note.id}
               viewMode="grid"
               onPress={onPress!}
+              selectDisabled={selectDisabled}
             />
             <View style={gridStyles.contentContainer}>
               <Text style={gridStyles.content} numberOfLines={9}>
@@ -136,7 +150,11 @@ const NoteCard = React.memo(
       return (
         <TouchableOpacity style={listStyles.outerContainer}>
           <MotiView {...animationProps} style={listStyles.innerContainer}>
-            <SelectedIndicator noteId={note.id} viewMode="list" />
+            <SelectedIndicator
+              noteId={note.id}
+              viewMode="list"
+              selectDisabled={selectDisabled}
+            />
 
             <Text style={listStyles.title} numberOfLines={1}>
               {note.title}

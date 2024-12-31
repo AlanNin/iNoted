@@ -15,12 +15,18 @@ import { FlashList } from "@shopify/flash-list";
 import { useNotebooksSelectedToMoveMode } from "@/hooks/useNotebookSelectedToMove";
 import Icon from "./icon";
 import Loader from "./loading";
+import { useNotebooksNotes } from "@/hooks/useNotebookNotes";
 
 const BottomDrawerSelectNotebook = React.forwardRef<
   BottomSheetModal,
   Omit<BottomDrawerSelectNotebookProps, "ref">
->(({ title, description, setSelectedNotebook, isNotebookSelected }, ref) => {
+>(({ title, description }, ref) => {
   const theme = useColorScheme();
+  const {
+    selectedNotebookToShow,
+    setSelectedNotebookToShow,
+    clearSelectedNotebookToShow,
+  } = useNotebooksNotes();
 
   const { data: notebooks, isLoading: isLoadingNotebooks } = useQuery({
     queryKey: ["notebooks"],
@@ -37,19 +43,24 @@ const BottomDrawerSelectNotebook = React.forwardRef<
     clearSelectedNotebook();
   };
 
-  const isButtonDisabled = !isNotebookSelected && selectedNotebook === null;
+  const isButtonDisabled = !selectedNotebookToShow && selectedNotebook === null;
 
   const handleSelectNotebook = () => {
     if (isButtonDisabled) {
       return;
     }
 
-    if (isNotebookSelected && !selectedNotebook) {
-      setSelectedNotebook(null);
+    if (selectedNotebookToShow && !selectedNotebook) {
+      clearSelectedNotebookToShow();
       closeDrawer();
       return;
     }
-    setSelectedNotebook(selectedNotebook!);
+
+    const dataNotebook = notebooks?.find(
+      (notebook) => notebook.id === selectedNotebook!
+    );
+
+    setSelectedNotebookToShow(dataNotebook!);
     closeDrawer();
   };
 
@@ -102,8 +113,6 @@ const BottomDrawerSelectNotebook = React.forwardRef<
             setSheetStatus("close");
           }
         }}
-        // snapPoints={snapPoints}
-        // enableDynamicSizing={false}
         enableContentPanningGesture={false}
         ref={ref}
         backdropComponent={() => (
@@ -144,7 +153,7 @@ const BottomDrawerSelectNotebook = React.forwardRef<
                     : colors[theme].primary_foggy
                 }
               >
-                {isNotebookSelected && !selectedNotebook
+                {selectedNotebookToShow && !selectedNotebook
                   ? "Show All"
                   : "Confirm"}
               </Text>

@@ -4,4 +4,5 @@ type NoteCardProps = {
   viewMode: "grid" | "list";
   onPress?: () => void;
   animated?: boolean;
+  selectDisabled?: boolean;
 };

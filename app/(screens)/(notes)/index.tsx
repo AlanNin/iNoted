@@ -27,7 +27,7 @@ import useAppConfig from "@/hooks/useAppConfig";
 import BottomDrawerMoveNote from "@/components/bottom_drawer_move_note";
 import { addNotesToNotebook } from "@/queries/notebooks";
 import BottomDrawerSelectNotebook from "@/components/bottom_drawer_select_notebook";
-import { useNotebooksSelectedToMoveMode } from "@/hooks/useNotebookSelectedToMove";
+import { useNotebooksNotes } from "@/hooks/useNotebookNotes";
 
 export default function NotesScreen() {
   const queryClient = useQueryClient();
@@ -45,9 +45,7 @@ export default function NotesScreen() {
   const bottomDeleteMultipleDrawerRef = React.useRef<BottomSheetModal>(null);
   const bottomMoveNoteDrawerRef = React.useRef<BottomSheetModal>(null);
   const bottomSelectNotebookDrawerRef = React.useRef<BottomSheetModal>(null);
-  const [selectedNotebook, setSelectedNotebook] = React.useState<number | null>(
-    null
-  );
+
   const [notesViewMode, saveNotesViewMode] = useAppConfig<"grid" | "list">(
     "notesViewMode",
     "grid"
@@ -61,13 +59,11 @@ export default function NotesScreen() {
     true
   );
 
+  const { selectedNotebookToShow } = useNotebooksNotes();
+
   const openMenu = () => {
     setNotesEditMode(false);
     navigation.dispatch(DrawerActions.openDrawer());
-  };
-
-  const handleToggleBottomSelectNotebookDrawer = () => {
-    bottomSelectNotebookDrawerRef.current?.present();
   };
 
   const {
@@ -76,7 +72,7 @@ export default function NotesScreen() {
     refetch: refetchNotes,
   } = useQuery({
     queryKey: ["notes"],
-    queryFn: () => getAllNotesCustom(selectedNotebook || undefined),
+    queryFn: () => getAllNotesCustom(selectedNotebookToShow?.id),
   });
 
   async function refetchCalendar() {
@@ -85,13 +81,12 @@ export default function NotesScreen() {
 
   React.useEffect(() => {
     refetchNotes();
-    refetchCalendar();
-  }, [selectedNotebook]);
+  }, [selectedNotebookToShow]);
 
   const sortedNotes = React.useMemo(() => {
-    if (!notesData?.notes) return [];
+    if (!notesData) return [];
 
-    const sorted = [...notesData?.notes];
+    const sorted = [...notesData];
 
     sorted.sort((a, b) => {
       let compareResult = 0;
@@ -119,10 +114,6 @@ export default function NotesScreen() {
       note.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [sortedNotes, searchQuery]);
-
-  const handleToggleBottomSortDrawer = () => {
-    sortBottomDrawerRef.current?.present();
-  };
 
   const toggleSortOrder = (actionTitle: typeof sortTypes[number]) => {
     saveNotesSortBy((prevState) => {
@@ -153,12 +144,21 @@ export default function NotesScreen() {
     return () => backHandler.remove();
   }, [isNotesEditMode]);
 
+  const handleToggleBottomSortDrawer = () => {
+    sortBottomDrawerRef.current?.present();
+  };
+
   const handleToggleBottomDeleteMultipleDrawer = () => {
     bottomDeleteMultipleDrawerRef.current?.present();
   };
 
   const handleToggleBottomMoveNoteDrawer = () => {
     bottomMoveNoteDrawerRef.current?.present();
+  };
+
+  const handleToggleBottomSelectNotebookDrawer = () => {
+    setNotesEditMode(false);
+    bottomSelectNotebookDrawerRef.current?.present();
   };
 
   async function refetchNotebooks() {
@@ -246,11 +246,11 @@ export default function NotesScreen() {
             {notesViewMode === "grid" ? (
               <TouchableOpacity
                 onPress={() => saveNotesViewMode("list")}
-                disabled={notesData?.notes?.length === 0}
+                disabled={notesData?.length === 0}
               >
                 <Icon
                   name="LayoutGrid"
-                  muted={notesData?.notes?.length === 0}
+                  muted={notesData?.length === 0}
                   size={20}
                   style={{ marginTop: 1 }}
                 />
@@ -258,11 +258,11 @@ export default function NotesScreen() {
             ) : (
               <TouchableOpacity
                 onPress={() => saveNotesViewMode("grid")}
-                disabled={notesData?.notes?.length === 0}
+                disabled={notesData?.length === 0}
               >
                 <Icon
                   name="Rows3"
-                  muted={notesData?.notes?.length === 0}
+                  muted={notesData?.length === 0}
                   size={20}
                   style={{ marginTop: 1 }}
                 />
@@ -279,10 +279,10 @@ export default function NotesScreen() {
                 style={styles.notesCount}
                 customTextColor={colors[theme].grayscale}
               >
-                {notesData?.notebookName
-                  ? notesData?.notebookName
+                {selectedNotebookToShow
+                  ? selectedNotebookToShow?.name
                   : "All Notes"}{" "}
-                ({isLoadingNotesData ? "..." : notesData?.notes?.length})
+                ({isLoadingNotesData ? "..." : notesData?.length})
               </Text>
               <Icon
                 name="ChevronDown"
@@ -295,18 +295,18 @@ export default function NotesScreen() {
               <TouchableOpacity
                 style={styles.actionButton}
                 onPress={handleToggleBottomSortDrawer}
-                disabled={notesData?.notes?.length === 0}
+                disabled={notesData?.length === 0}
               >
                 <Icon
                   name="ArrowDownUp"
                   size={16}
                   grayscale
-                  muted={notesData?.notes?.length === 0}
+                  muted={notesData?.length === 0}
                 />
                 <Text
                   style={styles.actionText}
                   customTextColor={colors[theme].grayscale}
-                  disabled={notesData?.notes?.length === 0}
+                  disabled={notesData?.length === 0}
                 >
                   Sort
                 </Text>
@@ -314,19 +314,19 @@ export default function NotesScreen() {
 
               <TouchableOpacity
                 style={styles.actionButton}
-                disabled={notesData?.notes?.length === 0}
+                disabled={notesData?.length === 0}
                 onPress={toggleNotesEditMode}
               >
                 <Icon
                   name={isNotesEditMode ? "PenOff" : "SquarePen"}
                   size={16}
                   grayscale
-                  muted={notesData?.notes?.length === 0}
+                  muted={notesData?.length === 0}
                 />
                 <Text
                   style={styles.actionText}
                   customTextColor={colors[theme].grayscale}
-                  disabled={notesData?.notes?.length === 0}
+                  disabled={notesData?.length === 0}
                 >
                   {isNotesEditMode ? "Cancel Edit" : "Edit"}
                 </Text>
@@ -372,7 +372,7 @@ export default function NotesScreen() {
 
         {!isLoadingNotesData && !isNotesEditMode && (
           <View style={styles.addButtonContainer}>
-            {notesData?.notes?.length === 0 && isFirstNote && (
+            {notesData?.length === 0 && isFirstNote && (
               <Text style={styles.emptyText}>
                 Let's start by creating your first{" "}
                 <Text
@@ -397,7 +397,7 @@ export default function NotesScreen() {
               }}
               style={styles.fabContainer}
             >
-              {notesData?.notes?.length === 0 && isFirstNote && (
+              {notesData?.length === 0 && isFirstNote && (
                 <Icon name="Spline" themed size={36} style={styles.spline} />
               )}
               <TouchableOpacity
@@ -499,8 +499,6 @@ export default function NotesScreen() {
         ref={bottomSelectNotebookDrawerRef}
         title="Select notebook"
         description={`Choose a notebook to show your notes from.`}
-        setSelectedNotebook={setSelectedNotebook}
-        isNotebookSelected={selectedNotebook ? true : false}
       />
     </>
   );

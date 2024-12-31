@@ -9,7 +9,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
  * @returns {Array} - An array containing the current config and a setter function to update it.
  */
 
-const useAppConfig = <T extends object | string | number | boolean>(
+const useAppConfig = <T extends object | string | number | boolean | undefined>(
   configKey: string,
   defaultValue: T
 ): [T, (newConfig: T | ((prevState: T) => T)) => void] => {

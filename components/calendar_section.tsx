@@ -22,6 +22,7 @@ export default function CalendarSection({
         viewMode={"grid"}
         index={index}
         animated={false}
+        selectDisabled={true}
       />
     </View>
   );

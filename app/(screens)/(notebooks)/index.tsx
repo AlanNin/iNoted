@@ -429,8 +429,14 @@ export default function NotebooksScreen() {
 
       <BottomDrawerConfirm
         ref={bottomDeleteMultipleDrawerRef}
-        title="Delete selected notebooks?"
-        description={`This notebooks will be permanently deleted from this device. You have selected ${selectedNotebooks.length} notebooks.`}
+        title={`Delete selected ${
+          selectedNotebooks.length > 1 ? "notebooks" : "notebook"
+        }?`}
+        description={`This ${
+          selectedNotebooks.length > 1 ? "notebooks" : "notebook"
+        } will be permanently deleted from this device. You have selected ${
+          selectedNotebooks.length
+        } ${selectedNotebooks.length > 1 ? "notebooks" : "notebook"}.`}
         submitButtonText="Delete"
         onSubmit={handleDeleteMultipleNotebooks}
       />

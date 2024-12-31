@@ -116,24 +116,17 @@ export async function getAllNotesCustom(notebookId?: number) {
     if (notebookId !== undefined) {
       const result = await db_client
         .select({
-          notebookName: notebooks.name,
           notes: notes,
         })
         .from(notes)
         .leftJoin(notebooks, eq(notes.notebook_id, notebooks.id))
         .where(eq(notes.notebook_id, notebookId));
 
-      return {
-        notebookName: result[0]?.notebookName || null,
-        notes: result.map((r) => r.notes),
-      };
+      return result.map((r) => r.notes);
     } else {
       const allNotes = await db_client.select().from(notes);
 
-      return {
-        notebookName: null,
-        notes: allNotes,
-      };
+      return allNotes;
     }
   } catch (error) {
     console.error("Error fetching notes:", error);

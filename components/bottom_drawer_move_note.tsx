@@ -9,7 +9,7 @@ import { BackHandler, Dimensions, StyleSheet } from "react-native";
 import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
 import NotebookCard from "./notebook_card";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { getAllNotebooks } from "@/queries/notebooks";
 import { FlashList } from "@shopify/flash-list";
 import { useNotebooksSelectedToMoveMode } from "@/hooks/useNotebookSelectedToMove";
@@ -166,39 +166,41 @@ const BottomDrawerMoveNote = React.forwardRef<
                     renderItem={renderNotebooks}
                     numColumns={3}
                     estimatedItemSize={width > 400 ? 180 : 156}
+                    ListFooterComponent={
+                      <TouchableOpacity
+                        style={styles.uncategorizedButton}
+                        customBackgroundColor={
+                          uncategorizedSelected
+                            ? colors[theme].primary
+                            : colors[theme].foggier
+                        }
+                        onPress={() =>
+                          setUncategorizedSelected(!uncategorizedSelected)
+                        }
+                      >
+                        <Icon
+                          name="Box"
+                          size={24}
+                          strokeWidth={1}
+                          customColor={
+                            uncategorizedSelected
+                              ? colors.dark.text
+                              : colors[theme].text_muted
+                          }
+                        />
+                        <Text
+                          style={styles.uncategorizedButtonText}
+                          customTextColor={
+                            uncategorizedSelected
+                              ? colors.dark.text
+                              : colors[theme].text_muted
+                          }
+                        >
+                          Uncategorized
+                        </Text>
+                      </TouchableOpacity>
+                    }
                   />
-                  <TouchableOpacity
-                    style={styles.uncategorizedButton}
-                    customBackgroundColor={
-                      uncategorizedSelected
-                        ? colors[theme].primary
-                        : colors[theme].foggier
-                    }
-                    onPress={() =>
-                      setUncategorizedSelected(!uncategorizedSelected)
-                    }
-                  >
-                    <Icon
-                      name="Box"
-                      size={24}
-                      strokeWidth={1}
-                      customColor={
-                        uncategorizedSelected
-                          ? colors.dark.text
-                          : colors[theme].text_muted
-                      }
-                    />
-                    <Text
-                      style={styles.uncategorizedButtonText}
-                      customTextColor={
-                        uncategorizedSelected
-                          ? colors.dark.text
-                          : colors[theme].text_muted
-                      }
-                    >
-                      Uncategorized
-                    </Text>
-                  </TouchableOpacity>
                 </View>
               ) : (
                 <View style={styles.noNotesContainer}>
@@ -292,7 +294,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     gap: 12,
     borderRadius: 12,
-    marginVertical: 16,
+    marginVertical: 8,
     paddingVertical: 12,
     paddingHorizontal: 24,
   },

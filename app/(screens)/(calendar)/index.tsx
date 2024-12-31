@@ -94,6 +94,7 @@ export default function CalendarScreen() {
       note={item}
       viewMode={"grid"}
       index={index}
+      selectDisabled={true}
     />
   );
 
