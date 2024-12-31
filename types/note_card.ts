@@ -3,4 +3,5 @@ type NoteCardProps = {
   note: NoteProps;
   viewMode: "grid" | "list";
   onPress?: () => void;
+  animated?: boolean;
 };

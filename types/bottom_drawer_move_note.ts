@@ -1,5 +1,5 @@
 type BottomDrawerMoveNoteProps = {
   title: string;
   description?: string;
-  onSubmit: (notebookId: number) => void;
+  onSubmit: (notebookId: number, isUncategorized?: boolean) => void;
 };

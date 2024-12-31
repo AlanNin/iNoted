@@ -14,14 +14,13 @@ import Icon from "./icon";
 import { LinearGradient } from "expo-linear-gradient";
 import ColorPickerComponent from "./color_picker";
 import { pickImage } from "@/lib/pick_image";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getNotebookById, removeNoteFromNotebook } from "@/queries/notebooks";
 import NoteCard from "./note_card";
 import Loader from "./loading";
 import { FlashList } from "@shopify/flash-list";
 import BottomDrawerConfirm from "./bottom_drawer_confirm";
 import { useNotesEditMode } from "@/hooks/useNotesEditMode";
-import { toast } from "@backpackapp-io/react-native-toast";
 import { Image } from "expo-image";
 
 const colorsOptions = ["#FF5781", "#E76F51", "#00838F"];
@@ -32,6 +31,7 @@ const BottomDrawerNotebook = React.forwardRef<
   BottomSheetModal,
   Omit<BottomDrawerNotebookProps, "ref">
 >(({ notebookId, onSubmit, onDelete }, ref) => {
+  const queryClient = useQueryClient();
   const theme = useColorScheme();
   const [background, setBackground] = React.useState(colors.dark.grayscale);
   const [name, setName] = React.useState("Loading...");
@@ -87,10 +87,16 @@ const BottomDrawerNotebook = React.forwardRef<
     });
   };
 
+  async function refetchNotes() {
+    await queryClient.refetchQueries({ queryKey: ["notes"] });
+    await queryClient.refetchQueries({ queryKey: ["note"] });
+  }
+
   const handleRemoveNoteFromNotebook = async () => {
     await removeNoteFromNotebook({ noteIds: selectedNotes });
     refetchNotebook();
-    closeDrawer();
+    refetchNotes();
+    setNotesEditMode(false);
   };
 
   const handleSubmit = () => {

@@ -147,18 +147,28 @@ export async function getAllNotesCalendar() {
 
     const groupedNotes = allNotes.reduce(
       (acc: Record<string, NoteProps[]>, note: NoteProps) => {
-        const date = note.created_at.split(" ")[0];
-        if (!acc[date]) {
-          acc[date] = [];
+        const isoDate = note.created_at.replace(" ", "T") + "Z";
+        const parsedDate = new Date(isoDate);
+
+        const localDate =
+          parsedDate.getFullYear() +
+          "-" +
+          String(parsedDate.getMonth() + 1).padStart(2, "0") +
+          "-" +
+          String(parsedDate.getDate()).padStart(2, "0");
+
+        if (!acc[localDate]) {
+          acc[localDate] = [];
         }
-        acc[date].push(note);
+
+        acc[localDate].push(note);
         return acc;
       },
       {} as Record<string, NoteProps[]>
     );
 
     const result = Object.keys(groupedNotes)
-      .sort((a, b) => (b > a ? 1 : -1))
+      .sort((a, b) => b.localeCompare(a))
       .map((date) => ({
         date,
         notes: groupedNotes[date].map((note) => ({

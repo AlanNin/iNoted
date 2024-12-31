@@ -1,0 +1,3 @@
+type BottomDrawerNoteDetailsProps = {
+  note: NoteProps;
+};

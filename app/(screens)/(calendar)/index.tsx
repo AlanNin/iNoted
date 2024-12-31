@@ -73,8 +73,19 @@ export default function CalendarScreen() {
     return () => backHandler.remove();
   }, [isCalendarModalOpen]);
 
-  const renderSection = ({ item }: { item: CalendarSectionProps }) => (
-    <CalendarSection key={`${item.date}`} notes={item.notes} date={item.date} />
+  const renderSection = ({
+    item,
+    index,
+  }: {
+    item: CalendarSectionProps;
+    index: number;
+  }) => (
+    <CalendarSection
+      key={`${item.date}`}
+      notes={item.notes}
+      date={item.date}
+      index={index}
+    />
   );
 
   const renderNote = ({ item, index }: { item: NoteProps; index: number }) => (

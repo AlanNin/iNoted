@@ -1,27 +1,47 @@
 import { StyleSheet } from "react-native";
-import { Text, View } from "./themed";
+import { MotiView, Text, View } from "./themed";
 import useColorScheme from "@/hooks/useColorScheme";
 import colors from "@/constants/colors";
 import { FlashList } from "@shopify/flash-list";
 import NoteCard from "./note_card";
 import { formatMediumDateCalendar } from "@/lib/format_date";
 
-export default function CalendarSection({ notes, date }: CalendarSectionProps) {
+export default function CalendarSection({
+  notes,
+  date,
+  index,
+  animated = true,
+}: CalendarSectionProps) {
   const theme = useColorScheme();
 
   const renderItem = ({ item, index }: { item: NoteProps; index: number }) => (
-    <View style={{ minHeight: 228, width: 140 }}>
+    <View style={{ height: 228, width: 140 }}>
       <NoteCard
         key={`${item.id}-${item.title}-${item.content}`}
         note={item}
         viewMode={"grid"}
         index={index}
+        animated={false}
       />
     </View>
   );
 
+  const delay = index ? (index + 1) * 50 : 0;
+
+  const animationProps = animated
+    ? ({
+        from: { opacity: 0, translateY: 10 },
+        animate: { opacity: 1, translateY: 0 },
+        transition: {
+          type: "timing",
+          duration: 250,
+          delay,
+        },
+      } as any)
+    : {};
+
   return (
-    <View style={styles.container}>
+    <MotiView {...animationProps} style={styles.container}>
       <View style={styles.dateContainer}>
         <View
           style={styles.dot}
@@ -44,7 +64,7 @@ export default function CalendarSection({ notes, date }: CalendarSectionProps) {
           estimatedItemSize={212}
         />
       </View>
-    </View>
+    </MotiView>
   );
 }
 

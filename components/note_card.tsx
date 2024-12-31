@@ -74,7 +74,7 @@ const SelectedIndicator = ({
 };
 
 const NoteCard = React.memo(
-  ({ note, index, viewMode, onPress }: NoteCardProps) => {
+  ({ note, index, viewMode, onPress, animated = true }: NoteCardProps) => {
     if (!note.id) {
       return <View style={gridStyles.innerContainer} />;
     }
@@ -83,15 +83,17 @@ const NoteCard = React.memo(
 
     const delay = index ? index * 50 : 0;
 
-    const animationProps = {
-      from: { opacity: 0, translateY: 10 },
-      animate: { opacity: 1, translateY: 0 },
-      transition: {
-        type: "timing",
-        duration: 250,
-        delay,
-      },
-    } as any;
+    const animationProps = animated
+      ? ({
+          from: { opacity: 0, translateY: 10 },
+          animate: { opacity: 1, translateY: 0 },
+          transition: {
+            type: "timing",
+            duration: 250,
+            delay,
+          },
+        } as any)
+      : {};
 
     if (viewMode === "grid") {
       return (

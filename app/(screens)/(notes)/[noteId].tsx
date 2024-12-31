@@ -22,12 +22,7 @@ import {
 import colors from "@/constants/colors";
 import { router, useLocalSearchParams } from "expo-router";
 import { formatLongDate } from "@/lib/format_date";
-import {
-  deleteNote,
-  getNoteById,
-  updateNote,
-  upsertNote,
-} from "@/queries/notes";
+import { deleteNote, getNoteById, updateNote } from "@/queries/notes";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Icon from "@/components/icon";
 import Loader from "@/components/loading";
@@ -38,6 +33,7 @@ import BottomDrawerConfirm from "@/components/bottom_drawer_confirm";
 import BottomDrawerMoveNote from "@/components/bottom_drawer_move_note";
 import { addNotesToNotebook } from "@/queries/notebooks";
 import { debounce } from "lodash";
+import BottomDrawerNoteDetails from "@/components/bottom_drawer_note_details";
 
 export default function NoteScreen() {
   const note = useLocalSearchParams();
@@ -52,6 +48,7 @@ export default function NoteScreen() {
   const [isMoreModalOpen, setIsMoreModalOpen] = React.useState(false);
   const bottomDrawerRef = React.useRef<BottomSheetModal>(null);
   const bottomMoveNoteDrawerRef = React.useRef<BottomSheetModal>(null);
+  const bottomNoteDetailsDrawerRef = React.useRef<BottomSheetModal>(null);
   const [isKeyboardVisible, setIsKeyboardVisible] = React.useState(false);
 
   const { data: noteData, isLoading: isLoadingNoteData } = useQuery({
@@ -132,9 +129,7 @@ export default function NoteScreen() {
 
   async function refetchNotes() {
     await queryClient.refetchQueries({ queryKey: ["notes"] });
-  }
-
-  async function refetchCalendar() {
+    await queryClient.refetchQueries({ queryKey: ["note"] });
     await queryClient.refetchQueries({ queryKey: ["notes_calendar"] });
   }
 
@@ -155,7 +150,6 @@ export default function NoteScreen() {
     try {
       await deleteNote(Number(note.noteId));
       refetchNotes();
-      refetchCalendar();
       refetchNotebooks();
       router.back();
     } catch (error) {
@@ -163,14 +157,18 @@ export default function NoteScreen() {
     }
   }
 
-  async function handleUpdateNote() {
+  async function handleUpdateNote(
+    { handleback }: { handleback?: boolean } = { handleback: true }
+  ) {
     if (inputs.content.length === 0) {
       handleDeleteNote();
       return;
     }
 
     if (noChanges) {
-      router.back();
+      if (handleback) {
+        router.back();
+      }
       return;
     }
 
@@ -181,8 +179,10 @@ export default function NoteScreen() {
       });
 
       refetchNotes();
-      refetchCalendar();
-      router.back();
+
+      if (handleback) {
+        router.back();
+      }
     } catch (error) {
       toast.error("An error occurred. Please try again.");
     }
@@ -209,12 +209,24 @@ export default function NoteScreen() {
     bottomMoveNoteDrawerRef.current?.present();
   };
 
-  const handleMoveNote = async (notebookId: number) => {
+  const handleToggleBottomNoteDetailsDrawer = () => {
+    Keyboard.dismiss();
+    setIsMoreModalOpen(false);
+    bottomNoteDetailsDrawerRef.current?.present();
+  };
+
+  const handleMoveNote = async (
+    notebookId: number | undefined,
+    isUncategorized?: boolean
+  ) => {
     try {
-      await addNotesToNotebook({ noteIds: [Number(note.noteId)], notebookId });
+      await addNotesToNotebook({
+        noteIds: [Number(note.noteId)],
+        notebookId,
+        isUncategorized: isUncategorized,
+      });
       refetchNotebooks();
       refetchNotes();
-      refetchCalendar();
       setIsMoreModalOpen(false);
       toast.success("Moved successfully");
     } catch (error) {
@@ -241,11 +253,6 @@ export default function NoteScreen() {
         return true;
       }
 
-      if (inputs.content.length === 0) {
-        router.back();
-        return true;
-      }
-
       try {
         await handleUpdateNote();
         return true;
@@ -266,11 +273,12 @@ export default function NoteScreen() {
     return () => backHandler.remove();
   }, [inputs, isMoreModalOpen]);
 
+  // save note on app state change
   React.useEffect(() => {
     const handleAppStateChange = async (nextAppState: AppStateStatus) => {
       if (nextAppState === "background" || nextAppState === "inactive") {
         if (inputs.content.length > 0) {
-          await handleUpdateNote();
+          await handleUpdateNote({ handleback: false });
         }
       }
     };
@@ -387,6 +395,13 @@ export default function NoteScreen() {
                             Move
                           </Text>
                         </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.moreModalButton}
+                          onPress={() => handleToggleBottomNoteDetailsDrawer()}
+                        >
+                          <Icon name="Info" strokeWidth={1.2} size={18} />
+                          <Text>Details</Text>
+                        </TouchableOpacity>
                         <View
                           style={styles.moreModalDivider}
                           customBackgroundColor={colors[theme].foggiest}
@@ -454,6 +469,10 @@ export default function NoteScreen() {
         title="Move note"
         description="Make this note part of a notebook."
         onSubmit={handleMoveNote}
+      />
+      <BottomDrawerNoteDetails
+        ref={bottomNoteDetailsDrawerRef}
+        note={noteData!}
       />
     </>
   );

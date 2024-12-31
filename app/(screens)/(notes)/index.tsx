@@ -27,6 +27,7 @@ import useAppConfig from "@/hooks/useAppConfig";
 import BottomDrawerMoveNote from "@/components/bottom_drawer_move_note";
 import { addNotesToNotebook } from "@/queries/notebooks";
 import BottomDrawerSelectNotebook from "@/components/bottom_drawer_select_notebook";
+import { useNotebooksSelectedToMoveMode } from "@/hooks/useNotebookSelectedToMove";
 
 export default function NotesScreen() {
   const queryClient = useQueryClient();
@@ -174,9 +175,13 @@ export default function NotesScreen() {
   }, [selectedNotes, toggleNotesEditMode]);
 
   const handleMoveMultipleNotes = React.useCallback(
-    async (notebookId: number) => {
+    async (notebookId: number | undefined, isUncategorized?: boolean) => {
       try {
-        await addNotesToNotebook({ noteIds: selectedNotes, notebookId });
+        await addNotesToNotebook({
+          noteIds: selectedNotes,
+          notebookId: notebookId,
+          isUncategorized: isUncategorized,
+        });
         refetchNotes();
         refetchCalendar();
         refetchNotebooks();

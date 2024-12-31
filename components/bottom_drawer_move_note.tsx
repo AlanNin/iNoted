@@ -9,7 +9,7 @@ import { BackHandler, Dimensions, StyleSheet } from "react-native";
 import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
 import NotebookCard from "./notebook_card";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getAllNotebooks } from "@/queries/notebooks";
 import { FlashList } from "@shopify/flash-list";
 import { useNotebooksSelectedToMoveMode } from "@/hooks/useNotebookSelectedToMove";
@@ -30,18 +30,22 @@ const BottomDrawerMoveNote = React.forwardRef<
   const {
     selectedNotebook,
     clearSelectedNotebook,
+    uncategorizedSelected,
+    setUncategorizedSelected,
   } = useNotebooksSelectedToMoveMode();
 
   const closeDrawer = () => {
     (ref as React.RefObject<BottomSheetModal>).current?.dismiss();
     clearSelectedNotebook();
+    setUncategorizedSelected(false);
   };
 
   const handleSubmit = () => {
-    if (!selectedNotebook) {
+    if (!selectedNotebook && !uncategorizedSelected) {
       return;
     }
-    onSubmit(selectedNotebook);
+
+    onSubmit(selectedNotebook!, uncategorizedSelected);
     closeDrawer();
   };
 
@@ -94,8 +98,6 @@ const BottomDrawerMoveNote = React.forwardRef<
             setSheetStatus("close");
           }
         }}
-        // snapPoints={snapPoints}
-        // enableDynamicSizing={false}
         enableContentPanningGesture={false}
         ref={ref}
         backdropComponent={() => (
@@ -126,12 +128,12 @@ const BottomDrawerMoveNote = React.forwardRef<
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.headerButton}
-              disabled={!selectedNotebook}
+              disabled={!selectedNotebook && !uncategorizedSelected}
               onPress={handleSubmit}
             >
               <Text
                 customTextColor={
-                  selectedNotebook
+                  selectedNotebook || uncategorizedSelected
                     ? colors[theme].primary
                     : colors[theme].primary_foggy
                 }
@@ -165,6 +167,38 @@ const BottomDrawerMoveNote = React.forwardRef<
                     numColumns={3}
                     estimatedItemSize={width > 400 ? 180 : 156}
                   />
+                  <TouchableOpacity
+                    style={styles.uncategorizedButton}
+                    customBackgroundColor={
+                      uncategorizedSelected
+                        ? colors[theme].primary
+                        : colors[theme].foggier
+                    }
+                    onPress={() =>
+                      setUncategorizedSelected(!uncategorizedSelected)
+                    }
+                  >
+                    <Icon
+                      name="Box"
+                      size={24}
+                      strokeWidth={1}
+                      customColor={
+                        uncategorizedSelected
+                          ? colors.dark.text
+                          : colors[theme].text_muted
+                      }
+                    />
+                    <Text
+                      style={styles.uncategorizedButtonText}
+                      customTextColor={
+                        uncategorizedSelected
+                          ? colors.dark.text
+                          : colors[theme].text_muted
+                      }
+                    >
+                      Uncategorized
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               ) : (
                 <View style={styles.noNotesContainer}>
@@ -249,6 +283,21 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 16,
     alignSelf: "center",
+  },
+  uncategorizedButton: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+    gap: 12,
+    borderRadius: 12,
+    marginVertical: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+  },
+  uncategorizedButtonText: {
+    fontSize: 16,
   },
 });
 
