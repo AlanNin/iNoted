@@ -11,6 +11,7 @@ import { StyleSheet } from "react-native";
 import { router } from "expo-router";
 import { Route } from "@react-navigation/native";
 import { Image } from "expo-image";
+import * as Application from "expo-application";
 
 export default function CustomDrawerContent(props: any) {
   const theme = useColorScheme();
@@ -60,7 +61,7 @@ export default function CustomDrawerContent(props: any) {
         ]}
       >
         <Text style={styles.versionText} disabled>
-          Version: 1.0.0 - © 2024 NinCloud
+          Version: {Application.nativeApplicationVersion} - © 2024 NinCloud
         </Text>
       </View>
     </View>
