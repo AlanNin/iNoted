@@ -201,6 +201,7 @@ export default function NotesScreen() {
     const newNote = await createNote({
       title: "",
       content: "",
+      notebook_id: selectedNotebookToShow?.id || null,
     });
 
     if (isFirstNote) {

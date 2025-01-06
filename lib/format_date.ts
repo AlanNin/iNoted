@@ -48,7 +48,7 @@ export function formatMediumDate(date: string | Date) {
   const month = parsedDate.toLocaleString("default", { month: "short" });
   const year = parsedDate.getFullYear();
 
-  return `${day} ${month}, ${year}`;
+  return `${month} ${day}, ${year}`;
 }
 
 export function formatMediumDateCalendar(date: string | Date) {
@@ -81,7 +81,7 @@ export function formatMediumDateCalendar(date: string | Date) {
   const month = parsedDate.toLocaleString("default", { month: "short" });
   const year = parsedDate.getFullYear();
 
-  return `${day} ${month}, ${year}`;
+  return `${month} ${day}, ${year}`;
 }
 
 export function getMaxDateInUTC(): string {

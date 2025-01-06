@@ -15,7 +15,6 @@ import {
   MarkdownTextInput,
   MotiView,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "@/components/themed";
@@ -301,18 +300,20 @@ export default function NoteScreen() {
       </View>
     );
   }
+
   return (
     <>
       <TouchableWithoutFeedback
         style={styles.container}
         onPress={() => setIsMoreModalOpen(false)}
       >
-        <KeyboardAvoidingView
-          style={styles.container}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 40}
-        >
-          <View style={styles.wrapper}>
+        <View style={styles.wrapper}>
+          <KeyboardAvoidingView
+            style={styles.container}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 64}
+            enabled={isKeyboardVisible}
+          >
             <View style={styles.header}>
               <TouchableOpacity style={styles.button} onPress={handleBack}>
                 <Icon name="ArrowLeft" />
@@ -436,12 +437,16 @@ export default function NoteScreen() {
               >
                 Last edited on {formatLongDate(noteDate!)}
               </Text>
-              <TextInput
+              <MarkdownTextInput
                 value={inputs.title}
                 onChangeText={(e) => handleInputChange("title", e)}
                 style={[styles.noteTitle]}
                 placeholder="Untitled note"
+                parser={parseExpensiMark}
                 onPress={() => setIsMoreModalOpen(false)}
+                multiline={true}
+                numberOfLines={2}
+                maxLength={48}
               />
               <MarkdownTextInput
                 value={inputs.content}
@@ -454,8 +459,8 @@ export default function NoteScreen() {
                 autoFocus={noteData?.content.length === 0}
               />
             </View>
-          </View>
-        </KeyboardAvoidingView>
+          </KeyboardAvoidingView>
+        </View>
       </TouchableWithoutFeedback>
       <BottomDrawerConfirm
         ref={bottomDrawerRef}
@@ -540,7 +545,7 @@ const styles = StyleSheet.create({
     padding: 0,
     margin: 0,
     textAlignVertical: "top",
-    height: 32,
+    height: "auto",
   },
   noteContent: {
     padding: 0,

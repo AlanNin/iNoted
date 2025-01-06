@@ -1,12 +1,15 @@
-import { StyleSheet } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
 import { MotiView, Text, View } from "./themed";
 import useColorScheme from "@/hooks/useColorScheme";
 import colors from "@/constants/colors";
 import { FlashList } from "@shopify/flash-list";
 import NoteCard from "./note_card";
 import { formatMediumDateCalendar } from "@/lib/format_date";
+import React from "react";
 
-export default function CalendarSection({
+const MemoizedNoteCard = React.memo(NoteCard);
+
+const CalendarSection = React.memo(function CalendarSection({
   notes,
   date,
   index,
@@ -14,19 +17,22 @@ export default function CalendarSection({
 }: CalendarSectionProps) {
   const theme = useColorScheme();
 
-  const renderItem = ({ item, index }: { item: NoteProps; index: number }) => (
-    <View style={{ height: 228, width: 140 }}>
-      <NoteCard
-        key={`${item.id}-${item.title}-${item.content}`}
-        note={item}
-        viewMode={"grid"}
-        index={index}
-        animated={false}
-        selectDisabled={true}
-      />
-    </View>
-  );
+  const { width } = Dimensions.get("screen");
 
+  const renderItem = React.useCallback(
+    ({ item, index }: { item: NoteProps; index: number }) => (
+      <View style={{ height: 228, width: width > 400 ? 132 : 124 }}>
+        <MemoizedNoteCard
+          note={item}
+          viewMode="grid"
+          index={index}
+          animated={false}
+          selectDisabled={true}
+        />
+      </View>
+    ),
+    []
+  );
   const delay = index ? (index + 1) * 50 : 0;
 
   const animationProps = animated
@@ -57,7 +63,7 @@ export default function CalendarSection({
         <FlashList
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => `${item.id}-${item.title}-${item.content}`}
           data={notes}
           renderItem={renderItem}
           horizontal={true}
@@ -67,7 +73,7 @@ export default function CalendarSection({
       </View>
     </MotiView>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -95,3 +101,5 @@ const styles = StyleSheet.create({
     marginHorizontal: -8,
   },
 });
+
+export default CalendarSection;

@@ -9,6 +9,7 @@ export async function createNote(note: NewNoteProps) {
       .values({
         title: note.title,
         content: note.content,
+        notebook_id: note.notebook_id,
       })
       .returning();
 

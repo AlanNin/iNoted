@@ -20,10 +20,29 @@ import { useQuery } from "@tanstack/react-query";
 import { getAllNotesCalendar } from "@/queries/notes";
 import Loader from "@/components/loading";
 
+const MemoizedNoteCard = React.memo(NoteCard);
+const MemoizedCalendarSection = React.memo(CalendarSection);
+const EmptyNotesView = React.memo(({ message }: { message: string }) => (
+  <View style={styles.noNotesContainer}>
+    <Icon name="Microscope" size={24} strokeWidth={1} muted />
+    <Text style={styles.noNotesText} disabled>
+      {message}
+    </Text>
+  </View>
+));
+
+const LoadingView = React.memo(() => (
+  <View style={styles.loadingContainer}>
+    <Loader />
+    <Text style={styles.loadingText}>Loading notes...</Text>
+  </View>
+));
+
 export default function CalendarScreen() {
   const { data: notesData, isLoading: isLoadingNotesData } = useQuery({
     queryKey: ["notes_calendar"],
     queryFn: getAllNotesCalendar,
+    select: (data) => data ?? [],
   });
 
   const theme = useColorScheme();
@@ -34,25 +53,26 @@ export default function CalendarScreen() {
   const [isCalendarModalOpen, setIsCalendarModalOpen] = React.useState(false);
   const [selectedDate, setSelectedDate] = React.useState("");
 
-  function handleCloseModal() {
+  const handleCloseModal = React.useCallback(() => {
     setIsCalendarModalOpen(false);
-  }
+  }, []);
 
-  function handleApplyModal(date: string) {
+  const handleApplyModal = React.useCallback((date: string) => {
     setSelectedDate(date);
     setIsCalendarModalOpen(false);
-  }
+  }, []);
 
-  function handleClearModal() {
+  const handleClearModal = React.useCallback(() => {
     setSelectedDate("");
     setIsCalendarModalOpen(false);
-  }
+  }, []);
 
   const filteredNotes = React.useMemo(() => {
-    const selectedDateNotes = notesData?.find((item) =>
+    if (!notesData) return [];
+
+    const selectedDateNotes = notesData.find((item) =>
       item.date.includes(selectedDate)
     );
-
     return selectedDateNotes ? selectedDateNotes.notes : [];
   }, [selectedDate, notesData]);
 
@@ -73,29 +93,28 @@ export default function CalendarScreen() {
     return () => backHandler.remove();
   }, [isCalendarModalOpen]);
 
-  const renderSection = ({
-    item,
-    index,
-  }: {
-    item: CalendarSectionProps;
-    index: number;
-  }) => (
-    <CalendarSection
-      key={`${item.date}`}
-      notes={item.notes}
-      date={item.date}
-      index={index}
-    />
+  const renderSection = React.useCallback(
+    ({ item, index }: { item: CalendarSectionProps; index: number }) => (
+      <MemoizedCalendarSection
+        notes={item.notes}
+        date={item.date}
+        index={index}
+        animated={true}
+      />
+    ),
+    []
   );
 
-  const renderNote = ({ item, index }: { item: NoteProps; index: number }) => (
-    <NoteCard
-      key={`${item.id}-${item.title}-${item.content}`}
-      note={item}
-      viewMode={"grid"}
-      index={index}
-      selectDisabled={true}
-    />
+  const renderNote = React.useCallback(
+    ({ item, index }: { item: NoteProps; index: number }) => (
+      <MemoizedNoteCard
+        note={item}
+        viewMode="grid"
+        index={index}
+        selectDisabled={true}
+      />
+    ),
+    []
   );
 
   return (
@@ -135,10 +154,7 @@ export default function CalendarScreen() {
           <View style={styles.content}>
             <>
               {isLoadingNotesData ? (
-                <View style={styles.loadingContainer}>
-                  <Loader />
-                  <Text style={styles.loadingText}>Loading notes...</Text>
-                </View>
+                <LoadingView />
               ) : (
                 <>
                   {selectedDate ? (
@@ -163,17 +179,7 @@ export default function CalendarScreen() {
                       </TouchableOpacity>
 
                       {filteredNotes.length === 0 ? (
-                        <View style={styles.noNotesContainer}>
-                          <Icon
-                            name="Microscope"
-                            size={24}
-                            strokeWidth={1}
-                            muted
-                          />
-                          <Text style={styles.noNotesText} disabled>
-                            No notes found
-                          </Text>
-                        </View>
+                        <EmptyNotesView message="No notes found" />
                       ) : (
                         <FlashList
                           showsVerticalScrollIndicator={false}
@@ -189,18 +195,7 @@ export default function CalendarScreen() {
                   ) : (
                     <>
                       {filteredNotes.length === 0 ? (
-                        <View style={styles.noNotesContainer}>
-                          <Icon
-                            name="Microscope"
-                            size={24}
-                            strokeWidth={1}
-                            muted
-                          />
-                          <Text style={styles.noNotesText} disabled>
-                            You haven't created any notes yet. Start by adding
-                            your first one!
-                          </Text>
-                        </View>
+                        <EmptyNotesView message="No notes found" />
                       ) : (
                         <FlashList
                           showsVerticalScrollIndicator={false}
