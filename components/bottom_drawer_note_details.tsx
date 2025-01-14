@@ -11,20 +11,24 @@ import useColorScheme from "@/hooks/useColorScheme";
 import { formatLongDate } from "@/lib/format_date";
 import { getNotebookById } from "@/queries/notebooks";
 import { useQuery } from "@tanstack/react-query";
+import * as NavigationBar from "expo-navigation-bar";
 
 const BottomDrawerNoteDetails = React.forwardRef<
   BottomSheetModal,
   Omit<BottomDrawerNoteDetailsProps, "ref">
->(({ note }, ref) => {
+>(({ note, previousNavigationBarColor }, ref) => {
   const theme = useColorScheme();
 
   const { data: notebookData, isLoading: isLoadingNotebookData } = useQuery({
-    queryKey: ["notebook", note.notebook_id],
-    queryFn: () => getNotebookById(note.notebook_id!),
-    enabled: !!note.notebook_id,
+    queryKey: ["notebook", note?.notebook_id],
+    queryFn: () => getNotebookById(note?.notebook_id!),
+    enabled: !!note?.notebook_id,
   });
 
   const closeDrawer = () => {
+    if (previousNavigationBarColor) {
+      NavigationBar.setBackgroundColorAsync(previousNavigationBarColor);
+    }
     (ref as React.RefObject<BottomSheetModal>).current?.dismiss();
   };
 
@@ -64,9 +68,7 @@ const BottomDrawerNoteDetails = React.forwardRef<
           <TouchableOpacity
             style={[styles.backdrop]}
             activeOpacity={1}
-            onPress={() =>
-              (ref as React.RefObject<BottomSheetModal>).current?.dismiss()
-            }
+            onPress={closeDrawer}
           />
         )}
         backgroundStyle={{
@@ -79,10 +81,12 @@ const BottomDrawerNoteDetails = React.forwardRef<
         <BottomSheetView style={styles.contentContainer}>
           <View style={styles.detailsContainer}>
             <Text style={styles.detail} disabled>
-              Created at {formatLongDate(note.created_at)}
+              Created at{" "}
+              {note?.created_at ? formatLongDate(note.created_at) : ""}
             </Text>
             <Text style={styles.detail} disabled>
-              Last update at {formatLongDate(note.updated_at)}
+              Last update at{" "}
+              {note?.updated_at ? formatLongDate(note.updated_at) : ""}
             </Text>
             <Text style={styles.detail} disabled>
               {isLoadingNotebookData
@@ -94,9 +98,7 @@ const BottomDrawerNoteDetails = React.forwardRef<
           </View>
 
           <TouchableOpacity
-            onPress={() =>
-              (ref as React.RefObject<BottomSheetModal>).current?.dismiss()
-            }
+            onPress={closeDrawer}
             style={styles.button}
             customBackgroundColor={colors[theme].primary}
           >

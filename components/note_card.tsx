@@ -6,6 +6,7 @@ import { formatLongDate, formatMediumDate } from "@/lib/format_date";
 import { router } from "expo-router";
 import React from "react";
 import { useNotesEditMode } from "@/hooks/useNotesEditMode";
+import { extractPlainText } from "@/lib/text_editor";
 
 const SelectedIndicator = ({
   noteId,
@@ -119,15 +120,20 @@ const NoteCard = React.memo(
               selectDisabled={selectDisabled}
             />
             <View style={gridStyles.contentContainer}>
-              <Text style={gridStyles.content} numberOfLines={9}>
-                {note.content}
-              </Text>
+              {extractPlainText(note.content).length > 0 ? (
+                <Text style={gridStyles.content} numberOfLines={9}>
+                  {extractPlainText(note.content)}
+                </Text>
+              ) : (
+                <Text style={gridStyles.noContent} numberOfLines={9} disabled>
+                  No content...
+                </Text>
+              )}
             </View>
             <View style={gridStyles.detailsContainer}>
               <Text style={gridStyles.title} numberOfLines={1}>
                 {note.title}
               </Text>
-
               <Text
                 style={[
                   gridStyles.date,
@@ -210,6 +216,11 @@ const gridStyles = StyleSheet.create({
   content: {
     fontSize: 12,
     flex: 1,
+  },
+  noContent: {
+    fontSize: 12,
+    flex: 1,
+    fontStyle: "italic",
   },
   detailsContainer: {
     display: "flex",

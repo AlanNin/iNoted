@@ -13,6 +13,16 @@ type ColorScheme = {
   foggier: string;
   foggiest: string;
   danger: string;
+  editor: {
+    background: string;
+    text: string;
+    placeholder: string;
+    toolbar_background: string;
+    toolbar_icon: string;
+    toolbar_icon_active: string;
+    toolbar_active: string;
+    toolbar_divider: string;
+  };
 };
 
 type Colors = {

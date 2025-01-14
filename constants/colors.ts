@@ -13,7 +13,17 @@ const colors: Colors = {
     foggy: "rgba(0, 0, 0, 0.3)",
     foggier: "rgba(0, 0, 0, 0.05)",
     foggiest: "rgba(0, 0, 0, 0.03)",
-    danger: "#c70000",
+    danger: "#ff0000",
+    editor: {
+      background: "#f2f3f4",
+      text: "#000",
+      placeholder: "rgba(0, 0, 0, 0.7)",
+      toolbar_background: "#fff",
+      toolbar_icon: "#000",
+      toolbar_icon_active: "#fff",
+      toolbar_active: "#FF5781",
+      toolbar_divider: "#d0d0d0",
+    },
   },
   dark: {
     text: "#fff",
@@ -29,7 +39,17 @@ const colors: Colors = {
     foggy: "rgba(255, 255, 255, 0.3)",
     foggier: "rgba(255, 255, 255, 0.15)",
     foggiest: "rgba(255, 255, 255, 0.1)",
-    danger: "#eb0000",
+    danger: "#ff0000",
+    editor: {
+      background: "#0f0f0f",
+      text: "#fff",
+      placeholder: "rgba(255, 255, 255, 0.5)",
+      toolbar_background: "#242424",
+      toolbar_icon: "#fff",
+      toolbar_icon_active: "#fff",
+      toolbar_active: "#C44565",
+      toolbar_divider: "#424242",
+    },
   },
 };
 

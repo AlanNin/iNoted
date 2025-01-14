@@ -1,3 +1,4 @@
 type BottomDrawerNoteDetailsProps = {
-  note: NoteProps;
+  note?: NoteProps;
+  previousNavigationBarColor?: string;
 };

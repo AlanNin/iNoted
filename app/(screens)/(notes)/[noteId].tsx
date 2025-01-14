@@ -1,54 +1,39 @@
-import {
-  StyleSheet,
-  TouchableWithoutFeedback,
-  BackHandler,
-  Share,
-  Keyboard,
-  KeyboardAvoidingView,
-  Platform,
-  AppStateStatus,
-  AppState,
-} from "react-native";
-import useColorScheme from "@/hooks/useColorScheme";
+import LexicalEditorComponent from "@/components/lexical";
+import { SafeAreaView, Text, View } from "@/components/themed";
+import { toast } from "@backpackapp-io/react-native-toast";
+import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
 import {
-  MarkdownTextInput,
-  MotiView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "@/components/themed";
+  AppState,
+  AppStateStatus,
+  BackHandler,
+  Keyboard,
+  KeyboardAvoidingView,
+  Share,
+  StyleSheet,
+} from "react-native";
+import * as NavigationBar from "expo-navigation-bar";
 import colors from "@/constants/colors";
-import { router, useLocalSearchParams } from "expo-router";
-import { formatLongDate } from "@/lib/format_date";
+import useColorScheme from "@/hooks/useColorScheme";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { deleteNote, getNoteById, updateNote } from "@/queries/notes";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import Icon from "@/components/icon";
-import Loader from "@/components/loading";
-import { parseExpensiMark } from "@expensify/react-native-live-markdown";
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
-import { toast } from "@backpackapp-io/react-native-toast";
+import { addNotesToNotebook } from "@/queries/notebooks";
 import BottomDrawerConfirm from "@/components/bottom_drawer_confirm";
 import BottomDrawerMoveNote from "@/components/bottom_drawer_move_note";
-import { addNotesToNotebook } from "@/queries/notebooks";
-import { debounce } from "lodash";
 import BottomDrawerNoteDetails from "@/components/bottom_drawer_note_details";
+import { convertToJson, extractPlainText } from "@/lib/text_editor";
+import Loader from "@/components/loading";
 
-export default function NoteScreen() {
-  const note = useLocalSearchParams();
+export default function TestScreen() {
   const theme = useColorScheme();
-  const undoStack = React.useRef<NewNoteProps[]>([]);
-  const redoStack = React.useRef<NewNoteProps[]>([]);
+  const [isKeyboardVisible, setIsKeyboardVisible] = React.useState(false);
+  const note = useLocalSearchParams();
   const queryClient = useQueryClient();
-  const [inputs, setInputs] = React.useState<NewNoteProps>({
-    title: "",
-    content: "",
-  });
-  const [isMoreModalOpen, setIsMoreModalOpen] = React.useState(false);
-  const bottomDrawerRef = React.useRef<BottomSheetModal>(null);
+  const [isShowMoreModalOpen, setIsShowMoreModalOpen] = React.useState(false);
   const bottomMoveNoteDrawerRef = React.useRef<BottomSheetModal>(null);
   const bottomNoteDetailsDrawerRef = React.useRef<BottomSheetModal>(null);
-  const [isKeyboardVisible, setIsKeyboardVisible] = React.useState(false);
+  const bottomDeleteNoteDrawerRef = React.useRef<BottomSheetModal>(null);
 
   const { data: noteData, isLoading: isLoadingNoteData } = useQuery({
     queryKey: ["note", Number(note.noteId)],
@@ -58,11 +43,14 @@ export default function NoteScreen() {
 
   const noteDate = noteData?.updated_at;
 
+  const initialContent = convertToJson(noteData?.content);
+
+  const [title, setTitle] = React.useState(noteData?.title ?? "");
+  const [content, setContent] = React.useState(initialContent ?? "");
+
   React.useEffect(() => {
-    setInputs({
-      title: noteData?.title || "",
-      content: noteData?.content || "",
-    });
+    setTitle(noteData?.title || "");
+    setContent(initialContent!);
   }, [noteData]);
 
   React.useEffect(() => {
@@ -80,175 +68,17 @@ export default function NoteScreen() {
     };
   }, []);
 
-  const handleHideKeyboard = () => {
-    if (isMoreModalOpen) {
-      setIsMoreModalOpen(false);
-    }
-    Keyboard.dismiss();
-  };
-
-  function handleInputChange(name: keyof NewNoteProps, value: string) {
-    const saveToUndoStack = debounce(() => {
-      undoStack.current.push({ ...inputs });
-      redoStack.current = [];
-    }, 500);
-
-    if (undoStack.current.length > 0) {
-      saveToUndoStack();
-    } else {
-      undoStack.current.push({ ...inputs });
-      redoStack.current = [];
-    }
-
-    setInputs((prev) => ({ ...prev, [name]: value }));
-  }
-
-  function handleUndo() {
-    if (isMoreModalOpen) {
-      setIsMoreModalOpen(false);
-    }
-    if (undoStack.current.length > 0) {
-      const previousState = undoStack.current.pop()!;
-      redoStack.current.push({ ...inputs });
-      setInputs(previousState);
-    }
-  }
-
-  function handleRedo() {
-    if (isMoreModalOpen) {
-      setIsMoreModalOpen(false);
-    }
-
-    if (redoStack.current.length > 0) {
-      const nextState = redoStack.current.pop()!;
-      undoStack.current.push({ ...inputs });
-      setInputs(nextState);
-    }
-  }
-
-  async function refetchNotes() {
-    await queryClient.refetchQueries({ queryKey: ["notes"] });
-    await queryClient.refetchQueries({ queryKey: ["note"] });
-    await queryClient.refetchQueries({ queryKey: ["notes_calendar"] });
-  }
-
-  async function refetchNotebooks() {
-    await queryClient.refetchQueries({ queryKey: ["notebook"] });
-  }
-
-  const noChanges =
-    inputs.title === noteData?.title && inputs.content === noteData?.content;
-
-  const handlePresentModalPress = React.useCallback(() => {
-    Keyboard.dismiss();
-    setIsMoreModalOpen(false);
-    bottomDrawerRef.current?.present();
-  }, []);
-
-  async function handleDeleteNote() {
-    try {
-      await deleteNote(Number(note.noteId));
-      refetchNotes();
-      refetchNotebooks();
-      router.back();
-    } catch (error) {
-      toast.error("An error occurred. Please try again.");
-    }
-  }
-
-  async function handleUpdateNote(
-    { handleback }: { handleback?: boolean } = { handleback: true }
-  ) {
-    if (inputs.content.length === 0) {
-      handleDeleteNote();
-      return;
-    }
-
-    if (noChanges) {
-      if (handleback) {
-        router.back();
-      }
-      return;
-    }
-
-    try {
-      await updateNote(Number(note.noteId), {
-        ...inputs,
-        title: inputs.title.length === 0 ? "Untitled note" : inputs.title,
-      });
-
-      refetchNotes();
-
-      if (handleback) {
-        router.back();
-      }
-    } catch (error) {
-      toast.error("An error occurred. Please try again.");
-    }
-  }
-
-  async function handleShareNote() {
-    try {
-      setIsMoreModalOpen(false);
-
-      const message = `${inputs.title || "Untitled Note"}\n\n${inputs.content}`;
-
-      await Share.share({
-        title: inputs.title || "Untitled Note",
-        message: message,
-      });
-    } catch (error) {
-      toast.error("An error occurred. Please try again.");
-    }
-  }
-
-  const handleToggleBottomMoveNoteDrawer = () => {
-    Keyboard.dismiss();
-    setIsMoreModalOpen(false);
-    bottomMoveNoteDrawerRef.current?.present();
-  };
-
-  const handleToggleBottomNoteDetailsDrawer = () => {
-    Keyboard.dismiss();
-    setIsMoreModalOpen(false);
-    bottomNoteDetailsDrawerRef.current?.present();
-  };
-
-  const handleMoveNote = async (
-    notebookId: number | undefined,
-    isUncategorized?: boolean
-  ) => {
-    try {
-      await addNotesToNotebook({
-        noteIds: [Number(note.noteId)],
-        notebookId,
-        isUncategorized: isUncategorized,
-      });
-      refetchNotebooks();
-      refetchNotes();
-      setIsMoreModalOpen(false);
-      toast.success("Moved successfully");
-    } catch (error) {
-      console.error("Error moving notes:", error);
-      toast.error(
-        "An error occurred while moving the notes. Please try again."
-      );
-    }
-  };
-
-  // save note on back press button
-  async function handleBack() {
-    if (isMoreModalOpen) {
-      setIsMoreModalOpen(false);
-    }
-    await handleUpdateNote();
-  }
+  React.useEffect(() => {
+    return () => {
+      NavigationBar.setBackgroundColorAsync(colors[theme].background);
+    };
+  }, [theme]);
 
   // save note on back press
   React.useEffect(() => {
     const backAction = async () => {
-      if (isMoreModalOpen) {
-        setIsMoreModalOpen(false);
+      if (isShowMoreModalOpen) {
+        setIsShowMoreModalOpen(false);
         return true;
       }
 
@@ -270,13 +100,13 @@ export default function NoteScreen() {
     );
 
     return () => backHandler.remove();
-  }, [inputs, isMoreModalOpen]);
+  }, [title, content, isShowMoreModalOpen]);
 
   // save note on app state change
   React.useEffect(() => {
     const handleAppStateChange = async (nextAppState: AppStateStatus) => {
       if (nextAppState === "background" || nextAppState === "inactive") {
-        if (inputs.content.length > 0) {
+        if (content.length > 0) {
           await handleUpdateNote({ handleback: false });
         }
       }
@@ -290,194 +120,175 @@ export default function NoteScreen() {
     return () => {
       subscription.remove();
     };
-  }, [inputs]);
+  }, [title, content]);
+
+  function ChangeNavigationBarColor({
+    color = colors[theme].editor.toolbar_background,
+  }: {
+    color?: string;
+  }) {
+    NavigationBar.setBackgroundColorAsync(color);
+  }
+
+  async function refetchNotes() {
+    await queryClient.refetchQueries({ queryKey: ["notes"] });
+    await queryClient.refetchQueries({ queryKey: ["note"] });
+    await queryClient.refetchQueries({ queryKey: ["notes_calendar"] });
+  }
+
+  async function refetchNotebooks() {
+    await queryClient.refetchQueries({ queryKey: ["notebook"] });
+  }
+
+  async function handleShare() {
+    try {
+      await Share.share({
+        title: title,
+        message: `${title || "Untitled Note"}\n\n${extractPlainText(content)}`,
+      });
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+    }
+  }
+
+  async function handleDeleteNote() {
+    try {
+      await deleteNote(Number(note.noteId));
+      refetchNotes();
+      refetchNotebooks();
+      router.back();
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+    }
+  }
+
+  async function handleMoveNote(
+    notebookId: number | undefined,
+    isUncategorized?: boolean
+  ) {
+    try {
+      await addNotesToNotebook({
+        noteIds: [Number(note.noteId)],
+        notebookId,
+        isUncategorized: isUncategorized,
+      });
+      refetchNotebooks();
+      refetchNotes();
+      toast.success("Moved successfully");
+    } catch (error) {
+      console.error("Error moving notes:", error);
+      toast.error(
+        "An error occurred while moving the notes. Please try again."
+      );
+    }
+  }
+
+  async function handleUpdateNote(
+    { handleback }: { handleback?: boolean } = { handleback: true }
+  ) {
+    const noChanges = title === noteData?.title && content === initialContent;
+
+    if (noChanges && title.length > 0) {
+      if (handleback) {
+        router.back();
+      }
+      return;
+    }
+
+    try {
+      await updateNote(Number(note.noteId), {
+        title: title.length === 0 ? "Untitled note" : title,
+        content,
+      });
+
+      refetchNotes();
+
+      if (handleback) {
+        router.back();
+      }
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+    }
+  }
+
+  const handleToggleBottomMoveNoteDrawer = () => {
+    NavigationBar.setBackgroundColorAsync(colors[theme].background);
+    bottomMoveNoteDrawerRef.current?.present();
+  };
+
+  const handleToggleBottomNoteDetailsDrawer = () => {
+    NavigationBar.setBackgroundColorAsync(colors[theme].background);
+    bottomNoteDetailsDrawerRef.current?.present();
+  };
+
+  const handleToggleBottomNoteDeleteDrawer = () => {
+    NavigationBar.setBackgroundColorAsync(colors[theme].background);
+    bottomDeleteNoteDrawerRef.current?.present();
+  };
+
+  // save note on back press button
+  async function handleBack() {
+    await handleUpdateNote();
+  }
 
   if (isLoadingNoteData) {
     return (
       <View style={styles.loadingContainer}>
         <Loader />
-        <Text style={styles.loadingText}>Loading note...</Text>
       </View>
     );
   }
 
   return (
     <>
-      <TouchableWithoutFeedback
-        style={styles.container}
-        onPress={() => setIsMoreModalOpen(false)}
-      >
-        <View style={styles.wrapper}>
-          <KeyboardAvoidingView
-            style={styles.container}
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 64}
-            enabled={isKeyboardVisible}
-          >
-            <View style={styles.header}>
-              <TouchableOpacity style={styles.button} onPress={handleBack}>
-                <Icon name="ArrowLeft" />
-              </TouchableOpacity>
-              <View style={styles.headerSecton}>
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={handleUndo}
-                  disabled={undoStack.current.length === 0}
-                >
-                  <Icon name="Undo2" muted={undoStack.current.length === 0} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={handleRedo}
-                  disabled={redoStack.current.length === 0}
-                >
-                  <Icon name="Redo2" muted={redoStack.current.length === 0} />
-                </TouchableOpacity>
-                {isKeyboardVisible && (
-                  <TouchableOpacity
-                    style={styles.button}
-                    onPress={handleHideKeyboard}
-                  >
-                    <Icon name="Check" />
-                  </TouchableOpacity>
-                )}
-                <View style={styles.moreContainer}>
-                  <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => {
-                      setIsMoreModalOpen(!isMoreModalOpen);
-                    }}
-                  >
-                    <Icon name="EllipsisVertical" />
-                  </TouchableOpacity>
-                  {isMoreModalOpen && (
-                    <TouchableWithoutFeedback>
-                      <MotiView
-                        style={styles.moreModal}
-                        customBackgroundColor={colors[theme].grayscale_light}
-                        from={{ opacity: 0, translateY: -10 }}
-                        animate={{ opacity: 1, translateY: 0 }}
-                        transition={{
-                          type: "timing",
-                          duration: 150,
-                        }}
-                      >
-                        <TouchableOpacity
-                          style={styles.moreModalButton}
-                          onPress={handleShareNote}
-                          disabled={inputs.content.length === 0}
-                        >
-                          <Icon
-                            name="Share2"
-                            strokeWidth={1.2}
-                            size={18}
-                            muted={inputs.content.length === 0}
-                          />
-                          <Text disabled={inputs.content.length === 0}>
-                            Share
-                          </Text>
-                        </TouchableOpacity>
-                        <View
-                          style={styles.moreModalDivider}
-                          customBackgroundColor={colors[theme].foggiest}
-                        />
-                        <TouchableOpacity
-                          style={styles.moreModalButton}
-                          onPress={handleToggleBottomMoveNoteDrawer}
-                          disabled={inputs.content.length === 0}
-                        >
-                          <Icon
-                            name="NotebookPen"
-                            strokeWidth={1.2}
-                            size={18}
-                            muted={inputs.content.length === 0}
-                          />
-                          <Text disabled={inputs.content.length === 0}>
-                            Move
-                          </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          style={styles.moreModalButton}
-                          onPress={() => handleToggleBottomNoteDetailsDrawer()}
-                        >
-                          <Icon name="Info" strokeWidth={1.2} size={18} />
-                          <Text>Details</Text>
-                        </TouchableOpacity>
-                        <View
-                          style={styles.moreModalDivider}
-                          customBackgroundColor={colors[theme].foggiest}
-                        />
-                        <TouchableOpacity
-                          style={[
-                            styles.moreModalButton,
-                            inputs.content.length === 0 && { display: "none" },
-                          ]}
-                          onPress={handlePresentModalPress}
-                        >
-                          <Icon
-                            name="Eraser"
-                            strokeWidth={1.2}
-                            size={18}
-                            customColor={colors[theme].primary}
-                          />
-                          <Text customTextColor={colors[theme].primary}>
-                            Delete
-                          </Text>
-                        </TouchableOpacity>
-                      </MotiView>
-                    </TouchableWithoutFeedback>
-                  )}
-                </View>
-              </View>
-            </View>
-            <View style={styles.content}>
-              <Text
-                style={styles.lastEditedText}
-                customTextColor={colors[theme].grayscale}
-              >
-                Last edited on {formatLongDate(noteDate!)}
-              </Text>
-              <MarkdownTextInput
-                value={inputs.title}
-                onChangeText={(e) => handleInputChange("title", e)}
-                style={[styles.noteTitle]}
-                placeholder="Untitled note"
-                parser={parseExpensiMark}
-                onPress={() => setIsMoreModalOpen(false)}
-                multiline={true}
-                numberOfLines={2}
-                maxLength={48}
-              />
-              <MarkdownTextInput
-                value={inputs.content}
-                onChangeText={(e) => handleInputChange("content", e)}
-                multiline={true}
-                style={[styles.noteContent]}
-                placeholder="Capture your thoughts..."
-                parser={parseExpensiMark}
-                onPress={() => setIsMoreModalOpen(false)}
-                autoFocus={noteData?.content.length === 0}
-              />
-            </View>
-          </KeyboardAvoidingView>
-        </View>
-      </TouchableWithoutFeedback>
+      <SafeAreaView style={styles.container}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior="height"
+          keyboardVerticalOffset={isKeyboardVisible ? 27 : 0}
+          enabled={isKeyboardVisible}
+        >
+          <LexicalEditorComponent
+            handleBack={handleBack}
+            isKeyboardVisible={isKeyboardVisible}
+            ChangeNavigationBarColor={ChangeNavigationBarColor}
+            isShowMoreModalOpen={isShowMoreModalOpen}
+            setIsShowMoreModalOpen={setIsShowMoreModalOpen}
+            handleShare={handleShare}
+            handleToggleBottomMoveNoteDrawer={handleToggleBottomMoveNoteDrawer}
+            handleToggleBottomNoteDetailsDrawer={
+              handleToggleBottomNoteDetailsDrawer
+            }
+            handleToggleBottomNoteDeleteDrawer={
+              handleToggleBottomNoteDeleteDrawer
+            }
+            setTitle={setTitle}
+            setContent={setContent}
+            title={title}
+            content={initialContent!}
+            noteDate={noteDate!}
+          />
+        </KeyboardAvoidingView>
+      </SafeAreaView>
       <BottomDrawerConfirm
-        ref={bottomDrawerRef}
+        ref={bottomDeleteNoteDrawerRef}
         title="Delete this note?"
         description="This note will be permanently deleted from this device."
         submitButtonText="Delete"
         onSubmit={() => handleDeleteNote()}
+        previousNavigationBarColor={colors[theme].tint}
       />
       <BottomDrawerMoveNote
         ref={bottomMoveNoteDrawerRef}
         title="Move note"
         description="Make this note part of a notebook."
         onSubmit={handleMoveNote}
+        previousNavigationBarColor={colors[theme].tint}
       />
       <BottomDrawerNoteDetails
         ref={bottomNoteDetailsDrawerRef}
-        note={noteData!}
+        note={noteData}
+        previousNavigationBarColor={colors[theme].tint}
       />
     </>
   );
@@ -487,91 +298,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  wrapper: {
-    flex: 1,
-    padding: 16,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 24,
-  },
-  headerSecton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  button: {
-    padding: 4,
-  },
-  moreContainer: {
-    position: "relative",
-  },
-  moreModal: {
-    position: "absolute",
-    right: 4,
-    top: 36,
-    borderRadius: 4,
-    zIndex: 10,
-    width: 108,
-    elevation: 5,
-    display: "flex",
-    flexDirection: "column",
-  },
-  moreModalButton: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    padding: 12,
-    borderRadius: 1,
-  },
-  moreModalDivider: {
-    height: 1,
-  },
-  content: {
-    flex: 1,
-    flexDirection: "column",
-    gap: 16,
-    position: "relative",
-  },
-  lastEditedText: {
-    fontSize: 14,
-  },
-  noteTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    padding: 0,
-    margin: 0,
-    textAlignVertical: "top",
-    height: "auto",
-  },
-  noteContent: {
-    padding: 0,
-    margin: 0,
-    flex: 1,
-    textAlignVertical: "top",
-    fontSize: 16,
-  },
-  noteSave: {
-    position: "absolute",
-    bottom: 16,
-    right: 16,
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-  },
   loadingContainer: {
     flex: 1,
     flexDirection: "column",
@@ -579,6 +305,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     textAlign: "center",
     gap: 12,
+    position: "absolute",
+    inset: 0,
   },
   loadingText: {
     fontSize: 16,

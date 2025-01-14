@@ -15,11 +15,12 @@ import { FlashList } from "@shopify/flash-list";
 import { useNotebooksSelectedToMoveMode } from "@/hooks/useNotebookSelectedToMove";
 import Icon from "./icon";
 import Loader from "./loading";
+import * as NavigationBar from "expo-navigation-bar";
 
 const BottomDrawerMoveNote = React.forwardRef<
   BottomSheetModal,
   Omit<BottomDrawerMoveNoteProps, "ref">
->(({ title, description, onSubmit }, ref) => {
+>(({ title, description, onSubmit, previousNavigationBarColor }, ref) => {
   const theme = useColorScheme();
 
   const { data: notebooks, isLoading: isLoadingNotebooks } = useQuery({
@@ -35,6 +36,10 @@ const BottomDrawerMoveNote = React.forwardRef<
   } = useNotebooksSelectedToMoveMode();
 
   const closeDrawer = () => {
+    if (previousNavigationBarColor) {
+      NavigationBar.setBackgroundColorAsync(previousNavigationBarColor);
+    }
+
     (ref as React.RefObject<BottomSheetModal>).current?.dismiss();
     clearSelectedNotebook();
     setUncategorizedSelected(false);
@@ -168,7 +173,12 @@ const BottomDrawerMoveNote = React.forwardRef<
                     estimatedItemSize={width > 400 ? 180 : 156}
                     ListFooterComponent={
                       <TouchableOpacity
-                        style={styles.uncategorizedButton}
+                        style={[
+                          styles.uncategorizedButton,
+                          notebooks.length > 3
+                            ? { marginTop: 8 }
+                            : { marginTop: 152 },
+                        ]}
                         customBackgroundColor={
                           uncategorizedSelected
                             ? colors[theme].primary
