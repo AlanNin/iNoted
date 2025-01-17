@@ -18,6 +18,7 @@ export default function ScreensLayout() {
         drawerItemStyle: {
           borderRadius: 8,
         },
+        swipeEnabled: false,
       }}
     >
       <Drawer.Screen

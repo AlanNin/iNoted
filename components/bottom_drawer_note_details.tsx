@@ -16,7 +16,7 @@ import * as NavigationBar from "expo-navigation-bar";
 const BottomDrawerNoteDetails = React.forwardRef<
   BottomSheetModal,
   Omit<BottomDrawerNoteDetailsProps, "ref">
->(({ note, previousNavigationBarColor }, ref) => {
+>(({ note }, ref) => {
   const theme = useColorScheme();
 
   const { data: notebookData, isLoading: isLoadingNotebookData } = useQuery({
@@ -26,9 +26,6 @@ const BottomDrawerNoteDetails = React.forwardRef<
   });
 
   const closeDrawer = () => {
-    if (previousNavigationBarColor) {
-      NavigationBar.setBackgroundColorAsync(previousNavigationBarColor);
-    }
     (ref as React.RefObject<BottomSheetModal>).current?.dismiss();
   };
 

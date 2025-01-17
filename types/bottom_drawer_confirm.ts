@@ -4,5 +4,4 @@ export type BottomDrawerConfirmProps = {
   submitButtonText: string;
   onSubmit: () => void;
   onCancel?: () => void;
-  previousNavigationBarColor?: string;
 };

@@ -9,7 +9,6 @@ import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { CheckListPlugin } from "@lexical/react/LexicalCheckListPlugin";
 import { ListNode, ListItemNode } from "@lexical/list";
-import { $getRoot, EditorState, LexicalEditor } from "lexical";
 import {
   theme as lexicalTheme,
   dark_theme as lexicalDarkTheme,
@@ -27,6 +26,7 @@ import { CodeNode } from "@lexical/code";
 import { LinkNode } from "@lexical/link";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
+import EditablePlugin from "@/components/lexical/plugins/EditablePlugin";
 
 const placeholder = "Capture your thoughts...";
 
@@ -36,7 +36,6 @@ export default function LexicalEditorComponent({
   handleShare,
   handleBack,
   isKeyboardVisible,
-  ChangeNavigationBarColor,
   handleToggleBottomMoveNoteDrawer,
   handleToggleBottomNoteDetailsDrawer,
   handleToggleBottomNoteDeleteDrawer,
@@ -45,8 +44,12 @@ export default function LexicalEditorComponent({
   title,
   content,
   noteDate,
+  navigationType,
+  handleToastAndroid,
 }: LexicalProps) {
   const theme = useColorScheme();
+  const [mode, SetMode] = React.useState<"edit" | "view">("edit");
+  const [isTitleEditable, setIsTitleEditable] = React.useState(true);
 
   const editorConfig = {
     namespace: "Lexical Editor",
@@ -66,31 +69,19 @@ export default function LexicalEditorComponent({
     theme: theme === "light" ? lexicalTheme : lexicalDarkTheme,
   };
 
-  React.useEffect(() => {
-    const handleVisibilityChange = () => {
-      ChangeNavigationBarColor({ color: undefined });
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    ChangeNavigationBarColor({ color: undefined });
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, []);
-
   return (
     <LexicalComposer initialConfig={editorConfig}>
       <main
         className="main-container"
-        style={{ background: colors[theme].editor.background }}
+        style={{
+          background: colors[theme].editor.background,
+          color: colors[theme].editor.text,
+        }}
       >
         <Header
           isShowMoreModalOpen={isShowMoreModalOpen}
           setIsShowMoreModalOpen={setIsShowMoreModalOpen}
           handleBack={handleBack}
-          isKeyboardVisible={isKeyboardVisible}
           handleShare={handleShare}
           handleToggleBottomMoveNoteDrawer={handleToggleBottomMoveNoteDrawer}
           handleToggleBottomNoteDetailsDrawer={
@@ -99,8 +90,17 @@ export default function LexicalEditorComponent({
           handleToggleBottomNoteDeleteDrawer={
             handleToggleBottomNoteDeleteDrawer
           }
+          handleToastAndroid={handleToastAndroid}
+          mode={mode}
+          SetMode={SetMode}
+          setIsTitleEditable={setIsTitleEditable}
         />
-        <ContentTop noteDate={noteDate} setTitle={setTitle} title={title} />
+        <ContentTop
+          noteDate={noteDate}
+          setTitle={setTitle}
+          title={title}
+          isTitleEditable={isTitleEditable}
+        />
 
         <div className="editor-container">
           <div
@@ -113,7 +113,13 @@ export default function LexicalEditorComponent({
             <RichTextPlugin
               contentEditable={
                 <ContentEditable
-                  className="editor-input"
+                  id="editor-input-content"
+                  autoComplete="off"
+                  spellCheck="false"
+                  autoCorrect="off"
+                  className={`editor-input${
+                    theme === "dark" ? " dark-editor-input" : ""
+                  }`}
                   aria-placeholder={placeholder}
                   style={{
                     color: colors[theme].editor.text,
@@ -141,10 +147,16 @@ export default function LexicalEditorComponent({
             <ListPlugin />
             <CheckListPlugin />
             <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
+            <EditablePlugin
+              isKeyboardVisible={isKeyboardVisible}
+              setIsTitleEditable={setIsTitleEditable}
+              navigationType={navigationType}
+              mode={mode}
+            />
             {/* <TreeViewPlugin /> */}
           </div>
         </div>
-        <ToolbarPlugin />
+        {mode === "edit" && isKeyboardVisible && <ToolbarPlugin />}
       </main>
     </LexicalComposer>
   );

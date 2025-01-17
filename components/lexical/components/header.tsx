@@ -1,48 +1,60 @@
 // dom component, use inside existing dom component or specify "use dom" in the file
 import Icon from "@/components/icon";
-import UndoButton from "./undoButton";
-import RedoButton from "./redoButton";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import React from "react";
+import React, { useEffect } from "react";
 import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
 import { MotiView } from "moti";
-import { BackHandler } from "react-native";
-import { $setSelection, SELECTION_CHANGE_COMMAND } from "lexical";
 
 export default function Header({
   isShowMoreModalOpen,
   setIsShowMoreModalOpen,
   handleBack,
-  isKeyboardVisible,
   handleShare,
   handleToggleBottomMoveNoteDrawer,
   handleToggleBottomNoteDetailsDrawer,
   handleToggleBottomNoteDeleteDrawer,
+  handleToastAndroid,
+  mode,
+  SetMode,
+  setIsTitleEditable,
 }: {
   isShowMoreModalOpen: boolean;
   setIsShowMoreModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   handleBack: () => void;
-  isKeyboardVisible: boolean;
   handleShare: () => void;
   handleToggleBottomMoveNoteDrawer: () => void;
   handleToggleBottomNoteDetailsDrawer: () => void;
   handleToggleBottomNoteDeleteDrawer: () => void;
+  handleToastAndroid: (message: string) => void;
+  mode: "edit" | "view";
+  SetMode: (mode: "edit" | "view") => void;
+  setIsTitleEditable: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const theme = useColorScheme();
   const [editor] = useLexicalComposerContext();
   const moreContainerRef = React.useRef<HTMLDivElement>(null);
 
+  function toggleMode(mode: "edit" | "view") {
+    if (mode === "edit") {
+      setIsTitleEditable(true);
+      editor.setEditable(true);
+      editor.focus();
+      handleToastAndroid("Edit Mode");
+    }
+
+    if (mode === "view") {
+      setIsTitleEditable(false);
+      editor.setEditable(false);
+      handleToastAndroid("View-Only");
+    }
+
+    SetMode(mode);
+  }
+
   function toggleMoreModal() {
     setIsShowMoreModalOpen(!isShowMoreModalOpen);
   }
-
-  const handleHideKeyboard = React.useCallback(() => {
-    editor.blur();
-    editor.update(() => {
-      $setSelection(null);
-    });
-  }, []);
 
   React.useEffect(() => {
     const handleClickOutsideMoreModal = (event: any) => {
@@ -53,30 +65,11 @@ export default function Header({
         setIsShowMoreModalOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClickOutsideMoreModal);
+    document.addEventListener("mouseover", handleClickOutsideMoreModal);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutsideMoreModal);
+      document.removeEventListener("mouseout", handleClickOutsideMoreModal);
     };
   }, []);
-
-  React.useEffect(() => {
-    const backAction = async () => {
-      if (isShowMoreModalOpen) {
-        setIsShowMoreModalOpen(false);
-        return true;
-      }
-    };
-
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      () => {
-        backAction();
-        return true;
-      }
-    );
-
-    return () => backHandler.remove();
-  }, [isShowMoreModalOpen]);
 
   const moreOptions = [
     {
@@ -108,13 +101,17 @@ export default function Header({
         <Icon name="ArrowLeft" />
       </button>
       <div className="header-right">
-        <UndoButton />
-        <RedoButton />
-        {isKeyboardVisible && (
-          <button onClick={handleHideKeyboard}>
-            <Icon name="Check" />
+        {mode === "edit" && (
+          <button onClick={() => toggleMode("view")}>
+            <Icon name="BookOpenText" />
           </button>
         )}
+        {mode === "view" && (
+          <button onClick={() => toggleMode("edit")}>
+            <Icon name="FilePen" />
+          </button>
+        )}
+
         <div className="more-container" ref={moreContainerRef}>
           <button onClick={toggleMoreModal}>
             <Icon name="EllipsisVertical" />

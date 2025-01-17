@@ -7,10 +7,12 @@ export default function ContentTop({
   title,
   noteDate,
   setTitle,
+  isTitleEditable,
 }: {
   title: string;
   noteDate: string;
   setTitle: React.Dispatch<React.SetStateAction<string>>;
+  isTitleEditable: boolean;
 }) {
   const theme = useColorScheme();
 
@@ -21,12 +23,16 @@ export default function ContentTop({
       </p>
       <input
         placeholder="Untitled note"
+        autoComplete="off"
+        spellCheck="false"
+        autoCorrect="off"
         className="title-input"
         style={{
           color: colors[theme].text,
         }}
-        value={title}
+        defaultValue={title}
         onChange={(e) => setTitle(e.target.value)}
+        disabled={!isTitleEditable}
       />
     </div>
   );

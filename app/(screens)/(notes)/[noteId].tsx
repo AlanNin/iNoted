@@ -1,5 +1,5 @@
 import LexicalEditorComponent from "@/components/lexical";
-import { SafeAreaView, Text, View } from "@/components/themed";
+import { SafeAreaView, View } from "@/components/themed";
 import { toast } from "@backpackapp-io/react-native-toast";
 import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
@@ -8,11 +8,9 @@ import {
   AppStateStatus,
   BackHandler,
   Keyboard,
-  KeyboardAvoidingView,
   Share,
   StyleSheet,
 } from "react-native";
-import * as NavigationBar from "expo-navigation-bar";
 import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
@@ -24,6 +22,9 @@ import BottomDrawerMoveNote from "@/components/bottom_drawer_move_note";
 import BottomDrawerNoteDetails from "@/components/bottom_drawer_note_details";
 import { convertToJson, extractPlainText } from "@/lib/text_editor";
 import Loader from "@/components/loading";
+import { getNavigationBarType } from "react-native-navigation-bar-detector";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { ToastAndroid } from "react-native";
 
 export default function TestScreen() {
   const theme = useColorScheme();
@@ -34,6 +35,7 @@ export default function TestScreen() {
   const bottomMoveNoteDrawerRef = React.useRef<BottomSheetModal>(null);
   const bottomNoteDetailsDrawerRef = React.useRef<BottomSheetModal>(null);
   const bottomDeleteNoteDrawerRef = React.useRef<BottomSheetModal>(null);
+  const navigationType = getNavigationBarType();
 
   const { data: noteData, isLoading: isLoadingNoteData } = useQuery({
     queryKey: ["note", Number(note.noteId)],
@@ -52,27 +54,6 @@ export default function TestScreen() {
     setTitle(noteData?.title || "");
     setContent(initialContent!);
   }, [noteData]);
-
-  React.useEffect(() => {
-    const keyboardShowListener = Keyboard.addListener("keyboardDidShow", () => {
-      setIsKeyboardVisible(true);
-    });
-
-    const keyboardHideListener = Keyboard.addListener("keyboardDidHide", () => {
-      setIsKeyboardVisible(false);
-    });
-
-    return () => {
-      keyboardShowListener.remove();
-      keyboardHideListener.remove();
-    };
-  }, []);
-
-  React.useEffect(() => {
-    return () => {
-      NavigationBar.setBackgroundColorAsync(colors[theme].background);
-    };
-  }, [theme]);
 
   // save note on back press
   React.useEffect(() => {
@@ -121,14 +102,6 @@ export default function TestScreen() {
       subscription.remove();
     };
   }, [title, content]);
-
-  function ChangeNavigationBarColor({
-    color = colors[theme].editor.toolbar_background,
-  }: {
-    color?: string;
-  }) {
-    NavigationBar.setBackgroundColorAsync(color);
-  }
 
   async function refetchNotes() {
     await queryClient.refetchQueries({ queryKey: ["notes"] });
@@ -212,23 +185,26 @@ export default function TestScreen() {
   }
 
   const handleToggleBottomMoveNoteDrawer = () => {
-    NavigationBar.setBackgroundColorAsync(colors[theme].background);
     bottomMoveNoteDrawerRef.current?.present();
   };
 
   const handleToggleBottomNoteDetailsDrawer = () => {
-    NavigationBar.setBackgroundColorAsync(colors[theme].background);
     bottomNoteDetailsDrawerRef.current?.present();
   };
 
   const handleToggleBottomNoteDeleteDrawer = () => {
-    NavigationBar.setBackgroundColorAsync(colors[theme].background);
     bottomDeleteNoteDrawerRef.current?.present();
   };
 
   // save note on back press button
   async function handleBack() {
+    await setIsKeyboardVisible(false);
+    Keyboard.dismiss();
     await handleUpdateNote();
+  }
+
+  function handleToastAndroid(message: string) {
+    ToastAndroid.show(message, ToastAndroid.SHORT);
   }
 
   if (isLoadingNoteData) {
@@ -241,17 +217,24 @@ export default function TestScreen() {
 
   return (
     <>
-      <SafeAreaView style={styles.container}>
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior="height"
-          keyboardVerticalOffset={isKeyboardVisible ? 27 : 0}
-          enabled={isKeyboardVisible}
+      <SafeAreaView
+        style={styles.container}
+        customBackgroundColor={
+          isKeyboardVisible
+            ? colors[theme].editor.toolbar_background
+            : colors[theme].background
+        }
+      >
+        <KeyboardAwareScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          enableOnAndroid={true}
+          keyboardShouldPersistTaps="handled"
+          onKeyboardDidShow={() => setIsKeyboardVisible(true)}
+          onKeyboardDidHide={() => setIsKeyboardVisible(false)}
         >
           <LexicalEditorComponent
             handleBack={handleBack}
             isKeyboardVisible={isKeyboardVisible}
-            ChangeNavigationBarColor={ChangeNavigationBarColor}
             isShowMoreModalOpen={isShowMoreModalOpen}
             setIsShowMoreModalOpen={setIsShowMoreModalOpen}
             handleShare={handleShare}
@@ -267,28 +250,28 @@ export default function TestScreen() {
             title={title}
             content={initialContent!}
             noteDate={noteDate!}
+            navigationType={navigationType}
+            handleToastAndroid={handleToastAndroid}
           />
-        </KeyboardAvoidingView>
+        </KeyboardAwareScrollView>
       </SafeAreaView>
+
       <BottomDrawerConfirm
         ref={bottomDeleteNoteDrawerRef}
         title="Delete this note?"
         description="This note will be permanently deleted from this device."
         submitButtonText="Delete"
         onSubmit={() => handleDeleteNote()}
-        previousNavigationBarColor={colors[theme].tint}
       />
       <BottomDrawerMoveNote
         ref={bottomMoveNoteDrawerRef}
         title="Move note"
         description="Make this note part of a notebook."
         onSubmit={handleMoveNote}
-        previousNavigationBarColor={colors[theme].tint}
       />
       <BottomDrawerNoteDetails
         ref={bottomNoteDetailsDrawerRef}
         note={noteData}
-        previousNavigationBarColor={colors[theme].tint}
       />
     </>
   );

@@ -1,7 +1,6 @@
 type LexicalProps = {
   handleBack: () => void;
   isKeyboardVisible: boolean;
-  ChangeNavigationBarColor: ({ color }: { color?: string }) => void;
   isShowMoreModalOpen: boolean;
   setIsShowMoreModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   handleShare: () => void;
@@ -13,4 +12,6 @@ type LexicalProps = {
   title: string;
   content: string;
   noteDate: string;
+  navigationType: string;
+  handleToastAndroid: (message: string) => void;
 };

@@ -20,7 +20,7 @@ import * as NavigationBar from "expo-navigation-bar";
 const BottomDrawerMoveNote = React.forwardRef<
   BottomSheetModal,
   Omit<BottomDrawerMoveNoteProps, "ref">
->(({ title, description, onSubmit, previousNavigationBarColor }, ref) => {
+>(({ title, description, onSubmit }, ref) => {
   const theme = useColorScheme();
 
   const { data: notebooks, isLoading: isLoadingNotebooks } = useQuery({
@@ -36,10 +36,6 @@ const BottomDrawerMoveNote = React.forwardRef<
   } = useNotebooksSelectedToMoveMode();
 
   const closeDrawer = () => {
-    if (previousNavigationBarColor) {
-      NavigationBar.setBackgroundColorAsync(previousNavigationBarColor);
-    }
-
     (ref as React.RefObject<BottomSheetModal>).current?.dismiss();
     clearSelectedNotebook();
     setUncategorizedSelected(false);

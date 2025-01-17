@@ -77,14 +77,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "transparent",
+    position: "absolute",
   },
   modalContainer: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
-    position: "absolute",
-    bottom: 0,
+    marginTop: "auto",
     width: 600,
     maxWidth: "100%",
     borderTopRightRadius: 16,

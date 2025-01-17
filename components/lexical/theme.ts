@@ -47,6 +47,6 @@ export const dark_theme = {
   ...theme,
   text: {
     ...theme.text,
-    highlight: "dark_editor-text-highlight",
+    highlight: "dark-editor-text-highlight",
   },
 };

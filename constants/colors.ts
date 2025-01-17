@@ -17,12 +17,14 @@ const colors: Colors = {
     editor: {
       background: "#f2f3f4",
       text: "#000",
+      text_highlight: "#fcb5c6",
       placeholder: "rgba(0, 0, 0, 0.7)",
       toolbar_background: "#fff",
       toolbar_icon: "#000",
       toolbar_icon_active: "#fff",
       toolbar_active: "#FF5781",
       toolbar_divider: "#d0d0d0",
+      checklist: "#FF5781",
     },
   },
   dark: {
@@ -43,12 +45,14 @@ const colors: Colors = {
     editor: {
       background: "#0f0f0f",
       text: "#fff",
+      text_highlight: "#ce335a",
       placeholder: "rgba(255, 255, 255, 0.5)",
       toolbar_background: "#242424",
       toolbar_icon: "#fff",
       toolbar_icon_active: "#fff",
       toolbar_active: "#C44565",
       toolbar_divider: "#424242",
+      checklist: "#FF5781",
     },
   },
 };

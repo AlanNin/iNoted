@@ -16,12 +16,14 @@ type ColorScheme = {
   editor: {
     background: string;
     text: string;
+    text_highlight: string;
     placeholder: string;
     toolbar_background: string;
     toolbar_icon: string;
     toolbar_icon_active: string;
     toolbar_active: string;
     toolbar_divider: string;
+    checklist: string;
   };
 };
 
