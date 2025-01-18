@@ -74,8 +74,17 @@ export const convertToJson = (text: string | null | undefined) => {
   }
 };
 
-export function extractPlainText(content: any) {
-  const data = typeof content === "string" ? JSON.parse(content) : content;
+export function parseEditorState(content: any) {
+  let data = content;
+
+  if (typeof content === "string") {
+    try {
+      data = JSON.parse(content);
+    } catch (error) {
+      return content;
+    }
+  }
+
   let texts: any = [];
 
   function traverse(node: any) {

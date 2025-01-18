@@ -20,7 +20,7 @@ import { addNotesToNotebook } from "@/queries/notebooks";
 import BottomDrawerConfirm from "@/components/bottom_drawer_confirm";
 import BottomDrawerMoveNote from "@/components/bottom_drawer_move_note";
 import BottomDrawerNoteDetails from "@/components/bottom_drawer_note_details";
-import { convertToJson, extractPlainText } from "@/lib/text_editor";
+import { convertToJson, parseEditorState } from "@/lib/text_editor";
 import Loader from "@/components/loading";
 import { getNavigationBarType } from "react-native-navigation-bar-detector";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -117,7 +117,7 @@ export default function TestScreen() {
     try {
       await Share.share({
         title: title,
-        message: `${title || "Untitled Note"}\n\n${extractPlainText(content)}`,
+        message: `${title || "Untitled Note"}\n\n${parseEditorState(content)}`,
       });
     } catch (error) {
       toast.error("An error occurred. Please try again.");
