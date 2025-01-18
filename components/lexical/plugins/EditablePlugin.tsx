@@ -1,4 +1,5 @@
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { $setSelection } from "lexical";
 import React from "react";
 
 export default function EditablePlugin({
@@ -31,7 +32,9 @@ export default function EditablePlugin({
     const timer = setTimeout(() => {
       editor.setEditable(true);
       setIsTitleEditable(true);
-      editor.focus();
+      editor.update(() => {
+        $setSelection(null);
+      });
     }, DELAY);
 
     return () => clearTimeout(timer);

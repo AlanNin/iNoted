@@ -26,44 +26,30 @@ const StorageScreen = () => {
   };
 
   const handleCreateBackup = async () => {
-    try {
-      const backupPath = await backupManager.createBackup();
-
-      await backupManager.shareBackup(backupPath);
-    } catch (error) {
-      toast.error("An error occurred. Please try again.");
-    }
+    await backupManager.createBackup();
   };
 
   const handleRestoreBackupConfirmation = async () => {
-    try {
-      const result = await DocumentPicker.getDocumentAsync({
-        type: "application/json",
-        copyToCacheDirectory: true,
-      });
+    const result = await DocumentPicker.getDocumentAsync({
+      type: "application/json",
+      copyToCacheDirectory: true,
+    });
 
-      if (result.canceled) {
-        return;
-      }
-      setResult(result);
-
-      handleToggleBottomConfirmRestoreDrawer();
-    } catch (error) {
-      toast.error("An error occurred. Please try again.");
+    if (result.canceled) {
+      return;
     }
+    setResult(result);
+
+    handleToggleBottomConfirmRestoreDrawer();
   };
 
   const handleRestoreBackup = async () => {
-    try {
-      const backupFilePath = await backupManager.importBackup(
-        result.assets[0].uri
-      );
-      await backupManager.restoreBackup(backupFilePath);
+    const backupFilePath = await backupManager.importBackup(
+      result.assets[0].uri
+    );
+    await backupManager.restoreBackup(backupFilePath);
 
-      reloadAppAsync();
-    } catch (error) {
-      toast.error("An error occurred. Please try again.");
-    }
+    reloadAppAsync();
   };
   return (
     <>

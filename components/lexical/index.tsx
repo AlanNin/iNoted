@@ -137,11 +137,10 @@ export default function LexicalEditorComponent({
               ErrorBoundary={LexicalErrorBoundary}
             />
             <OnChangePlugin
-              onChange={(editorState, editor, tags) => {
+              onChange={(editorState) => {
                 setContent(JSON.stringify(editorState.toJSON()));
               }}
               ignoreHistoryMergeTagChange
-              ignoreSelectionChange
             />
             <HistoryPlugin />
             <ListPlugin />

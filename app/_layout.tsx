@@ -32,25 +32,21 @@ SplashScreen.setOptions({
 
 export default function RootLayout() {
   const theme = useColorScheme();
-
-  setStatusBarStyle(theme === "light" ? "dark" : "light");
-
   const [fontsLoaded, fontsError] = useFonts({
     "Geist-Regular": require("@/assets/fonts/Geist-Regular.otf"),
     "Geist-SemiBold": require("@/assets/fonts/Geist-SemiBold.otf"),
   });
-
-  useDrizzleStudio(expo_db);
-
   const { success } = useMigrations(db_client, migrations);
+  const [isFirstAppLaunch] = useAppConfig<boolean>("isFirstAppLaunch", true);
+
+  setStatusBarStyle(theme === "light" ? "dark" : "light");
+  useDrizzleStudio(expo_db);
 
   React.useEffect(() => {
     if (fontsLoaded || fontsError) {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded, fontsError]);
-
-  const [isFirstAppLaunch] = useAppConfig<boolean>("isFirstAppLaunch", true);
 
   if (
     (!fontsLoaded && !fontsError) ||

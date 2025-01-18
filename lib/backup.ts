@@ -1,11 +1,10 @@
-import * as FileSystem from "expo-file-system";
-import * as Sharing from "expo-sharing";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SQLite from "expo-sqlite";
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { ExpoSQLiteDatabase } from "drizzle-orm/expo-sqlite/driver";
 import * as schemas from "@/db/schema";
 import { eq } from "drizzle-orm";
+import * as FileSystem from "expo-file-system";
 
 interface BackupData {
   appConfig: Record<string, any>;
@@ -16,6 +15,12 @@ interface BackupData {
     base64Data: string;
   }[];
 }
+
+interface BackupError extends Error {
+  code?: string;
+  message: string;
+}
+
 class AppBackupManager {
   private db: ExpoSQLiteDatabase;
   private backgroundsDir = `${FileSystem.documentDirectory}notebook-backgrounds/`;
@@ -24,25 +29,33 @@ class AppBackupManager {
     this.db = drizzle(sqliteDb);
   }
 
-  /**
-   * Create a complete backup of the app
-   * @returns {Promise<string>} Path to the backup file
-   */
   private async imageToBase64(filePath: string): Promise<string> {
     try {
-      // Read file as base64
       const base64 = await FileSystem.readAsStringAsync(filePath, {
         encoding: FileSystem.EncodingType.Base64,
       });
       return base64;
     } catch (error) {
-      console.error(`Failed to convert image to base64: ${filePath}`, error);
+      const backupError = error as BackupError;
+      console.error(
+        `Failed to convert image to base64: ${filePath}`,
+        backupError
+      );
       return "";
     }
   }
 
-  async createBackup(): Promise<string> {
+  async createBackup(): Promise<void> {
     try {
+      // Request permissions
+      const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+
+      if (!permissions.granted) {
+        throw new Error("Permission to access storage was denied");
+      }
+
+      const directoryUri = permissions.directoryUri;
+
       await FileSystem.makeDirectoryAsync(this.backgroundsDir, {
         intermediates: true,
       });
@@ -80,19 +93,20 @@ class AppBackupManager {
       };
 
       // Create backup file
-      const backupDir = `${FileSystem.documentDirectory}app-backup/`;
-      await FileSystem.makeDirectoryAsync(backupDir, { intermediates: true });
-
-      const backupFilePath = `${backupDir}app_backup_${Date.now()}.json`;
-      await FileSystem.writeAsStringAsync(
-        backupFilePath,
-        JSON.stringify(backupData, null, 2)
+      const filename = `iNoted_backup_${Date.now()}.json`;
+      const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
+        directoryUri,
+        filename,
+        "application/json"
       );
-
-      return backupFilePath;
+      await FileSystem.writeAsStringAsync(
+        fileUri,
+        JSON.stringify(backupData, null, 2),
+        { encoding: FileSystem.EncodingType.UTF8 }
+      );
     } catch (error) {
-      console.error("Backup creation failed:", error);
-      throw error;
+      const backupError = error as BackupError;
+      throw backupError;
     }
   }
 
@@ -238,21 +252,6 @@ class AppBackupManager {
       console.error("Backup restoration failed:", error);
       throw error;
     }
-  }
-
-  /**
-   * Share the backup file
-   * @param {string} backupFilePath Path to the backup file
-   */
-  async shareBackup(backupFilePath: string): Promise<void> {
-    if (!(await Sharing.isAvailableAsync())) {
-      throw new Error("Sharing is not available on this platform");
-    }
-
-    await Sharing.shareAsync(backupFilePath, {
-      mimeType: "application/json",
-      dialogTitle: "Save your app backup",
-    });
   }
 
   /**
