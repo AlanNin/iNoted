@@ -1,11 +1,10 @@
 import {
   Text as DefaultText,
   View as DefaultView,
-  View as DefaultSafeAreaView,
   TouchableOpacity as DefaultTouchableOpacity,
   TextInput as DefaultTextInput,
+  SafeAreaView as DefaultSafeAreaView,
 } from "react-native";
-import { MarkdownTextInput as DefaultMarkdownTextInput } from "@expensify/react-native-live-markdown";
 import { MotiView as DefaultMotiView } from "moti";
 import useColorScheme from "@/hooks/useColorScheme";
 import colors from "@/constants/colors";
@@ -16,7 +15,6 @@ import {
   TouchableOpacityProps,
   ViewProps,
   SafeAreaViewProps,
-  MarkdownTextInputProps,
 } from "@/types/themed";
 
 export function useThemeColor(
@@ -29,7 +27,9 @@ export function useThemeColor(
   if (colorFromProps) {
     return colorFromProps;
   } else {
-    return colors[theme][colorName];
+    const color = colors[theme][colorName];
+
+    return typeof color === "string" ? color : color?.text || "black";
   }
 }
 
@@ -113,43 +113,6 @@ export function TextInput(props: TextInputProps) {
           fontFamily: "Geist-Regular",
           fontSize: 16,
           backgroundColor: customBackgroundColor,
-        },
-        style,
-      ]}
-      selectionColor={colors[theme].primary}
-      placeholderTextColor={placeholderTextColor}
-      {...otherProps}
-    />
-  );
-}
-
-export function MarkdownTextInput(props: MarkdownTextInputProps) {
-  const {
-    style,
-    customTextColor,
-    customPlaceholderColor,
-    ...otherProps
-  } = props;
-
-  const theme = useColorScheme();
-
-  const color = useThemeColor(
-    { light: customTextColor, dark: customTextColor },
-    "text"
-  );
-
-  const placeholderTextColor = useThemeColor(
-    { light: customPlaceholderColor, dark: customPlaceholderColor },
-    "text_muted"
-  );
-
-  return (
-    <DefaultMarkdownTextInput
-      style={[
-        {
-          color,
-          fontFamily: "Geist-Regular",
-          fontSize: 16,
         },
         style,
       ]}

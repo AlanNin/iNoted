@@ -7,4 +7,6 @@ type NoteBookCardProps = {
   isLoading?: boolean;
   isToMove?: boolean;
   disabled?: boolean;
+  mini?: boolean;
+  showName?: boolean;
 };

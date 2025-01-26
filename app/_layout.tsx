@@ -32,6 +32,7 @@ SplashScreen.setOptions({
 
 export default function RootLayout() {
   const theme = useColorScheme();
+
   const [fontsLoaded, fontsError] = useFonts({
     "Geist-Regular": require("@/assets/fonts/Geist-Regular.otf"),
     "Geist-SemiBold": require("@/assets/fonts/Geist-SemiBold.otf"),

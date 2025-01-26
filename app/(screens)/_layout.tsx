@@ -22,7 +22,7 @@ export default function ScreensLayout() {
       }}
     >
       <Drawer.Screen
-        name="(notes)"
+        name="notes"
         options={{
           headerShown: false,
           drawerLabel: "Notes",
@@ -39,7 +39,7 @@ export default function ScreensLayout() {
       />
 
       <Drawer.Screen
-        name="(notebooks)"
+        name="notebooks"
         options={{
           headerShown: false,
           drawerLabel: "Notebooks",
@@ -56,7 +56,7 @@ export default function ScreensLayout() {
       />
 
       <Drawer.Screen
-        name="(calendar)"
+        name="calendar"
         options={{
           headerShown: false,
           drawerLabel: "Calendar",
@@ -73,7 +73,7 @@ export default function ScreensLayout() {
       />
 
       <Drawer.Screen
-        name="(settings)"
+        name="settings"
         options={{
           headerShown: false,
           drawerItemStyle: { display: "none" },

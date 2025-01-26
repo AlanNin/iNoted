@@ -9,7 +9,7 @@ import {
   View,
 } from "@/components/themed";
 import colors from "@/constants/colors";
-import { useNavigation } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import Loader from "@/components/loading";
 import Icon from "@/components/icon";
@@ -188,9 +188,13 @@ export default function NotebooksScreen() {
     }
   }
 
+  // function handleNotebookPress(notebookId: number) {
+  //   setSelectedNotebook(notebookId);
+  //   notebookBottomDrawerRef.current?.present();
+  // }
+
   function handleNotebookPress(notebookId: number) {
-    setSelectedNotebook(notebookId);
-    notebookBottomDrawerRef.current?.present();
+    router.push(`notebooks/${notebookId}`);
   }
 
   const renderItem = ({

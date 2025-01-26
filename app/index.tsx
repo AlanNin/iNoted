@@ -1,7 +1,13 @@
 import * as React from "react";
 import { StyleSheet } from "react-native";
 import useColorScheme from "@/hooks/useColorScheme";
-import { MotiView, Text, TouchableOpacity, View } from "@/components/themed";
+import {
+  MotiView,
+  SafeAreaView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "@/components/themed";
 import { ArrowRight, CircleCheckBig } from "lucide-react-native";
 import colors from "@/constants/colors";
 import { router } from "expo-router";
@@ -70,7 +76,7 @@ export default function StartScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <MotiView
         key={`step-${currentStep}`}
         from={{ opacity: 0, translateY: 10 }}
@@ -141,7 +147,7 @@ export default function StartScreen() {
           <ArrowRight size={20} color={colors.dark.tint} style={styles.icon} />
         )}
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 

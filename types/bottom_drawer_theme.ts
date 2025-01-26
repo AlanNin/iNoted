@@ -1,4 +1,4 @@
-import { ThemeProps } from "@/app/(screens)/(settings)/appearance";
+import { ThemeProps } from "@/app/(screens)/settings/appearance";
 
 export type BottomDrawerThemeProps = {
   title: string;

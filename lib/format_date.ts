@@ -96,3 +96,27 @@ export function getMaxDateInUTC(): string {
 
   return format(utcDate, "yyyy-MM-dd");
 }
+
+export function formatTime(date: string | Date): string {
+  let parsedDate: Date;
+
+  if (typeof date === "string") {
+    if (date.includes(" ")) {
+      const isoDate = date.replace(" ", "T") + "Z";
+      parsedDate = new Date(isoDate);
+    } else {
+      parsedDate = parseISO(date);
+    }
+  } else {
+    parsedDate = new Date(date);
+  }
+
+  if (!isValid(parsedDate)) {
+    throw new Error("Invalid date format");
+  }
+
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const zonedDate = toZonedTime(parsedDate, timeZone);
+
+  return format(zonedDate, "h:mm a");
+}

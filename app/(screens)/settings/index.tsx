@@ -15,14 +15,14 @@ const settings = [
     icon: "Palette",
     description:
       "Tweak the app's look and vibe, change themes, colors, and more!",
-    route: "./appearance",
+    route: "settings/appearance",
     isEnabled: true,
   },
   {
     title: "Data and Storage",
     icon: "Database",
     description: "Manage your data, create and restore backups.",
-    route: "./storage",
+    route: "settings/storage",
     isEnabled: true,
   },
   {
@@ -30,7 +30,7 @@ const settings = [
     icon: "Info",
     description:
       "Find out more about the app, its version, and the reason behind it.",
-    route: "./about",
+    route: "settings/about",
     isEnabled: true,
   },
 ];

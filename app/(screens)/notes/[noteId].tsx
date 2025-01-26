@@ -21,7 +21,6 @@ import BottomDrawerConfirm from "@/components/bottom_drawer_confirm";
 import BottomDrawerMoveNote from "@/components/bottom_drawer_move_note";
 import BottomDrawerNoteDetails from "@/components/bottom_drawer_note_details";
 import { convertToJson, parseEditorState } from "@/lib/text_editor";
-import Loader from "@/components/loading";
 import { getNavigationBarType } from "react-native-navigation-bar-detector";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { ToastAndroid } from "react-native";
@@ -29,7 +28,7 @@ import { ToastAndroid } from "react-native";
 export default function TestScreen() {
   const theme = useColorScheme();
   const [isKeyboardVisible, setIsKeyboardVisible] = React.useState(false);
-  const note = useLocalSearchParams();
+  const { noteId } = useLocalSearchParams();
   const queryClient = useQueryClient();
   const [isShowMoreModalOpen, setIsShowMoreModalOpen] = React.useState(false);
   const bottomMoveNoteDrawerRef = React.useRef<BottomSheetModal>(null);
@@ -38,9 +37,9 @@ export default function TestScreen() {
   const navigationType = getNavigationBarType();
 
   const { data: noteData, isLoading: isLoadingNoteData } = useQuery({
-    queryKey: ["note", Number(note.noteId)],
-    queryFn: () => getNoteById(Number(note.noteId)),
-    enabled: !!note.noteId,
+    queryKey: ["note", Number(noteId)],
+    queryFn: () => getNoteById(Number(noteId)),
+    enabled: !!noteId,
   });
 
   const noteDate = noteData?.updated_at;
@@ -126,7 +125,7 @@ export default function TestScreen() {
 
   async function handleDeleteNote() {
     try {
-      await deleteNote(Number(note.noteId));
+      await deleteNote(Number(noteId));
       refetchNotes();
       refetchNotebooks();
       router.back();
@@ -141,7 +140,7 @@ export default function TestScreen() {
   ) {
     try {
       await addNotesToNotebook({
-        noteIds: [Number(note.noteId)],
+        noteIds: [Number(noteId)],
         notebookId,
         isUncategorized: isUncategorized,
       });
@@ -169,7 +168,7 @@ export default function TestScreen() {
     }
 
     try {
-      await updateNote(Number(note.noteId), {
+      await updateNote(Number(noteId), {
         title: title.length === 0 ? "Untitled note" : title,
         content,
       });
@@ -208,11 +207,7 @@ export default function TestScreen() {
   }
 
   if (isLoadingNoteData) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Loader />
-      </View>
-    );
+    return null;
   }
 
   return (

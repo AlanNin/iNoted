@@ -149,6 +149,8 @@ const NotebookCard = React.memo(
     isLoading = false,
     isToMove = false,
     disabled = false,
+    mini = false,
+    showName = true,
   }: NoteBookCardProps) => {
     const isBackgroundAColor =
       typeof notebook.background === "string" &&
@@ -184,26 +186,31 @@ const NotebookCard = React.memo(
         {...animationProps}
         style={[
           styles.container,
-          isAdding && { minWidth: width > 400 ? 120 : 104 },
-          { height: width > 400 ? 180 : 156 },
+          isAdding && { minWidth: !mini && width > 400 ? 120 : 104 },
+          { height: !mini && width > 400 ? 180 : 156 },
         ]}
+        customBackgroundColor="transparent"
       >
-        {isToMove ? (
-          <SelectedIndicatorToMove
-            notebookId={notebook.id!}
-            name={notebook.name}
-            numberOfLinesName={numberOfLinesName}
-            isLoading={isLoading}
-          />
-        ) : (
-          <SelectedIndicator
-            notebookId={notebook.id!}
-            onPress={onPress!}
-            disabled={disabled}
-            name={notebook.name}
-            numberOfLinesName={numberOfLinesName}
-            isLoading={isLoading}
-          />
+        {showName && (
+          <>
+            {isToMove ? (
+              <SelectedIndicatorToMove
+                notebookId={notebook.id!}
+                name={notebook.name}
+                numberOfLinesName={numberOfLinesName}
+                isLoading={isLoading}
+              />
+            ) : (
+              <SelectedIndicator
+                notebookId={notebook.id!}
+                onPress={onPress!}
+                disabled={disabled}
+                name={notebook.name}
+                numberOfLinesName={numberOfLinesName}
+                isLoading={isLoading}
+              />
+            )}
+          </>
         )}
 
         <View

@@ -2,7 +2,11 @@ import { StyleSheet } from "react-native";
 import useColorScheme from "@/hooks/useColorScheme";
 import { MotiView, Text, TouchableOpacity, View } from "./themed";
 import colors from "@/constants/colors";
-import { formatLongDate, formatMediumDate } from "@/lib/format_date";
+import {
+  formatLongDate,
+  formatMediumDate,
+  formatTime,
+} from "@/lib/format_date";
 import { router } from "expo-router";
 import React from "react";
 import { useNotesEditMode } from "@/hooks/useNotesEditMode";
@@ -13,11 +17,13 @@ const SelectedIndicator = ({
   viewMode,
   onPress,
   selectDisabled = false,
+  href,
 }: {
   noteId: number;
   viewMode: "grid" | "list";
   onPress?: () => void;
   selectDisabled?: boolean;
+  href?: string;
 }) => {
   const {
     isNotesEditMode,
@@ -36,7 +42,7 @@ const SelectedIndicator = ({
     if (isNotesEditMode && !selectDisabled) {
       selectNote(noteId);
     } else {
-      router.push(`./${noteId}`);
+      router.push(href ?? `notes/${noteId}`, { relativeToDirectory: true });
     }
   }, [isNotesEditMode, selectNote, noteId]);
 
@@ -88,6 +94,8 @@ const NoteCard = React.memo(
     onPress,
     animated = true,
     selectDisabled = false,
+    href,
+    dateType = "date",
   }: NoteCardProps) => {
     if (!note.id) {
       return <View style={gridStyles.innerContainer} />;
@@ -118,6 +126,7 @@ const NoteCard = React.memo(
               viewMode="grid"
               onPress={onPress!}
               selectDisabled={selectDisabled}
+              href={href}
             />
             <View style={gridStyles.contentContainer}>
               {parseEditorState(note.content).length > 0 ? (
@@ -146,7 +155,9 @@ const NoteCard = React.memo(
                 ]}
                 numberOfLines={1}
               >
-                {formatMediumDate(note.created_at)}
+                {dateType === "date"
+                  ? formatMediumDate(note.created_at)
+                  : formatTime(note.created_at)}
               </Text>
             </View>
           </MotiView>
@@ -160,14 +171,22 @@ const NoteCard = React.memo(
               noteId={note.id}
               viewMode="list"
               selectDisabled={selectDisabled}
+              href={href}
             />
 
             <Text style={listStyles.title} numberOfLines={1}>
               {note.title}
             </Text>
-            <Text style={listStyles.content} numberOfLines={2}>
-              {note.content}
-            </Text>
+
+            {parseEditorState(note.content).length > 0 ? (
+              <Text style={listStyles.content} numberOfLines={3}>
+                {parseEditorState(note.content)}
+              </Text>
+            ) : (
+              <Text style={listStyles.noContent} numberOfLines={3} disabled>
+                No content...
+              </Text>
+            )}
             <Text
               style={[
                 listStyles.date,
@@ -180,7 +199,9 @@ const NoteCard = React.memo(
               ]}
               numberOfLines={1}
             >
-              {formatLongDate(note.created_at)}
+              {dateType === "date"
+                ? formatLongDate(note.created_at)
+                : formatTime(note.created_at)}
             </Text>
           </MotiView>
         </TouchableOpacity>
@@ -268,6 +289,11 @@ const listStyles = StyleSheet.create({
   },
   content: {
     fontSize: 12,
+  },
+  noContent: {
+    fontSize: 12,
+    flex: 1,
+    fontStyle: "italic",
   },
   date: {
     marginTop: "auto",

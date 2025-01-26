@@ -247,7 +247,7 @@ const BottomDrawerNotebook = React.forwardRef<
               </View>
             )}
 
-            <View style={styles.bookContainer}>
+            <View style={styles.notebookContainer}>
               <NotebookCard
                 notebook={{ name: name || "Untitled", background: background }}
                 isAdding
@@ -440,7 +440,7 @@ const styles = StyleSheet.create({
   headerButton: {
     padding: 4,
   },
-  bookContainer: {
+  notebookContainer: {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",

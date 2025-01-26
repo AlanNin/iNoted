@@ -35,7 +35,7 @@ export default function CustomDrawerContent(props: any) {
           focused={
             props.state.index ===
             props.state.routes.findIndex(
-              (route: Route<string>) => route.name === "(settings)"
+              (route: Route<string>) => route.name === "settings"
             )
           }
           activeBackgroundColor={colors[theme].primary}
@@ -51,7 +51,7 @@ export default function CustomDrawerContent(props: any) {
               }
             />
           )}
-          onPress={() => router.push("./(settings)")}
+          onPress={() => router.push("/settings")}
         />
       </View>
       <View

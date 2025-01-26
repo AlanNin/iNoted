@@ -1,6 +1,7 @@
 import { db_client } from "@/db/client";
 import { notebooks, notes } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
+import { updateNotebookUpdatedAt } from "./notebooks";
 
 export async function createNote(note: NewNoteProps) {
   try {
@@ -13,6 +14,10 @@ export async function createNote(note: NewNoteProps) {
       })
       .returning();
 
+    if (note.notebook_id) {
+      await updateNotebookUpdatedAt(note.notebook_id);
+    }
+
     return response;
   } catch (error) {
     throw new Error("Could not create the note");
@@ -21,9 +26,20 @@ export async function createNote(note: NewNoteProps) {
 
 export async function deleteNote(id: number) {
   try {
-    const result = await db_client.delete(notes).where(eq(notes.id, id));
-    if (!result) {
+    const note = await db_client
+      .select()
+      .from(notes)
+      .where(eq(notes.id, id))
+      .limit(1);
+
+    if (!note.length) {
       throw new Error("Note not found");
+    }
+
+    await db_client.delete(notes).where(eq(notes.id, id));
+
+    if (note[0].notebook_id) {
+      await updateNotebookUpdatedAt(note[0].notebook_id);
     }
   } catch (error) {
     throw new Error("Could not delete the note");
@@ -32,9 +48,25 @@ export async function deleteNote(id: number) {
 
 export async function deleteNotes(ids: number[]) {
   try {
-    const result = await db_client.delete(notes).where(inArray(notes.id, ids));
-    if (!result) {
-      throw new Error("Note not found");
+    const notesToDelete = await db_client
+      .select()
+      .from(notes)
+      .where(inArray(notes.id, ids));
+
+    if (!notesToDelete.length) {
+      throw new Error("No notes found to delete");
+    }
+
+    const notebookIds = [
+      ...new Set(notesToDelete.map((note) => note.notebook_id).filter(Boolean)),
+    ];
+
+    await db_client.delete(notes).where(inArray(notes.id, ids));
+
+    for (const notebookId of notebookIds) {
+      if (notebookId) {
+        await updateNotebookUpdatedAt(notebookId);
+      }
     }
   } catch (error) {
     throw new Error("Could not delete the notes");

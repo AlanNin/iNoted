@@ -76,6 +76,21 @@ export async function updateNotebook(id: number, notebook: NewNotebookProps) {
   }
 }
 
+export async function updateNotebookUpdatedAt(id: number) {
+  try {
+    const result = await db_client
+      .update(notebooks)
+      .set({ updated_at: new Date().toISOString() })
+      .where(eq(notebooks.id, id));
+
+    if (!result) {
+      throw new Error("Notebook not found");
+    }
+  } catch (error) {
+    throw new Error("Could not update the notebook updated_at");
+  }
+}
+
 export async function getNotebookById(id: number) {
   try {
     const notebook = await db_client
@@ -148,7 +163,7 @@ export async function addNotesToNotebook({
       )
     );
 
-    if (!isUncategorized) {
+    if (!isUncategorized && notebookId) {
       await Promise.all(
         notesToUpdate.map((noteId) =>
           db_client
@@ -157,6 +172,8 @@ export async function addNotesToNotebook({
             .where(eq(notes.id, noteId))
         )
       );
+
+      await updateNotebookUpdatedAt(notebookId);
     }
   } catch (error) {
     console.error(error);
@@ -172,19 +189,28 @@ export async function removeNoteFromNotebook({
   try {
     const notesToRemove = Array.isArray(noteIds) ? noteIds : [noteIds];
 
-    const result = await Promise.all(
-      notesToRemove.map((noteId) =>
-        db_client
-          .update(notes)
-          .set({ notebook_id: null })
-          .where(eq(notes.id, noteId))
-      )
-    );
+    const notesResult = await db_client
+      .select()
+      .from(notes)
+      .where(inArray(notes.id, notesToRemove));
 
-    if (result.some((res) => !res)) {
-      throw new Error(
-        "One or more notes were not found or could not be removed"
-      );
+    if (!notesResult.length) {
+      throw new Error("No notes found to remove from the notebook");
+    }
+
+    const notebookIds = [
+      ...new Set(notesResult.map((note) => note.notebook_id).filter(Boolean)),
+    ];
+
+    await db_client
+      .update(notes)
+      .set({ notebook_id: null })
+      .where(inArray(notes.id, notesToRemove));
+
+    for (const notebookId of notebookIds) {
+      if (notebookId) {
+        await updateNotebookUpdatedAt(notebookId);
+      }
     }
   } catch (error) {
     console.error(error);

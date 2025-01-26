@@ -5,7 +5,6 @@ import {
   TouchableOpacity as DefaultTouchableOpacity,
   TextInput as DefaultTextInput,
 } from "react-native";
-import { MarkdownTextInput as DefaultMarkdownTextInput } from "@expensify/react-native-live-markdown";
 import { MotiView as DefaultMotiView } from "moti";
 
 type ThemedProps = {
@@ -27,7 +26,5 @@ export type TextProps = ThemedTextProps & DefaultText["props"];
 export type TouchableOpacityProps = ThemedProps &
   React.ComponentProps<typeof DefaultTouchableOpacity>;
 export type TextInputProps = ThemedInputProps & DefaultTextInput["props"];
-export type MarkdownTextInputProps = ThemedInputProps &
-  DefaultMarkdownTextInput["props"];
 export type MotiViewProps = ThemedProps &
   React.ComponentProps<typeof DefaultMotiView>;

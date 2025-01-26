@@ -208,7 +208,7 @@ export default function NotesScreen() {
       saveIsFirstNote(false);
     }
 
-    router.push(`./${newNote[0].id}`);
+    router.push(`notes/${newNote[0].id}`);
   };
 
   const renderItem = ({ item, index }: { item: NoteProps; index: number }) => (
