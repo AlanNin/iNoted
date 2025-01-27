@@ -91,6 +91,7 @@ export default function CalendarScreen() {
         index={index}
         selectDisabled={true}
         dateType="hour"
+        key={`${item.id}-${item.title}-${item.content}-${item.updated_at}`}
       />
     ),
     []
