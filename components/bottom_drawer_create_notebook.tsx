@@ -191,6 +191,8 @@ const BottomDrawerCreateNotebook = React.forwardRef<
               maxLength={nameMaxLength}
               placeholderTextColor={colors[theme].text_muted}
               placeholder="Type a name for your notebook..."
+              keyboardType={"visible-password"}
+              autoCorrect={false}
             />
             <Text style={styles.inputCounter}>
               {name.length}/{nameMaxLength}

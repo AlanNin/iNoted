@@ -119,6 +119,8 @@ export function TextInput(props: TextInputProps) {
       selectionColor={colors[theme].primary}
       placeholderTextColor={placeholderTextColor}
       {...otherProps}
+      keyboardType={"visible-password"}
+      autoCorrect={false}
     />
   );
 }
