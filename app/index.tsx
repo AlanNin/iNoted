@@ -48,7 +48,7 @@ export default function StartScreen() {
       setCurrentStep(currentStep + 1);
     } else {
       saveIsFirstAppLaunch(false);
-      router.replace("./(screens)/(notes)");
+      router.replace("./notes");
     }
   };
 

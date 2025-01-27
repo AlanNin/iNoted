@@ -41,8 +41,8 @@ export default function CalendarScreen() {
   const { data: notesData, isLoading: isLoadingNotesData } = useQuery({
     queryKey: ["notes_calendar"],
     queryFn: getAllNotesCalendar,
-    select: (data) => data ?? [],
   });
+
   const theme = useColorScheme();
   const navigation = useNavigation();
   const openMenu = () => {
@@ -62,6 +62,7 @@ export default function CalendarScreen() {
     const selectedDateNotes = notesData.find((item) =>
       item.date.includes(date)
     );
+
     return selectedDateNotes ? selectedDateNotes.notes : [];
   }, [date, notesData]);
 

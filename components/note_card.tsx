@@ -206,6 +206,8 @@ const NoteCard = React.memo(
   (prevProps, nextProps) => {
     return (
       prevProps.note.id === nextProps.note.id &&
+      prevProps.note.title === nextProps.note.title &&
+      prevProps.note.content === nextProps.note.content &&
       prevProps.viewMode === nextProps.viewMode
     );
   }

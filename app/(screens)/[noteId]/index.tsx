@@ -35,6 +35,7 @@ export default function NoteScreen() {
   const bottomNoteDetailsDrawerRef = React.useRef<BottomSheetModal>(null);
   const bottomDeleteNoteDrawerRef = React.useRef<BottomSheetModal>(null);
   const navigationType = getNavigationBarType();
+  const [key, setKey] = React.useState("");
 
   const { data: noteData, isLoading: isLoadingNoteData } = useQuery({
     queryKey: ["note", Number(noteId)],
@@ -52,6 +53,8 @@ export default function NoteScreen() {
   React.useEffect(() => {
     setTitle(noteData?.title || "");
     setContent(initialContent!);
+
+    setKey(`${noteId}-${noteData?.title}-${initialContent}-${noteDate}`);
   }, [noteData]);
 
   // save note on back press
@@ -202,7 +205,7 @@ export default function NoteScreen() {
     ToastAndroid.show(message, ToastAndroid.SHORT);
   }
 
-  if (isLoadingNoteData) {
+  if (isLoadingNoteData || noteData === undefined) {
     return null;
   }
 
@@ -211,6 +214,7 @@ export default function NoteScreen() {
       <SafeAreaView
         style={styles.container}
         customBackgroundColor={colors[theme].background}
+        key={key}
       >
         <KeyboardAwareScrollView
           contentContainerStyle={{ flexGrow: 1 }}
@@ -239,7 +243,6 @@ export default function NoteScreen() {
             noteDate={noteDate!}
             navigationType={navigationType}
             handleToastAndroid={handleToastAndroid}
-            key={String(noteId)}
           />
         </KeyboardAwareScrollView>
       </SafeAreaView>
