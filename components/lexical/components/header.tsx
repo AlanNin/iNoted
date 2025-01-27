@@ -79,7 +79,7 @@ export default function Header({
     },
     {
       name: "Move",
-      icon: "NotebookPen",
+      icon: "BookCopy",
       onClick: handleToggleBottomMoveNoteDrawer,
     },
     {

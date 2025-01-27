@@ -89,7 +89,6 @@ export default function CalendarScreen() {
         viewMode="grid"
         index={index}
         selectDisabled={true}
-        href={`notes/${item.id}`}
         dateType="hour"
       />
     ),

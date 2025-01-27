@@ -17,13 +17,11 @@ const SelectedIndicator = ({
   viewMode,
   onPress,
   selectDisabled = false,
-  href,
 }: {
   noteId: number;
   viewMode: "grid" | "list";
   onPress?: () => void;
   selectDisabled?: boolean;
-  href?: string;
 }) => {
   const {
     isNotesEditMode,
@@ -42,7 +40,7 @@ const SelectedIndicator = ({
     if (isNotesEditMode && !selectDisabled) {
       selectNote(noteId);
     } else {
-      router.push(href ?? `notes/${noteId}`, { relativeToDirectory: true });
+      router.push(`${noteId}`);
     }
   }, [isNotesEditMode, selectNote, noteId]);
 
@@ -94,7 +92,6 @@ const NoteCard = React.memo(
     onPress,
     animated = true,
     selectDisabled = false,
-    href,
     dateType = "date",
   }: NoteCardProps) => {
     if (!note.id) {
@@ -126,7 +123,6 @@ const NoteCard = React.memo(
               viewMode="grid"
               onPress={onPress!}
               selectDisabled={selectDisabled}
-              href={href}
             />
             <View style={gridStyles.contentContainer}>
               {parseEditorState(note.content).length > 0 ? (
@@ -171,7 +167,6 @@ const NoteCard = React.memo(
               noteId={note.id}
               viewMode="list"
               selectDisabled={selectDisabled}
-              href={href}
             />
 
             <Text style={listStyles.title} numberOfLines={1}>

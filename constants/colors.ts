@@ -15,6 +15,7 @@ const colors: Colors = {
     foggiest: "rgba(0, 0, 0, 0.03)",
     danger: "#ff0000",
     calendar_background: "#f5edf1",
+
     editor: {
       background: "#f2f3f4",
       text: "#000",
@@ -42,8 +43,9 @@ const colors: Colors = {
     foggy: "rgba(255, 255, 255, 0.3)",
     foggier: "rgba(255, 255, 255, 0.15)",
     foggiest: "rgba(255, 255, 255, 0.1)",
-    danger: "#ff0000",
+    danger: "#ff3d3d",
     calendar_background: "#241b21",
+
     editor: {
       background: "#0f0f0f",
       text: "#fff",

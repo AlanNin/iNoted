@@ -32,13 +32,28 @@ SplashScreen.setOptions({
 
 export default function RootLayout() {
   const theme = useColorScheme();
-
   const [fontsLoaded, fontsError] = useFonts({
     "Geist-Regular": require("@/assets/fonts/Geist-Regular.otf"),
     "Geist-SemiBold": require("@/assets/fonts/Geist-SemiBold.otf"),
   });
   const { success } = useMigrations(db_client, migrations);
   const [isFirstAppLaunch] = useAppConfig<boolean>("isFirstAppLaunch", true);
+  const LightThemeCustom = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: colors.light.background,
+      primary: colors.light.primary,
+    },
+  };
+  const DarkThemeCustom = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: colors.dark.background,
+      primary: colors.dark.primary,
+    },
+  };
 
   setStatusBarStyle(theme === "light" ? "dark" : "light");
   useDrizzleStudio(expo_db);
@@ -61,7 +76,9 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <GestureHandlerRootView>
         <ReactQueryProvider>
-          <ThemeProvider value={theme === "dark" ? DarkTheme : DefaultTheme}>
+          <ThemeProvider
+            value={theme === "dark" ? DarkThemeCustom : LightThemeCustom}
+          >
             <SafeAreaView
               style={{ flex: 1, backgroundColor: colors[theme].background }}
             >

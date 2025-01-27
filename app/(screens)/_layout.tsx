@@ -18,6 +18,9 @@ export default function ScreensLayout() {
         drawerItemStyle: {
           borderRadius: 8,
         },
+        drawerStyle: {
+          backgroundColor: colors[theme].background,
+        },
         swipeEnabled: false,
       }}
     >
@@ -74,6 +77,14 @@ export default function ScreensLayout() {
 
       <Drawer.Screen
         name="settings"
+        options={{
+          headerShown: false,
+          drawerItemStyle: { display: "none" },
+        }}
+      />
+
+      <Drawer.Screen
+        name="[noteId]"
         options={{
           headerShown: false,
           drawerItemStyle: { display: "none" },

@@ -31,7 +31,7 @@ import useAppConfig from "@/hooks/useAppConfig";
 import { useNotebooksEditMode } from "@/hooks/useNotebooksEditMode";
 import BottomDrawerCreateNotebook from "@/components/bottom_drawer_create_notebook";
 import NotebookCard from "@/components/notebook_card";
-import BottomDrawerNotebook from "@/components/bottom_drawer_notebook";
+import BottomDrawerNotebook from "@/components/bottom_drawer_edit_notebook";
 
 export default function NotebooksScreen() {
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -39,8 +39,6 @@ export default function NotebooksScreen() {
   const theme = useColorScheme();
   const sortBottomDrawerRef = React.useRef<BottomSheetModal>(null);
   const createNotebookBottomDrawerRef = React.useRef<BottomSheetModal>(null);
-  const notebookBottomDrawerRef = React.useRef<BottomSheetModal>(null);
-  const [selectedNotebook, setSelectedNotebook] = React.useState<number>();
   const sortTypes = ["Recently added", "A-Z"] as const;
   const bottomDeleteMultipleDrawerRef = React.useRef<BottomSheetModal>(null);
   const [notebooksSortBy, saveNotebooksSortBy] = useAppConfig<{
@@ -168,31 +166,6 @@ export default function NotebooksScreen() {
     }
   }
 
-  async function handleUpdateNotebook(notebook: NewNotebookProps) {
-    const { id, ...notebookData } = notebook;
-
-    try {
-      await updateNotebook(id!, notebookData);
-      await refetchNotebooks();
-    } catch (error) {
-      toast.error("An error occurred. Please try again.");
-    }
-  }
-
-  async function handleDeleteNotebook(notebookId: number) {
-    try {
-      await deleteNotebook(notebookId);
-      await refetchNotebooks();
-    } catch (error) {
-      toast.error("An error occurred. Please try again.");
-    }
-  }
-
-  // function handleNotebookPress(notebookId: number) {
-  //   setSelectedNotebook(notebookId);
-  //   notebookBottomDrawerRef.current?.present();
-  // }
-
   function handleNotebookPress(notebookId: number) {
     router.push(`notebooks/${notebookId}`);
   }
@@ -272,7 +245,7 @@ export default function NotebooksScreen() {
                 onPress={toggleNotebooksEditMode}
               >
                 <Icon
-                  name={isNotebooksEditMode ? "PenOff" : "SquarePen"}
+                  name={isNotebooksEditMode ? "PenOff" : "PenLine"}
                   size={16}
                   grayscale
                   muted={notebooksData?.length === 0}
@@ -422,13 +395,6 @@ export default function NotebooksScreen() {
         title="New notebook"
         description="Create a notebook to organize your notes."
         onSubmit={handleCreateNotebook}
-      />
-
-      <BottomDrawerNotebook
-        ref={notebookBottomDrawerRef}
-        notebookId={selectedNotebook}
-        onSubmit={handleUpdateNotebook}
-        onDelete={handleDeleteNotebook}
       />
 
       <BottomDrawerConfirm

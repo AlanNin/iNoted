@@ -5,6 +5,5 @@ type NoteCardProps = {
   onPress?: () => void;
   animated?: boolean;
   selectDisabled?: boolean;
-  href?: string;
   dateType?: "date" | "hour";
 };

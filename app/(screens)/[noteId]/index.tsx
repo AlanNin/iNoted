@@ -1,7 +1,7 @@
 import LexicalEditorComponent from "@/components/lexical";
 import { SafeAreaView, View } from "@/components/themed";
 import { toast } from "@backpackapp-io/react-native-toast";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams, usePathname } from "expo-router";
 import React from "react";
 import {
   AppState,
@@ -25,7 +25,7 @@ import { getNavigationBarType } from "react-native-navigation-bar-detector";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { ToastAndroid } from "react-native";
 
-export default function TestScreen() {
+export default function NoteScreen() {
   const theme = useColorScheme();
   const [isKeyboardVisible, setIsKeyboardVisible] = React.useState(false);
   const { noteId } = useLocalSearchParams();
@@ -71,15 +71,16 @@ export default function TestScreen() {
       }
     };
 
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      () => {
-        backAction();
-        return true;
-      }
-    );
+    const backHandler = () => {
+      backAction();
+      return false;
+    };
 
-    return () => backHandler.remove();
+    BackHandler.addEventListener("hardwareBackPress", backHandler);
+
+    return () => {
+      BackHandler.removeEventListener("hardwareBackPress", backHandler);
+    };
   }, [title, content, isShowMoreModalOpen]);
 
   // save note on app state change
@@ -87,7 +88,7 @@ export default function TestScreen() {
     const handleAppStateChange = async (nextAppState: AppStateStatus) => {
       if (nextAppState === "background" || nextAppState === "inactive") {
         if (content.length > 0) {
-          await handleUpdateNote({ handleback: false });
+          await handleUpdateNote();
         }
       }
     };
@@ -128,7 +129,9 @@ export default function TestScreen() {
       await deleteNote(Number(noteId));
       refetchNotes();
       refetchNotebooks();
-      router.back();
+      if (router.canGoBack()) {
+        router.back();
+      }
     } catch (error) {
       toast.error("An error occurred. Please try again.");
     }
@@ -155,15 +158,10 @@ export default function TestScreen() {
     }
   }
 
-  async function handleUpdateNote(
-    { handleback }: { handleback?: boolean } = { handleback: true }
-  ) {
+  async function handleUpdateNote() {
     const noChanges = title === noteData?.title && content === initialContent;
 
     if (noChanges && title.length > 0) {
-      if (handleback) {
-        router.back();
-      }
       return;
     }
 
@@ -174,10 +172,7 @@ export default function TestScreen() {
       });
 
       refetchNotes();
-
-      if (handleback) {
-        router.back();
-      }
+      refetchNotebooks();
     } catch (error) {
       toast.error("An error occurred. Please try again.");
     }
@@ -200,6 +195,7 @@ export default function TestScreen() {
     await setIsKeyboardVisible(false);
     Keyboard.dismiss();
     await handleUpdateNote();
+    router.back();
   }
 
   function handleToastAndroid(message: string) {
@@ -214,11 +210,7 @@ export default function TestScreen() {
     <>
       <SafeAreaView
         style={styles.container}
-        customBackgroundColor={
-          isKeyboardVisible
-            ? colors[theme].editor.toolbar_background
-            : colors[theme].background
-        }
+        customBackgroundColor={colors[theme].background}
       >
         <KeyboardAwareScrollView
           contentContainerStyle={{ flexGrow: 1 }}
@@ -247,6 +239,7 @@ export default function TestScreen() {
             noteDate={noteDate!}
             navigationType={navigationType}
             handleToastAndroid={handleToastAndroid}
+            key={String(noteId)}
           />
         </KeyboardAwareScrollView>
       </SafeAreaView>

@@ -208,7 +208,7 @@ export default function NotesScreen() {
       saveIsFirstNote(false);
     }
 
-    router.push(`notes/${newNote[0].id}`);
+    router.push(`${newNote[0].id}`);
   };
 
   const renderItem = ({ item, index }: { item: NoteProps; index: number }) => (
@@ -319,7 +319,7 @@ export default function NotesScreen() {
                 onPress={toggleNotesEditMode}
               >
                 <Icon
-                  name={isNotesEditMode ? "PenOff" : "SquarePen"}
+                  name={isNotesEditMode ? "PenOff" : "PenLine"}
                   size={16}
                   grayscale
                   muted={notesData?.length === 0}
@@ -454,7 +454,7 @@ export default function NotesScreen() {
               disabled={selectedNotes.length === 0}
             >
               <Icon
-                name="NotebookPen"
+                name="BookCopy"
                 size={24}
                 strokeWidth={1}
                 muted={selectedNotes.length === 0}

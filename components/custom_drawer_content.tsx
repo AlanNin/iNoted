@@ -18,7 +18,12 @@ export default function CustomDrawerContent(props: any) {
   const image = theme === "light" ? "app_long" : "dark_app_long";
 
   return (
-    <View style={{ flex: 1 }}>
+    <View
+      style={{
+        flex: 1,
+        overflow: "hidden",
+      }}
+    >
       <DrawerContentScrollView {...props}>
         <View style={styles.drawerHeader}>
           <Image

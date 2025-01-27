@@ -14,6 +14,7 @@ type ColorScheme = {
   foggiest: string;
   danger: string;
   calendar_background: string;
+
   editor: {
     background: string;
     text: string;
