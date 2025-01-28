@@ -10,9 +10,9 @@ import {
 } from "@/components/themed";
 import { ArrowRight, CircleCheckBig } from "lucide-react-native";
 import colors from "@/constants/colors";
-import { router } from "expo-router";
-import useAppConfig from "@/hooks/useAppConfig";
+import { Redirect, router } from "expo-router";
 import { Image } from "expo-image";
+import { useConfig } from "@/providers/config";
 
 export default function StartScreen() {
   const theme = useColorScheme();
@@ -38,10 +38,14 @@ export default function StartScreen() {
   ];
 
   const [currentStep, setCurrentStep] = React.useState(0);
-  const [isFirstAppLaunch, saveIsFirstAppLaunch] = useAppConfig<boolean>(
+  const [isFirstAppLaunch, saveIsFirstAppLaunch] = useConfig<boolean>(
     "isFirstAppLaunch",
     true
   );
+
+  if (isFirstAppLaunch === false) {
+    return <Redirect href="./notes" />;
+  }
 
   const handleNextStep = () => {
     if (currentStep < steps.length - 1) {
@@ -70,10 +74,6 @@ export default function StartScreen() {
   }
 
   const currentStepData = steps[currentStep] || steps[0];
-
-  if (!isFirstAppLaunch) {
-    return null;
-  }
 
   return (
     <SafeAreaView style={styles.container}>

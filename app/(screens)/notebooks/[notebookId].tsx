@@ -30,13 +30,15 @@ import { LinearGradient } from "expo-linear-gradient";
 import NoteCard from "@/components/note_card";
 import { FlashList } from "@shopify/flash-list";
 import { createNote } from "@/queries/notes";
-import useAppConfig from "@/hooks/useAppConfig";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import BottomDrawerConfirm from "@/components/bottom_drawer_confirm";
 import { toast } from "@backpackapp-io/react-native-toast";
 import BottomDrawerEditNotebook from "@/components/bottom_drawer_edit_notebook";
 import { useNotesEditMode } from "@/hooks/useNotesEditMode";
 import BottomDrawerMoveNote from "@/components/bottom_drawer_move_note";
+import { useConfig } from "@/providers/config";
+
+const MemoizedNoteCard = React.memo(NoteCard);
 
 export default function NotebookScreen() {
   const { notebookId } = useLocalSearchParams();
@@ -48,10 +50,11 @@ export default function NotebookScreen() {
   const bottomMoveNotesDrawerRef = React.useRef<BottomSheetModal>(null);
   const queryClient = useQueryClient();
   const theme = useColorScheme();
-  const [isFirstNote, saveIsFirstNote] = useAppConfig<boolean>(
+  const [isFirstNote, saveIsFirstNote] = useConfig<boolean>(
     "isFirstNote",
     true
   );
+  const [notesViewMode] = useConfig<"grid" | "list">("notesViewMode", "grid");
   const {
     isNotesEditMode,
     toggleNotesEditMode,
@@ -98,13 +101,16 @@ export default function NotebookScreen() {
     return `rgba(${difuminationColor}, ${opacity})`;
   }
 
-  const renderItem = ({ item, index }: { item: NoteProps; index: number }) => (
-    <NoteCard
-      key={`${item.id}-${item.title}-${item.content}`}
-      note={item}
-      viewMode={"grid"}
-      index={index}
-    />
+  const renderItem = React.useCallback(
+    ({ item, index }: { item: NoteProps; index: number }) => (
+      <MemoizedNoteCard
+        key={`${item.id}-${item.title}-${item.content}`}
+        note={item}
+        viewMode={notesViewMode}
+        index={index}
+      />
+    ),
+    [notesViewMode]
   );
 
   const handleScroll = React.useCallback(
@@ -484,9 +490,10 @@ export default function NotebookScreen() {
                   }
                   data={notebookData?.notes}
                   renderItem={renderItem}
-                  numColumns={3}
+                  numColumns={notesViewMode === "grid" ? 3 : 1}
                   removeClippedSubviews={true}
-                  estimatedItemSize={212}
+                  estimatedItemSize={notesViewMode === "grid" ? 212 : 140}
+                  key={notesViewMode}
                 />
               </View>
             </TouchableWithoutFeedback>

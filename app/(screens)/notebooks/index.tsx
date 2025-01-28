@@ -27,11 +27,11 @@ import {
   getAllNotebooks,
   updateNotebook,
 } from "@/queries/notebooks";
-import useAppConfig from "@/hooks/useAppConfig";
 import { useNotebooksEditMode } from "@/hooks/useNotebooksEditMode";
 import BottomDrawerCreateNotebook from "@/components/bottom_drawer_create_notebook";
 import NotebookCard from "@/components/notebook_card";
 import BottomDrawerNotebook from "@/components/bottom_drawer_edit_notebook";
+import { useConfig } from "@/providers/config";
 
 export default function NotebooksScreen() {
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -41,11 +41,11 @@ export default function NotebooksScreen() {
   const createNotebookBottomDrawerRef = React.useRef<BottomSheetModal>(null);
   const sortTypes = ["Recently added", "A-Z"] as const;
   const bottomDeleteMultipleDrawerRef = React.useRef<BottomSheetModal>(null);
-  const [notebooksSortBy, saveNotebooksSortBy] = useAppConfig<{
+  const [notebooksSortBy, saveNotebooksSortBy] = useConfig<{
     key: typeof sortTypes[number];
     order: "asc" | "desc";
   }>("notebooksSortBy", { key: sortTypes[0], order: "desc" });
-  const [isFirstNotebook, saveIsFirstNotebook] = useAppConfig<boolean>(
+  const [isFirstNotebook, saveIsFirstNotebook] = useConfig<boolean>(
     "isFirstNotebook",
     true
   );

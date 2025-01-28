@@ -20,8 +20,8 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SheetProvider } from "react-native-actions-sheet";
 import { Toasts } from "@backpackapp-io/react-native-toast";
-import useAppConfig from "@/hooks/useAppConfig";
 import { setStatusBarStyle } from "expo-status-bar";
+import { ConfigProvider } from "@/providers/config";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -37,7 +37,6 @@ export default function RootLayout() {
     "Geist-SemiBold": require("@/assets/fonts/Geist-SemiBold.otf"),
   });
   const { success } = useMigrations(db_client, migrations);
-  const [isFirstAppLaunch] = useAppConfig<boolean>("isFirstAppLaunch", true);
   const LightThemeCustom = {
     ...DefaultTheme,
     colors: {
@@ -64,47 +63,44 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, fontsError]);
 
-  if (
-    (!fontsLoaded && !fontsError) ||
-    !success ||
-    isFirstAppLaunch === undefined
-  ) {
+  if ((!fontsLoaded && !fontsError) || !success) {
     return null;
   }
 
   return (
     <SafeAreaProvider>
-      <GestureHandlerRootView>
-        <ReactQueryProvider>
-          <ThemeProvider
-            value={theme === "dark" ? DarkThemeCustom : LightThemeCustom}
-          >
-            <SafeAreaView
-              style={{ flex: 1, backgroundColor: colors[theme].background }}
+      <ConfigProvider>
+        <GestureHandlerRootView>
+          <ReactQueryProvider>
+            <ThemeProvider
+              value={theme === "dark" ? DarkThemeCustom : LightThemeCustom}
             >
-              <SheetProvider context="global">
-                <Stack>
-                  <Stack.Screen
-                    name="index"
-                    options={{ headerShown: false }}
-                    redirect={!isFirstAppLaunch}
-                  />
-                  <Stack.Screen
-                    name="(screens)"
-                    options={{ headerShown: false }}
-                  />
-                </Stack>
-              </SheetProvider>
-            </SafeAreaView>
-          </ThemeProvider>
-        </ReactQueryProvider>
-        <Toasts
-          overrideDarkMode={theme !== "dark"}
-          defaultStyle={{
-            indicator: { backgroundColor: colors[theme].primary },
-          }}
-        />
-      </GestureHandlerRootView>
+              <SafeAreaView
+                style={{ flex: 1, backgroundColor: colors[theme].background }}
+              >
+                <SheetProvider context="global">
+                  <Stack>
+                    <Stack.Screen
+                      name="index"
+                      options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                      name="(screens)"
+                      options={{ headerShown: false }}
+                    />
+                  </Stack>
+                </SheetProvider>
+              </SafeAreaView>
+            </ThemeProvider>
+          </ReactQueryProvider>
+          <Toasts
+            overrideDarkMode={theme !== "dark"}
+            defaultStyle={{
+              indicator: { backgroundColor: colors[theme].primary },
+            }}
+          />
+        </GestureHandlerRootView>
+      </ConfigProvider>
     </SafeAreaProvider>
   );
 }

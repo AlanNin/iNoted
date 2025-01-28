@@ -8,20 +8,17 @@ import {
 } from "@/components/themed";
 import { router } from "expo-router";
 import Icon from "@/components/icon";
-import useAppConfig from "@/hooks/useAppConfig";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import BottomDrawerTheme from "@/components/bottom_drawer_theme";
 import { reloadAppAsync } from "expo";
+import { useConfig } from "@/providers/config";
 
 const themeOptions = ["system", "light", "dark"] as const;
 
 export type ThemeProps = typeof themeOptions[number];
 
 const AppearanceScreen = () => {
-  const [appTheme, saveAppTheme] = useAppConfig<ThemeProps>(
-    "appTheme",
-    "system"
-  );
+  const [appTheme, saveAppTheme] = useConfig<ThemeProps>("appTheme", "system");
   const [selectedTheme, setSelectedTheme] = React.useState<ThemeProps>(
     appTheme
   );

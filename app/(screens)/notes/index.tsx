@@ -23,11 +23,11 @@ import { toast } from "@backpackapp-io/react-native-toast";
 import { FlashList } from "@shopify/flash-list";
 import { useNotesEditMode } from "@/hooks/useNotesEditMode";
 import { DrawerActions } from "@react-navigation/native";
-import useAppConfig from "@/hooks/useAppConfig";
 import BottomDrawerMoveNote from "@/components/bottom_drawer_move_note";
 import { addNotesToNotebook } from "@/queries/notebooks";
 import BottomDrawerSelectNotebook from "@/components/bottom_drawer_select_notebook";
 import { useNotebooksNotes } from "@/hooks/useNotebookNotes";
+import { useConfig } from "@/providers/config";
 
 export default function NotesScreen() {
   const queryClient = useQueryClient();
@@ -46,15 +46,15 @@ export default function NotesScreen() {
   const bottomMoveNoteDrawerRef = React.useRef<BottomSheetModal>(null);
   const bottomSelectNotebookDrawerRef = React.useRef<BottomSheetModal>(null);
 
-  const [notesViewMode, saveNotesViewMode] = useAppConfig<"grid" | "list">(
+  const [notesViewMode, saveNotesViewMode] = useConfig<"grid" | "list">(
     "notesViewMode",
     "grid"
   );
-  const [notesSortBy, saveNotesSortBy] = useAppConfig<{
+  const [notesSortBy, saveNotesSortBy] = useConfig<{
     key: typeof sortTypes[number];
     order: "asc" | "desc";
   }>("notesSortBy", { key: sortTypes[0], order: "desc" });
-  const [isFirstNote, saveIsFirstNote] = useAppConfig<boolean>(
+  const [isFirstNote, saveIsFirstNote] = useConfig<boolean>(
     "isFirstNote",
     true
   );

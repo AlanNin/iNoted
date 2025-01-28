@@ -25,12 +25,21 @@ const settings = [
     route: "settings/storage",
     isEnabled: true,
   },
+
   {
     title: "About",
     icon: "Info",
     description:
       "Find out more about the app, its version, and the reason behind it.",
     route: "settings/about",
+    isEnabled: true,
+  },
+  {
+    title: "FAQ",
+    icon: "CircleHelp",
+    description:
+      "Get answers to common questions and learn how to use the app effectively.",
+    route: "settings/faq",
     isEnabled: true,
   },
 ];

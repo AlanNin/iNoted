@@ -7,6 +7,7 @@ export default function SettingsLayout() {
       <Stack.Screen name="storage" options={{ headerShown: false }} />
       <Stack.Screen name="appearance" options={{ headerShown: false }} />
       <Stack.Screen name="about" options={{ headerShown: false }} />
+      <Stack.Screen name="faq" options={{ headerShown: false }} />
     </Stack>
   );
 }

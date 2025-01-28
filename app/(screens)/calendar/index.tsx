@@ -19,6 +19,7 @@ import { getAllNotesCalendar } from "@/queries/notes";
 import Loader from "@/components/loading";
 import { Calendar } from "react-native-calendars";
 import { ScrollView } from "moti";
+import { useConfig } from "@/providers/config";
 
 const MemoizedNoteCard = React.memo(NoteCard);
 const EmptyNotesView = React.memo(({ message }: { message: string }) => (
@@ -42,16 +43,15 @@ export default function CalendarScreen() {
     queryKey: ["notes_calendar"],
     queryFn: getAllNotesCalendar,
   });
-
+  const [notesViewMode] = useConfig<"grid" | "list">("notesViewMode", "grid");
   const theme = useColorScheme();
   const navigation = useNavigation();
   const openMenu = () => {
     navigation.dispatch(DrawerActions.openDrawer());
   };
   const [isCalendarModalOpen, setIsCalendarModalOpen] = React.useState(false);
-  const [date, setDate] = React.useState(
-    new Date().toISOString().split("T")[0]
-  );
+  const [date, setDate] = React.useState(getMaxDateInUTC());
+
   const handleCloseModal = React.useCallback(() => {
     setIsCalendarModalOpen(false);
   }, []);
@@ -87,14 +87,14 @@ export default function CalendarScreen() {
     ({ item, index }: { item: NoteProps; index: number }) => (
       <MemoizedNoteCard
         note={item}
-        viewMode="grid"
+        viewMode={notesViewMode}
         index={index}
         selectDisabled={true}
         dateType="hour"
         key={`${item.id}-${item.title}-${item.content}-${item.updated_at}`}
       />
     ),
-    []
+    [notesViewMode]
   );
 
   return (
@@ -171,9 +171,10 @@ export default function CalendarScreen() {
                         keyExtractor={(item) => item.id.toString()}
                         data={filteredNotes}
                         renderItem={renderNote}
-                        numColumns={3}
+                        numColumns={notesViewMode === "grid" ? 3 : 1}
                         removeClippedSubviews={true}
-                        estimatedItemSize={240}
+                        estimatedItemSize={notesViewMode === "grid" ? 212 : 140}
+                        key={notesViewMode}
                       />
                     )}
                   </>
