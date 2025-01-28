@@ -505,7 +505,10 @@ export default function NotebookScreen() {
               </View>
             </TouchableWithoutFeedback>
           ) : (
-            <View style={styles.noNotesContainer}>
+            <View
+              style={styles.noNotesContainer}
+              onTouchStart={() => setIsMoreModalOpen(false)}
+            >
               <TouchableWithoutFeedback
                 onPressIn={() => setIsMoreModalOpen(false)}
                 style={styles.noNotesContainer}
@@ -742,6 +745,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     gap: 12,
     paddingBottom: 40,
+    width: "100%",
   },
   noNotesText: {
     fontSize: 16,
