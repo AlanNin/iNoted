@@ -3,9 +3,39 @@ import { Drawer } from "expo-router/drawer";
 import colors from "@/constants/colors";
 import Icon from "@/components/icon";
 import CustomDrawerContent from "@/components/custom_drawer_content";
+import React from "react";
+import {
+  setStatusBarStyle,
+  setStatusBarBackgroundColor,
+} from "expo-status-bar";
+import { AppState } from "react-native";
+import { AppStateStatus } from "react-native";
 
 export default function ScreensLayout() {
   const theme = useColorScheme();
+  React.useEffect(() => {
+    const changeStatusBarStyle = () => {
+      setStatusBarStyle(theme === "light" ? "dark" : "light");
+      setStatusBarBackgroundColor(colors[theme].background);
+    };
+
+    changeStatusBarStyle();
+
+    const handleAppStateChange = (nextAppState: AppStateStatus) => {
+      if (nextAppState === "active") {
+        changeStatusBarStyle();
+      }
+    };
+
+    const subscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, [theme]);
 
   return (
     <Drawer

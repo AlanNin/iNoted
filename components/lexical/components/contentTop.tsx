@@ -8,14 +8,14 @@ export default function ContentTop({
   noteDate,
   setTitle,
   isTitleEditable,
+  theme,
 }: {
   title: string;
   noteDate: string;
   setTitle: React.Dispatch<React.SetStateAction<string>>;
   isTitleEditable: boolean;
+  theme: "light" | "dark";
 }) {
-  const theme = useColorScheme();
-
   return (
     <div className="content-top">
       <p style={{ color: colors[theme].grayscale }} className="last-edited">

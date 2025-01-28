@@ -77,8 +77,7 @@ export const SET_IS_SHOWING_HIGHLIGHT_COLOR_OPTIONS_COMMAND: LexicalCommand<bool
 const LowPriority = 1;
 const MAX_LIST_DEPTH = 5;
 
-export default function ToolbarPlugin() {
-  const theme = useColorScheme();
+export default function ToolbarPlugin({ theme }: { theme: "light" | "dark" }) {
   const [editor] = useLexicalComposerContext();
   const [isBold, setIsBold] = React.useState(false);
   const [isItalic, setIsItalic] = React.useState(false);
@@ -401,7 +400,7 @@ export default function ToolbarPlugin() {
         aria-label="Font Modal"
         style={{ gap: 4 }}
       >
-        {fontSizeIcon()}
+        {fontSizeIcon({ theme })}
       </button>
       <button
         onClick={() => {
@@ -415,7 +414,7 @@ export default function ToolbarPlugin() {
             : "transparent",
         }}
       >
-        {boldIcon(isBold)}
+        {boldIcon({ theme, isActive: isBold })}
       </button>
       <button
         onClick={() => {
@@ -429,7 +428,7 @@ export default function ToolbarPlugin() {
             : "transparent",
         }}
       >
-        {italicIcon(isItalic)}
+        {italicIcon({ theme, isActive: isItalic })}
       </button>
       <button
         onClick={() => {
@@ -443,7 +442,7 @@ export default function ToolbarPlugin() {
         }}
         aria-label="Format Underline"
       >
-        {underlineIcon(isUnderline)}
+        {underlineIcon({ theme, isActive: isUnderline })}
       </button>
       <button
         onClick={() => {
@@ -457,7 +456,7 @@ export default function ToolbarPlugin() {
         }}
         aria-label="Format Strikethrough"
       >
-        {strikethroughIcon(isStrikethrough)}
+        {strikethroughIcon({ theme, isActive: isStrikethrough })}
       </button>
       <button
         onClick={() => {
@@ -471,7 +470,7 @@ export default function ToolbarPlugin() {
         }}
         aria-label="Format Strikethrough"
       >
-        {superscriptIcon(isSuperScript)}
+        {superscriptIcon({ theme, isActive: isSuperScript })}
       </button>
       <button
         onClick={() => {
@@ -485,7 +484,7 @@ export default function ToolbarPlugin() {
         }}
         aria-label="Format Strikethrough"
       >
-        {subscriptIcon(isSubScript)}
+        {subscriptIcon({ theme, isActive: isSubScript })}
       </button>
       <button
         onMouseDown={() => {
@@ -497,7 +496,7 @@ export default function ToolbarPlugin() {
         className={"toolbar-item spaced"}
         aria-label="Font Color"
       >
-        {fontColorIcon(fontColor)}
+        {fontColorIcon({ theme, color: fontColor })}
       </button>
       <button
         onMouseDown={() => {
@@ -509,9 +508,9 @@ export default function ToolbarPlugin() {
         className={"toolbar-item spaced"}
         aria-label="Format Strikethrough"
       >
-        {highlightIcon(highlightColor)}
+        {highlightIcon({ theme, color: highlightColor })}
       </button>
-      <Divider />
+      <Divider theme={theme} />
       {/* Undo Redo */}
       <button
         onClick={() => {
@@ -521,7 +520,7 @@ export default function ToolbarPlugin() {
         aria-label="Undo Last Action"
         disabled={!canUndo}
       >
-        {undoIcon()}
+        {undoIcon({ theme })}
       </button>
       <button
         onClick={() => {
@@ -531,9 +530,9 @@ export default function ToolbarPlugin() {
         aria-label="Redo Last Undone Action"
         disabled={!canRedo}
       >
-        {redoIcon()}
+        {redoIcon({ theme })}
       </button>
-      <Divider />
+      <Divider theme={theme} />
       <button
         onClick={() => {
           editor.dispatchCommand(FORMAT_ELEMENT_COMMAND, "left");
@@ -541,7 +540,7 @@ export default function ToolbarPlugin() {
         className="toolbar-item spaced"
         aria-label="Left Align"
       >
-        {alignLeftIcon()}
+        {alignLeftIcon({ theme })}
       </button>
       <button
         onClick={() => {
@@ -550,7 +549,7 @@ export default function ToolbarPlugin() {
         className="toolbar-item spaced"
         aria-label="Center Align"
       >
-        {alignCenterIcon()}
+        {alignCenterIcon({ theme })}
       </button>
       <button
         onClick={() => {
@@ -559,7 +558,7 @@ export default function ToolbarPlugin() {
         className="toolbar-item spaced"
         aria-label="Right Align"
       >
-        {alignRightIcon()}
+        {alignRightIcon({ theme })}
       </button>
       <button
         onClick={() => {
@@ -568,9 +567,9 @@ export default function ToolbarPlugin() {
         className="toolbar-item"
         aria-label="Justify Align"
       >
-        {alignJustifyIcon()}
+        {alignJustifyIcon({ theme })}
       </button>
-      <Divider />
+      <Divider theme={theme} />
       {/* Lists */}
       <button
         onClick={() => toggleList("check")}
@@ -582,7 +581,7 @@ export default function ToolbarPlugin() {
         }}
         aria-label="Insert Check List"
       >
-        {checkListIcon(isCheckList)}
+        {checkListIcon({ theme, isActive: isCheckList })}
       </button>
       <button
         onClick={() => toggleList("ul")}
@@ -594,7 +593,7 @@ export default function ToolbarPlugin() {
         }}
         aria-label="Toggle Unordered List"
       >
-        {ULIcon(isUnorderedList)}
+        {ULIcon({ theme, isActive: isUnorderedList })}
       </button>
       <button
         onClick={() => toggleList("ol")}
@@ -606,7 +605,7 @@ export default function ToolbarPlugin() {
         }}
         aria-label="Toggle Ordered List"
       >
-        {OLIcon(isOrderedList)}
+        {OLIcon({ theme, isActive: isOrderedList })}
       </button>
       <button
         onClick={handleOutdentList}
@@ -614,7 +613,7 @@ export default function ToolbarPlugin() {
         aria-label="Decrease Depth"
         disabled={!isCheckList && !isOrderedList && !isUnorderedList}
       >
-        {outdentIcon()}
+        {outdentIcon({ theme })}
       </button>
       <button
         onClick={handleIndentList}
@@ -625,7 +624,7 @@ export default function ToolbarPlugin() {
           listDepth >= MAX_LIST_DEPTH
         }
       >
-        {indentIcon()}
+        {indentIcon({ theme })}
       </button>
       {/* Font Size Modal */}
       <MotiView
@@ -658,9 +657,9 @@ export default function ToolbarPlugin() {
           className={"toolbar-item spaced"}
           aria-label="Close Font Modal"
         >
-          {closeIcon()}
+          {closeIcon({ theme })}
         </button>
-        <Divider />
+        <Divider theme={theme} />
         <button
           onMouseDown={() => {
             handleFontSizeChange(fontSize - 1);
@@ -669,7 +668,7 @@ export default function ToolbarPlugin() {
           aria-label="Font Size -"
           disabled={fontSize === 12}
         >
-          {minusIcon()}
+          {minusIcon({ theme })}
         </button>
         <button
           className={"toolbar-item spaced "}
@@ -690,9 +689,9 @@ export default function ToolbarPlugin() {
           aria-label="Font Size +"
           disabled={fontSize === 52}
         >
-          {plusIcon()}
+          {plusIcon({ theme })}
         </button>
-        <Divider />
+        <Divider theme={theme} />
         <button
           onMouseDown={() => {
             handleFontSizeChange(16);
@@ -706,7 +705,7 @@ export default function ToolbarPlugin() {
                 : "transparent",
           }}
         >
-          {h6Icon(fontSize === 16)}
+          {h6Icon({ theme, isActive: fontSize === 16 })}
         </button>
         <button
           onMouseDown={() => {
@@ -721,7 +720,7 @@ export default function ToolbarPlugin() {
                 : "transparent",
           }}
         >
-          {h5Icon(fontSize === 20)}
+          {h5Icon({ theme, isActive: fontSize === 20 })}
         </button>
         <button
           onMouseDown={() => {
@@ -736,7 +735,7 @@ export default function ToolbarPlugin() {
                 : "transparent",
           }}
         >
-          {h4Icon(fontSize === 28)}
+          {h4Icon({ theme, isActive: fontSize === 28 })}
         </button>
         <button
           onMouseDown={() => {
@@ -751,7 +750,7 @@ export default function ToolbarPlugin() {
                 : "transparent",
           }}
         >
-          {h3Icon(fontSize === 36)}
+          {h3Icon({ theme, isActive: fontSize === 36 })}
         </button>
         <button
           onMouseDown={() => {
@@ -766,7 +765,7 @@ export default function ToolbarPlugin() {
                 : "transparent",
           }}
         >
-          {h2Icon(fontSize === 44)}
+          {h2Icon({ theme, isActive: fontSize === 44 })}
         </button>
         <button
           onMouseDown={() => {
@@ -781,7 +780,7 @@ export default function ToolbarPlugin() {
                 : "transparent",
           }}
         >
-          {h1Icon(fontSize === 52)}
+          {h1Icon({ theme, isActive: fontSize === 52 })}
         </button>
       </MotiView>
 
@@ -817,9 +816,9 @@ export default function ToolbarPlugin() {
           className={"toolbar-item spaced"}
           aria-label="Close Font Modal"
         >
-          {closeIcon()}
+          {closeIcon({ theme })}
         </button>
-        <Divider />
+        <Divider theme={theme} />
         <button
           onMouseDown={() => {
             if (colorPicker === null) {
@@ -837,9 +836,9 @@ export default function ToolbarPlugin() {
                 : "transparent",
           }}
         >
-          {colorPaletteIcon(colorPicker !== null)}
+          {colorPaletteIcon({ theme, isActive: colorPicker !== null })}
         </button>
-        <Divider />
+        <Divider theme={theme} />
         {fontColorPalette.map((color) => (
           <button
             onMouseDown={() => {
@@ -901,9 +900,9 @@ export default function ToolbarPlugin() {
           className={"toolbar-item spaced"}
           aria-label="Close Font Modal"
         >
-          {closeIcon()}
+          {closeIcon({ theme })}
         </button>
-        <Divider />
+        <Divider theme={theme} />
         <button
           onMouseDown={() => {
             if (colorPicker === null) {
@@ -921,9 +920,9 @@ export default function ToolbarPlugin() {
                 : "transparent",
           }}
         >
-          {colorPaletteIcon(colorPicker !== null)}
+          {colorPaletteIcon({ theme, isActive: colorPicker !== null })}
         </button>
-        <Divider />
+        <Divider theme={theme} />
         {highlightColorPalette.map((color) => (
           <button
             onMouseDown={() => {

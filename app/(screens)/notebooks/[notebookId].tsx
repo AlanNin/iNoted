@@ -316,9 +316,18 @@ export default function NotebookScreen() {
                           setIsMoreModalOpen(false);
                           toggleNotesEditMode();
                         }}
+                        disabled={notebookData?.notes.length === 0}
                       >
-                        <Icon name="LibraryBig" strokeWidth={1.2} size={18} />
-                        <Text style={styles.moreModalButtonText}>
+                        <Icon
+                          name="LibraryBig"
+                          strokeWidth={1.2}
+                          size={18}
+                          muted={notebookData?.notes.length === 0}
+                        />
+                        <Text
+                          style={styles.moreModalButtonText}
+                          disabled={notebookData?.notes.length === 0}
+                        >
                           {isNotesEditMode ? "Cancel" : "Manage Notes"}
                         </Text>
                       </TouchableOpacity>
@@ -356,12 +365,10 @@ export default function NotebookScreen() {
           >
             <View style={styles.difumBackgroundContainer}>
               {isBackgroundAColor ? (
-                <>
-                  <View
-                    style={styles.backgroundImage}
-                    customBackgroundColor={colorSource}
-                  />
-                </>
+                <LinearGradient
+                  colors={[colorSource, colors[theme].background]}
+                  style={styles.backgroundImage}
+                />
               ) : (
                 <>
                   <Image

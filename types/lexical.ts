@@ -14,4 +14,5 @@ type LexicalProps = {
   noteDate: string;
   navigationType: string;
   handleToastAndroid: (message: string) => void;
+  theme: "light" | "dark";
 };

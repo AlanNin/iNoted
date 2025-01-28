@@ -1,10 +1,7 @@
 import "../styles.css";
 import colors from "@/constants/colors";
-import useColorScheme from "@/hooks/useColorScheme";
 
-function getIconColor(isActive?: boolean) {
-  const theme = useColorScheme();
-
+function getIconColor(theme: "light" | "dark", isActive?: boolean) {
   if (isActive === undefined) {
     return colors[theme].editor.toolbar_icon;
   }
@@ -14,9 +11,7 @@ function getIconColor(isActive?: boolean) {
     : colors[theme].editor.toolbar_icon;
 }
 
-export function Divider() {
-  const theme = useColorScheme();
-
+export function Divider({ theme }: { theme: "light" | "dark" }) {
   return (
     <div
       className="divider"
@@ -25,12 +20,18 @@ export function Divider() {
   );
 }
 
-export function boldIcon(isActive: boolean) {
+export function boldIcon({
+  theme,
+  isActive,
+}: {
+  theme: "light" | "dark";
+  isActive: boolean;
+}) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor(isActive)}
+      fill={getIconColor(theme, isActive)}
       width="16"
       height="16"
     >
@@ -48,12 +49,18 @@ export function boldIcon(isActive: boolean) {
   );
 }
 
-export function italicIcon(isActive: boolean) {
+export function italicIcon({
+  theme,
+  isActive,
+}: {
+  theme: "light" | "dark";
+  isActive: boolean;
+}) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor(isActive)}
+      fill={getIconColor(theme, isActive)}
       width="16"
       height="16"
     >
@@ -73,12 +80,18 @@ export function italicIcon(isActive: boolean) {
   );
 }
 
-export function underlineIcon(isActive: boolean) {
+export function underlineIcon({
+  theme,
+  isActive,
+}: {
+  theme: "light" | "dark";
+  isActive: boolean;
+}) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor(isActive)}
+      fill={getIconColor(theme, isActive)}
       width="16"
       height="16"
     >
@@ -98,12 +111,18 @@ export function underlineIcon(isActive: boolean) {
   );
 }
 
-export function strikethroughIcon(isActive: boolean) {
+export function strikethroughIcon({
+  theme,
+  isActive,
+}: {
+  theme: "light" | "dark";
+  isActive: boolean;
+}) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor(isActive)}
+      fill={getIconColor(theme, isActive)}
       width="16"
       height="16"
     >
@@ -123,7 +142,13 @@ export function strikethroughIcon(isActive: boolean) {
   );
 }
 
-export function fontColorIcon(color: string) {
+export function fontColorIcon({
+  theme,
+  color,
+}: {
+  theme: "light" | "dark";
+  color: string;
+}) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -142,7 +167,7 @@ export function fontColorIcon(color: string) {
           <path fill="none" d="M0 0h24v24H0z"></path>
           <path
             d="M15.246 14H8.754l-1.6 4H5l6-15h2l6 15h-2.154l-1.6-4zm-.8-2L12 5.885 9.554 12h4.892z"
-            fill={getIconColor()}
+            fill={getIconColor(theme)}
           />
           <path d="M5 20.9h18v3H01v-3z" fill={color} />
         </g>
@@ -151,10 +176,16 @@ export function fontColorIcon(color: string) {
   );
 }
 
-export function highlightIcon(color: string) {
+export function highlightIcon({
+  theme,
+  color,
+}: {
+  theme: "light" | "dark";
+  color: string;
+}) {
   return (
     <svg
-      fill={getIconColor()}
+      fill={getIconColor(theme)}
       width="16"
       height="16"
       viewBox="0 0 36 36"
@@ -190,12 +221,18 @@ export function highlightIcon(color: string) {
   );
 }
 
-export function superscriptIcon(isActive: boolean) {
+export function superscriptIcon({
+  theme,
+  isActive,
+}: {
+  theme: "light" | "dark";
+  isActive: boolean;
+}) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor(isActive)}
+      fill={getIconColor(theme, isActive)}
       width="16"
       height="16"
     >
@@ -215,12 +252,18 @@ export function superscriptIcon(isActive: boolean) {
   );
 }
 
-export function subscriptIcon(isActive: boolean) {
+export function subscriptIcon({
+  theme,
+  isActive,
+}: {
+  theme: "light" | "dark";
+  isActive: boolean;
+}) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor(isActive)}
+      fill={getIconColor(theme, isActive)}
       width="16"
       height="16"
     >
@@ -240,12 +283,12 @@ export function subscriptIcon(isActive: boolean) {
   );
 }
 
-export function undoIcon() {
+export function undoIcon({ theme }: { theme: "light" | "dark" }) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor()}
+      fill={getIconColor(theme)}
       width="16"
       height="16"
     >
@@ -265,12 +308,12 @@ export function undoIcon() {
   );
 }
 
-export function redoIcon() {
+export function redoIcon({ theme }: { theme: "light" | "dark" }) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor()}
+      fill={getIconColor(theme)}
       width="16"
       height="16"
     >
@@ -290,12 +333,12 @@ export function redoIcon() {
   );
 }
 
-export function alignLeftIcon() {
+export function alignLeftIcon({ theme }: { theme: "light" | "dark" }) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor()}
+      fill={getIconColor(theme)}
       width="16"
       height="16"
     >
@@ -315,12 +358,12 @@ export function alignLeftIcon() {
   );
 }
 
-export function alignCenterIcon() {
+export function alignCenterIcon({ theme }: { theme: "light" | "dark" }) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor()}
+      fill={getIconColor(theme)}
       width="16"
       height="16"
     >
@@ -340,12 +383,12 @@ export function alignCenterIcon() {
   );
 }
 
-export function alignRightIcon() {
+export function alignRightIcon({ theme }: { theme: "light" | "dark" }) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor()}
+      fill={getIconColor(theme)}
       width="16"
       height="16"
     >
@@ -365,12 +408,12 @@ export function alignRightIcon() {
   );
 }
 
-export function alignJustifyIcon() {
+export function alignJustifyIcon({ theme }: { theme: "light" | "dark" }) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor()}
+      fill={getIconColor(theme)}
       width="16"
       height="16"
     >
@@ -390,12 +433,18 @@ export function alignJustifyIcon() {
   );
 }
 
-export function checkListIcon(isActive: boolean) {
+export function checkListIcon({
+  theme,
+  isActive,
+}: {
+  theme: "light" | "dark";
+  isActive: boolean;
+}) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor(isActive)}
+      fill={getIconColor(theme, isActive)}
       width="16"
       height="16"
     >
@@ -415,12 +464,18 @@ export function checkListIcon(isActive: boolean) {
   );
 }
 
-export function ULIcon(isActive: boolean) {
+export function ULIcon({
+  theme,
+  isActive,
+}: {
+  theme: "light" | "dark";
+  isActive: boolean;
+}) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor(isActive)}
+      fill={getIconColor(theme, isActive)}
       width="16"
       height="16"
     >
@@ -440,12 +495,18 @@ export function ULIcon(isActive: boolean) {
   );
 }
 
-export function OLIcon(isActive: boolean) {
+export function OLIcon({
+  theme,
+  isActive,
+}: {
+  theme: "light" | "dark";
+  isActive: boolean;
+}) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor(isActive)}
+      fill={getIconColor(theme, isActive)}
       width="16"
       height="16"
     >
@@ -465,12 +526,12 @@ export function OLIcon(isActive: boolean) {
   );
 }
 
-export function outdentIcon() {
+export function outdentIcon({ theme }: { theme: "light" | "dark" }) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor()}
+      fill={getIconColor(theme)}
       width="16"
       height="16"
     >
@@ -490,12 +551,12 @@ export function outdentIcon() {
   );
 }
 
-export function indentIcon() {
+export function indentIcon({ theme }: { theme: "light" | "dark" }) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor()}
+      fill={getIconColor(theme)}
       width="16"
       height="16"
     >
@@ -515,12 +576,12 @@ export function indentIcon() {
   );
 }
 
-export function fontSizeIcon() {
+export function fontSizeIcon({ theme }: { theme: "light" | "dark" }) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor()}
+      fill={getIconColor(theme)}
       width="16"
       height="16"
     >
@@ -540,12 +601,12 @@ export function fontSizeIcon() {
   );
 }
 
-export function closeIcon() {
+export function closeIcon({ theme }: { theme: "light" | "dark" }) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor()}
+      fill={getIconColor(theme)}
       width="16"
       height="16"
     >
@@ -565,12 +626,12 @@ export function closeIcon() {
   );
 }
 
-export function minusIcon() {
+export function minusIcon({ theme }: { theme: "light" | "dark" }) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor()}
+      fill={getIconColor(theme)}
       width="16"
       height="16"
     >
@@ -590,12 +651,12 @@ export function minusIcon() {
   );
 }
 
-export function plusIcon() {
+export function plusIcon({ theme }: { theme: "light" | "dark" }) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor()}
+      fill={getIconColor(theme)}
       width="16"
       height="16"
     >
@@ -615,12 +676,18 @@ export function plusIcon() {
   );
 }
 
-export function h6Icon(isActive: boolean) {
+export function h6Icon({
+  theme,
+  isActive,
+}: {
+  theme: "light" | "dark";
+  isActive: boolean;
+}) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor(isActive)}
+      fill={getIconColor(theme, isActive)}
       width="16"
       height="16"
     >
@@ -640,12 +707,18 @@ export function h6Icon(isActive: boolean) {
   );
 }
 
-export function h5Icon(isActive: boolean) {
+export function h5Icon({
+  theme,
+  isActive,
+}: {
+  theme: "light" | "dark";
+  isActive: boolean;
+}) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor(isActive)}
+      fill={getIconColor(theme, isActive)}
       width="16"
       height="16"
     >
@@ -665,12 +738,18 @@ export function h5Icon(isActive: boolean) {
   );
 }
 
-export function h4Icon(isActive: boolean) {
+export function h4Icon({
+  theme,
+  isActive,
+}: {
+  theme: "light" | "dark";
+  isActive: boolean;
+}) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor(isActive)}
+      fill={getIconColor(theme, isActive)}
       width="16"
       height="16"
     >
@@ -690,12 +769,18 @@ export function h4Icon(isActive: boolean) {
   );
 }
 
-export function h3Icon(isActive: boolean) {
+export function h3Icon({
+  theme,
+  isActive,
+}: {
+  theme: "light" | "dark";
+  isActive: boolean;
+}) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor(isActive)}
+      fill={getIconColor(theme, isActive)}
       width="16"
       height="16"
     >
@@ -715,12 +800,18 @@ export function h3Icon(isActive: boolean) {
   );
 }
 
-export function h2Icon(isActive: boolean) {
+export function h2Icon({
+  theme,
+  isActive,
+}: {
+  theme: "light" | "dark";
+  isActive: boolean;
+}) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor(isActive)}
+      fill={getIconColor(theme, isActive)}
       width="16"
       height="16"
     >
@@ -740,12 +831,18 @@ export function h2Icon(isActive: boolean) {
   );
 }
 
-export function h1Icon(isActive: boolean) {
+export function h1Icon({
+  theme,
+  isActive,
+}: {
+  theme: "light" | "dark";
+  isActive: boolean;
+}) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor(isActive)}
+      fill={getIconColor(theme, isActive)}
       width="16"
       height="16"
     >
@@ -765,12 +862,18 @@ export function h1Icon(isActive: boolean) {
   );
 }
 
-export function colorPaletteIcon(isActive: boolean) {
+export function colorPaletteIcon({
+  theme,
+  isActive,
+}: {
+  theme: "light" | "dark";
+  isActive: boolean;
+}) {
   return (
     <svg
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
-      fill={getIconColor(isActive)}
+      fill={getIconColor(theme, isActive)}
       width="16"
       height="16"
     >

@@ -46,8 +46,8 @@ export default function LexicalEditorComponent({
   noteDate,
   navigationType,
   handleToastAndroid,
+  theme,
 }: LexicalProps) {
-  const theme = useColorScheme();
   const [mode, SetMode] = React.useState<"edit" | "view">("edit");
   const [isTitleEditable, setIsTitleEditable] = React.useState(true);
 
@@ -94,12 +94,14 @@ export default function LexicalEditorComponent({
           mode={mode}
           SetMode={SetMode}
           setIsTitleEditable={setIsTitleEditable}
+          theme={theme}
         />
         <ContentTop
           noteDate={noteDate}
           setTitle={setTitle}
           title={title}
           isTitleEditable={isTitleEditable}
+          theme={theme}
         />
 
         <div className="editor-container">
@@ -155,7 +157,9 @@ export default function LexicalEditorComponent({
             {/* <TreeViewPlugin /> */}
           </div>
         </div>
-        {mode === "edit" && isKeyboardVisible && <ToolbarPlugin />}
+        {mode === "edit" && isKeyboardVisible && (
+          <ToolbarPlugin theme={theme} />
+        )}
       </main>
     </LexicalComposer>
   );

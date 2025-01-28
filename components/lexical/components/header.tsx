@@ -18,6 +18,7 @@ export default function Header({
   mode,
   SetMode,
   setIsTitleEditable,
+  theme,
 }: {
   isShowMoreModalOpen: boolean;
   setIsShowMoreModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -30,8 +31,8 @@ export default function Header({
   mode: "edit" | "view";
   SetMode: (mode: "edit" | "view") => void;
   setIsTitleEditable: React.Dispatch<React.SetStateAction<boolean>>;
+  theme: "light" | "dark";
 }) {
-  const theme = useColorScheme();
   const [editor] = useLexicalComposerContext();
   const moreContainerRef = React.useRef<HTMLDivElement>(null);
 
@@ -98,23 +99,23 @@ export default function Header({
   return (
     <header className="header">
       <button onClick={() => handleBack()}>
-        <Icon name="ArrowLeft" />
+        <Icon name="ArrowLeft" customColor={colors[theme].tint} />
       </button>
       <div className="header-right">
         {mode === "edit" && (
           <button onClick={() => toggleMode("view")}>
-            <Icon name="BookOpenText" />
+            <Icon name="BookOpenText" customColor={colors[theme].tint} />
           </button>
         )}
         {mode === "view" && (
           <button onClick={() => toggleMode("edit")}>
-            <Icon name="FilePen" />
+            <Icon name="FilePen" customColor={colors[theme].tint} />
           </button>
         )}
 
         <div className="more-container" ref={moreContainerRef}>
           <button onClick={toggleMoreModal}>
-            <Icon name="EllipsisVertical" />
+            <Icon name="EllipsisVertical" customColor={colors[theme].tint} />
           </button>
           {isShowMoreModalOpen && (
             <MotiView
@@ -143,7 +144,7 @@ export default function Header({
                         name={option.icon}
                         strokeWidth={1.2}
                         size={18}
-                        customColor={option.color || colors[theme].text}
+                        customColor={option.color || colors[theme].tint}
                       />
                       <p style={{ color: option.color || colors[theme].text }}>
                         {option.name}

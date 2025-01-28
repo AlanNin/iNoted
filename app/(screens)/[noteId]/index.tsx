@@ -243,6 +243,7 @@ export default function NoteScreen() {
             noteDate={noteDate!}
             navigationType={navigationType}
             handleToastAndroid={handleToastAndroid}
+            theme={theme}
           />
         </KeyboardAwareScrollView>
       </SafeAreaView>

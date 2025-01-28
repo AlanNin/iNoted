@@ -10,7 +10,6 @@ import { router } from "expo-router";
 import Icon from "@/components/icon";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import BottomDrawerTheme from "@/components/bottom_drawer_theme";
-import { reloadAppAsync } from "expo";
 import { useConfig } from "@/providers/config";
 import useColorScheme from "@/hooks/useColorScheme";
 import colors from "@/constants/colors";
@@ -44,7 +43,6 @@ const AppearanceScreen = () => {
 
   const handleApplyTheme = (theme: ThemeProps) => {
     saveAppTheme(theme);
-    reloadAppAsync();
   };
 
   const handleCancelApplyTheme = () => {
