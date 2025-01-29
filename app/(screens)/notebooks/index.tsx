@@ -22,16 +22,14 @@ import { FlashList } from "@shopify/flash-list";
 import { DrawerActions } from "@react-navigation/native";
 import {
   createNotebook,
-  deleteNotebook,
   deleteNotebooks,
   getAllNotebooks,
-  updateNotebook,
 } from "@/queries/notebooks";
 import { useNotebooksEditMode } from "@/hooks/useNotebooksEditMode";
 import BottomDrawerCreateNotebook from "@/components/bottom_drawer_create_notebook";
 import NotebookCard from "@/components/notebook_card";
-import BottomDrawerNotebook from "@/components/bottom_drawer_edit_notebook";
 import { useConfig } from "@/providers/config";
+import { sortTypes } from "@/types/bottom_drawer_sort";
 
 export default function NotebooksScreen() {
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -39,7 +37,6 @@ export default function NotebooksScreen() {
   const theme = useColorScheme();
   const sortBottomDrawerRef = React.useRef<BottomSheetModal>(null);
   const createNotebookBottomDrawerRef = React.useRef<BottomSheetModal>(null);
-  const sortTypes = ["Recently added", "A-Z"] as const;
   const bottomDeleteMultipleDrawerRef = React.useRef<BottomSheetModal>(null);
   const [notebooksSortBy, saveNotebooksSortBy] = useConfig<{
     key: typeof sortTypes[number];
@@ -111,16 +108,8 @@ export default function NotebooksScreen() {
     sortBottomDrawerRef.current?.present();
   };
 
-  const toggleSortOrder = (actionTitle: typeof sortTypes[number]) => {
-    saveNotebooksSortBy((prevState) => {
-      return {
-        key: actionTitle,
-        order:
-          prevState?.key === actionTitle && prevState?.order === "desc"
-            ? "asc"
-            : "desc",
-      };
-    });
+  const handleSaveNotebooksSortOrder = (sort: any) => {
+    saveNotebooksSortBy(sort);
   };
 
   React.useEffect(() => {
@@ -379,15 +368,13 @@ export default function NotebooksScreen() {
           </MotiView>
         )}
       </SafeAreaView>
+
       <BottomDrawerSort
         ref={sortBottomDrawerRef}
         title="Sort your notebooks"
-        actions={sortTypes.map((type) => ({
-          title: type,
-          action: () => toggleSortOrder(type),
-          isSelected: notebooksSortBy.key === type,
-          order: notebooksSortBy.order,
-        }))}
+        options={[sortTypes[0], sortTypes[1]]}
+        selectedSort={notebooksSortBy}
+        handleSortOrder={handleSaveNotebooksSortOrder}
       />
 
       <BottomDrawerCreateNotebook

@@ -14,9 +14,10 @@ import { useConfig } from "@/providers/config";
 import useColorScheme from "@/hooks/useColorScheme";
 import colors from "@/constants/colors";
 import BottomDrawerSort from "@/components/bottom_drawer_sort";
+import BottomDrawerOptions from "@/components/bottom_drawer_options";
+import { sortTypes } from "@/types/bottom_drawer_sort";
 
 const themeOptions = ["system", "light", "dark"] as const;
-const sortTypes = ["Recently added", "A-Z"] as const;
 
 export type ThemeProps = typeof themeOptions[number];
 
@@ -63,16 +64,8 @@ const AppearanceScreen = () => {
     order: "asc" | "desc";
   }>("notesSortBy", { key: sortTypes[0], order: "desc" });
 
-  const toggleNotesSortOrder = (actionTitle: typeof sortTypes[number]) => {
-    saveNotesSortBy((prevState) => {
-      return {
-        key: actionTitle,
-        order:
-          prevState?.key === actionTitle && prevState?.order === "desc"
-            ? "asc"
-            : "desc",
-      };
-    });
+  const handleSaveNotesSortOrder = (sort: any) => {
+    saveNotesSortBy(sort);
   };
 
   // Sort Notebooks
@@ -87,28 +80,24 @@ const AppearanceScreen = () => {
     order: "asc" | "desc";
   }>("notebooksSortBy", { key: sortTypes[0], order: "desc" });
 
-  const toggleNotebooksSortOrder = (actionTitle: typeof sortTypes[number]) => {
-    saveNotebooksSortBy((prevState) => {
-      return {
-        key: actionTitle,
-        order:
-          prevState?.key === actionTitle && prevState?.order === "desc"
-            ? "asc"
-            : "desc",
-      };
-    });
+  const handleSaveNotebooksSortOrder = (sort: any) => {
+    saveNotebooksSortBy(sort);
   };
 
   // Layout Notes
+  const layoutOptionsBottomDrawerRef = React.useRef<BottomSheetModal>(null);
+
+  const handleToggleBottomLayoutOptionsDrawer = () => {
+    layoutOptionsBottomDrawerRef.current?.present();
+  };
+
   const [notesViewMode, saveNotesViewMode] = useConfig<"grid" | "list">(
     "notesViewMode",
     "grid"
   );
 
-  const handleToggleNotesViewMode = () => {
-    saveNotesViewMode((prevState) => {
-      return prevState === "grid" ? "list" : "grid";
-    });
+  const handleSelectOption = (option: string) => {
+    saveNotesViewMode(option as "grid" | "list");
   };
 
   return (
@@ -190,7 +179,7 @@ const AppearanceScreen = () => {
               </Text>
               <TouchableOpacity
                 style={styles.itemsButton}
-                onPress={handleToggleNotesViewMode}
+                onPress={handleToggleBottomLayoutOptionsDrawer}
               >
                 <View style={styles.itemButtonDetails}>
                   <Text>Notes Layout</Text>
@@ -218,22 +207,32 @@ const AppearanceScreen = () => {
       <BottomDrawerSort
         ref={notesSortBottomDrawerRef}
         title="Sort your notes"
-        actions={sortTypes.map((type) => ({
-          title: type,
-          action: () => toggleNotesSortOrder(type),
-          isSelected: notesSortBy.key === type,
-          order: notesSortBy.order,
-        }))}
+        options={[sortTypes[0], sortTypes[1]]}
+        selectedSort={notesSortBy}
+        handleSortOrder={handleSaveNotesSortOrder}
       />
       <BottomDrawerSort
         ref={notebooksSortBottomDrawerRef}
         title="Sort your notebooks"
-        actions={sortTypes.map((type) => ({
-          title: type,
-          action: () => toggleNotebooksSortOrder(type),
-          isSelected: notebooksSortBy.key === type,
-          order: notebooksSortBy.order,
-        }))}
+        options={[sortTypes[0], sortTypes[1]]}
+        selectedSort={notebooksSortBy}
+        handleSortOrder={handleSaveNotebooksSortOrder}
+      />
+      <BottomDrawerOptions
+        ref={layoutOptionsBottomDrawerRef}
+        title="Choose your notes layout"
+        options={[
+          {
+            name: "grid",
+            icon: "LayoutGrid",
+          },
+          {
+            name: "list",
+            icon: "Rows2",
+          },
+        ]}
+        selectedOption={notesViewMode}
+        handleSelectOption={handleSelectOption}
       />
     </>
   );

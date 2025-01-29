@@ -28,13 +28,13 @@ import { addNotesToNotebook } from "@/queries/notebooks";
 import BottomDrawerSelectNotebook from "@/components/bottom_drawer_select_notebook";
 import { useNotebooksNotes } from "@/hooks/useNotebookNotes";
 import { useConfig } from "@/providers/config";
+import { sortTypes } from "@/types/bottom_drawer_sort";
 
 export default function NotesScreen() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = React.useState("");
   const navigation = useNavigation();
   const theme = useColorScheme();
-  const sortTypes = ["Recently added", "A-Z"] as const;
   const {
     isNotesEditMode,
     toggleNotesEditMode,
@@ -115,16 +115,8 @@ export default function NotesScreen() {
     );
   }, [sortedNotes, searchQuery]);
 
-  const toggleSortOrder = (actionTitle: typeof sortTypes[number]) => {
-    saveNotesSortBy((prevState) => {
-      return {
-        key: actionTitle,
-        order:
-          prevState?.key === actionTitle && prevState?.order === "desc"
-            ? "asc"
-            : "desc",
-      };
-    });
+  const handleSaveNotesSortOrder = (sort: any) => {
+    saveNotesSortBy(sort);
   };
 
   React.useEffect(() => {
@@ -262,7 +254,7 @@ export default function NotesScreen() {
                 disabled={notesData?.length === 0}
               >
                 <Icon
-                  name="Rows3"
+                  name="Rows2"
                   muted={notesData?.length === 0}
                   size={20}
                   style={{ marginTop: 1 }}
@@ -473,14 +465,10 @@ export default function NotesScreen() {
       <BottomDrawerSort
         ref={sortBottomDrawerRef}
         title="Sort your notes"
-        actions={sortTypes.map((type) => ({
-          title: type,
-          action: () => toggleSortOrder(type),
-          isSelected: notesSortBy.key === type,
-          order: notesSortBy.order,
-        }))}
+        options={[sortTypes[0], sortTypes[1]]}
+        selectedSort={notesSortBy}
+        handleSortOrder={handleSaveNotesSortOrder}
       />
-
       <BottomDrawerConfirm
         ref={bottomDeleteMultipleDrawerRef}
         title="Delete selected notes?"

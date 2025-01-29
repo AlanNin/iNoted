@@ -1,12 +1,14 @@
-type BottomDrawerSortActionsProps = {
-  title: string;
-  action: () => void;
-  order?: "asc" | "desc";
-  isSelected?: boolean;
+export const sortTypes = ["Recently added", "A-Z"] as const;
+
+export type BottomDrawerSortOptionProps = {
+  key: string;
+  order: "asc" | "desc";
 };
 
 export type BottomDrawerSortProps = {
   title: string;
   description?: string;
-  actions: BottomDrawerSortActionsProps[];
+  options: typeof sortTypes;
+  selectedSort: BottomDrawerSortOptionProps;
+  handleSortOrder: (sort: BottomDrawerSortOptionProps) => void;
 };

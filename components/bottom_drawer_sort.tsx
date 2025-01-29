@@ -9,16 +9,48 @@ import { BackHandler, StyleSheet } from "react-native";
 import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
 import Icon from "./icon";
-import { BottomDrawerSortProps } from "@/types/bottom_drawer_sort";
+import {
+  BottomDrawerSortOptionProps,
+  BottomDrawerSortProps,
+  sortTypes,
+} from "@/types/bottom_drawer_sort";
 
 const BottomDrawerSort = React.forwardRef<
   BottomSheetModal,
   Omit<BottomDrawerSortProps, "ref">
->(({ title, description, actions }, ref) => {
+>(({ title, description, options, selectedSort, handleSortOrder }, ref) => {
   const theme = useColorScheme();
+  const [temporalSelection, setTemporalSelection] = React.useState<
+    BottomDrawerSortOptionProps
+  >(selectedSort);
+  const isApplyDisabled =
+    temporalSelection.key === selectedSort.key &&
+    selectedSort.order === temporalSelection.order;
 
   const closeDrawer = () => {
     (ref as React.RefObject<BottomSheetModal>).current?.dismiss();
+  };
+
+  const handleCancel = () => {
+    closeDrawer();
+    setTemporalSelection(selectedSort);
+  };
+
+  const handleSubmit = () => {
+    handleSortOrder(temporalSelection);
+    closeDrawer();
+  };
+
+  const toggleSortOrder = (key: typeof sortTypes[number]) => {
+    setTemporalSelection((prevState) => {
+      return {
+        key,
+        order:
+          prevState?.key === key && prevState?.order === "desc"
+            ? "asc"
+            : "desc",
+      };
+    });
   };
 
   const [sheetStatus, setSheetStatus] = React.useState<"open" | "close">(
@@ -73,60 +105,74 @@ const BottomDrawerSort = React.forwardRef<
           <Text style={styles.title}>{title}</Text>
           {description && <Text style={styles.description}>{description}</Text>}
           <View style={styles.actionsContainer}>
-            {actions.map((action, index) => (
-              <TouchableOpacity
-                key={`${action.title}-${index}`}
-                onPress={() => action.action()}
-                style={styles.actionsButton}
-                customBackgroundColor={
-                  action.isSelected ? colors[theme].foggiest : ""
-                }
-              >
-                <Text style={styles.actionsButtonText}>{action.title}</Text>
-                {action.isSelected && (
-                  <View
-                    style={styles.actionsButtonsIconContainer}
-                    customBackgroundColor="transparent"
-                  >
-                    <Icon
-                      name="MoveDown"
-                      size={20}
-                      customColor={
-                        action.order === "desc"
-                          ? colors[theme].primary
-                          : colors[theme].text_muted
-                      }
-                      style={styles.actionsButtonsIcon}
-                    />
-                    <Icon
-                      name="MoveUp"
-                      size={20}
-                      customColor={
-                        action.order === "asc"
-                          ? colors[theme].primary
-                          : colors[theme].text_muted
-                      }
-                      style={styles.actionsButtonsIcon}
-                    />
-                  </View>
-                )}
-              </TouchableOpacity>
-            ))}
+            {options.map((option) => {
+              const isSelected = option === temporalSelection.key;
+
+              return (
+                <TouchableOpacity
+                  key={option}
+                  onPress={() => toggleSortOrder(option)}
+                  style={styles.actionsButton}
+                  customBackgroundColor={
+                    isSelected ? colors[theme].foggiest : ""
+                  }
+                >
+                  <Text style={styles.actionsButtonText}>{option}</Text>
+                  {isSelected && (
+                    <View
+                      style={styles.actionsButtonsIconContainer}
+                      customBackgroundColor="transparent"
+                    >
+                      <Icon
+                        name="MoveDown"
+                        size={20}
+                        customColor={
+                          temporalSelection.order === "desc"
+                            ? colors[theme].primary
+                            : colors[theme].text_muted
+                        }
+                        style={styles.actionsButtonsIcon}
+                      />
+                      <Icon
+                        name="MoveUp"
+                        size={20}
+                        customColor={
+                          temporalSelection.order === "asc"
+                            ? colors[theme].primary
+                            : colors[theme].text_muted
+                        }
+                        style={styles.actionsButtonsIcon}
+                      />
+                    </View>
+                  )}
+                </TouchableOpacity>
+              );
+            })}
           </View>
-          <TouchableOpacity
-            onPress={() =>
-              (ref as React.RefObject<BottomSheetModal>).current?.dismiss()
-            }
-            style={styles.closeButton}
-            customBackgroundColor={colors[theme].primary}
-          >
-            <Text
-              style={styles.closeButtonText}
-              customTextColor={colors.dark.text}
+          <View style={styles.buttonsContainer}>
+            <TouchableOpacity onPress={handleCancel} style={styles.button}>
+              <Text>Cancel</Text>
+            </TouchableOpacity>
+            <View
+              style={styles.buttonsDivider}
+              customBackgroundColor={colors[theme].foggy}
+            />
+            <TouchableOpacity
+              onPress={handleSubmit}
+              style={styles.button}
+              disabled={isApplyDisabled}
             >
-              Close
-            </Text>
-          </TouchableOpacity>
+              <Text
+                style={{
+                  color: isApplyDisabled
+                    ? colors[theme].primary_foggy
+                    : colors[theme].primary,
+                }}
+              >
+                Apply
+              </Text>
+            </TouchableOpacity>
+          </View>
         </BottomSheetView>
       </BottomSheetModal>
     </BottomSheetModalProvider>
@@ -184,16 +230,17 @@ const styles = StyleSheet.create({
   actionsButtonsIcon: {
     marginHorizontal: -4,
   },
-  closeButton: {
+  buttonsContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 20,
     marginVertical: 8,
-    padding: 12,
-    width: "80%",
-    textAlign: "center",
-    borderRadius: 8,
-    alignSelf: "center",
   },
-  closeButtonText: {
-    textAlign: "center",
+  buttonsDivider: {
+    width: 1,
+  },
+  button: {
+    padding: 4,
   },
 });
 
