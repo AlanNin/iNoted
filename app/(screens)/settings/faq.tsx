@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "column",
     gap: 8,
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
   },
   faqItem: {
     paddingVertical: 12,
@@ -173,6 +173,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "500",
     flex: 1,
+    opacity: 0.85,
   },
   answerText: {
     marginTop: 8,

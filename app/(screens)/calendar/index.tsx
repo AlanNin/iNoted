@@ -56,6 +56,29 @@ export default function CalendarScreen() {
     setIsCalendarModalOpen(false);
   }, []);
 
+  const markedDates = React.useMemo(() => {
+    if (!notesData) return {};
+
+    const marks: { [key: string]: any } = {};
+
+    notesData.forEach((dayData) => {
+      if (dayData.notes.length > 0) {
+        marks[dayData.date] = {
+          dots: [{ color: colors[theme].primary }],
+        };
+      }
+    });
+
+    marks[date] = {
+      ...marks[date],
+      selected: true,
+      disableTouchEvent: true,
+      selectedColor: colors[theme].primary,
+    };
+
+    return marks;
+  }, [date, notesData, theme]);
+
   const filteredNotes = React.useMemo(() => {
     if (!notesData) return [];
 
@@ -127,14 +150,8 @@ export default function CalendarScreen() {
               <Calendar
                 key={theme}
                 onDayPress={(day) => setDate(day.dateString)}
-                markedDates={{
-                  [date]: {
-                    selected: true,
-                    disableTouchEvent: true,
-                    selectedColor: colors[theme].primary,
-                    color: colors[theme].primary,
-                  },
-                }}
+                markedDates={markedDates}
+                markingType="multi-dot"
                 theme={{
                   monthTextColor: colors[theme].text,
                   arrowColor: colors[theme].primary,

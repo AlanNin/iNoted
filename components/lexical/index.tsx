@@ -15,11 +15,12 @@ import {
 } from "@/components/lexical/theme";
 import ToolbarPlugin from "@/components/lexical/plugins/ToolbarPlugin";
 import colors from "@/constants/colors";
-import useColorScheme from "@/hooks/useColorScheme";
 import React from "react";
 import Header from "./components/header";
 import ContentTop from "./components/contentTop";
 import TreeViewPlugin from "./plugins/TreeViewPlugin";
+import { HashtagPlugin } from "@lexical/react/LexicalHashtagPlugin";
+import { HashtagNode } from "@lexical/hashtag";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 import { TRANSFORMERS } from "@lexical/markdown";
 import { CodeNode } from "@lexical/code";
@@ -62,6 +63,7 @@ export default function LexicalEditorComponent({
       ListItemNode,
       HeadingNode,
       QuoteNode,
+      HashtagNode,
     ],
     onError(error: Error) {
       throw error;
@@ -154,6 +156,7 @@ export default function LexicalEditorComponent({
               navigationType={navigationType}
               mode={mode}
             />
+            <HashtagPlugin />
             {/* <TreeViewPlugin /> */}
           </div>
         </div>

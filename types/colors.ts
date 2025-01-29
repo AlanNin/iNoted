@@ -1,5 +1,6 @@
 type ColorScheme = {
   text: string;
+  text_bit_muted: string;
   text_muted: string;
   background: string;
   tint: string;
@@ -9,12 +10,12 @@ type ColorScheme = {
   primary_dark: string;
   primary_light: string;
   primary_foggy: string;
+  primary_foggier: string;
   foggy: string;
   foggier: string;
   foggiest: string;
   danger: string;
   calendar_background: string;
-
   editor: {
     background: string;
     text: string;

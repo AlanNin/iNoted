@@ -9,6 +9,7 @@ export const theme = {
   },
   image: "editor-image",
   link: "editor-link",
+  hashtag: "editor-text-hashtag",
   list: {
     listitem: "editor-listitem",
     listitemChecked: "editor-listitem-checked",
@@ -45,6 +46,11 @@ export const theme = {
 
 export const dark_theme = {
   ...theme,
+  heading: {
+    ...theme.heading,
+    h2: "dark-editor-heading-h2",
+  },
+  hashtag: "dark-editor-text-hashtag",
   text: {
     ...theme.text,
     highlight: "dark-editor-text-highlight",

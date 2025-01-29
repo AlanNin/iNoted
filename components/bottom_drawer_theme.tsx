@@ -9,6 +9,7 @@ import { BackHandler, StyleSheet } from "react-native";
 import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
 import { BottomDrawerThemeProps } from "@/types/bottom_drawer_theme";
+import Icon from "./icon";
 
 const BottomDrawerTheme = React.forwardRef<
   BottomSheetModal,
@@ -111,22 +112,32 @@ const BottomDrawerTheme = React.forwardRef<
                   }}
                 >
                   <View style={styles.itemButtonDetails}>
-                    <Text
-                      customTextColor={
-                        themeItem === selectedTheme
-                          ? colors.dark.text
-                          : colors[theme].text
-                      }
-                    >
-                      {themeItem.charAt(0).toUpperCase() +
-                        themeItem.slice(1).toLowerCase()}
-                    </Text>
-                    <Text
-                      style={styles.itemButtonDetailsDescription}
-                      customTextColor={colors.dark.text_muted}
-                    >
-                      {themeItem === selectedTheme ? "Selected" : ""}
-                    </Text>
+                    <View style={styles.itemButtonDetailsTxts}>
+                      <Text
+                        customTextColor={
+                          themeItem === selectedTheme
+                            ? colors.dark.text
+                            : colors[theme].text
+                        }
+                      >
+                        {themeItem.charAt(0).toUpperCase() +
+                          themeItem.slice(1).toLowerCase()}
+                      </Text>
+                      <Text
+                        style={styles.itemButtonDetailsDescription}
+                        customTextColor={colors.dark.text_bit_muted}
+                      >
+                        {themeItem === selectedTheme ? "Selected" : ""}
+                      </Text>
+                    </View>
+                    {themeItem === selectedTheme && (
+                      <Icon
+                        name="CircleCheckBig"
+                        size={20}
+                        strokeWidth={1}
+                        customColor={colors.dark.tint}
+                      />
+                    )}
                   </View>
                 </TouchableOpacity>
               ))}
@@ -203,6 +214,13 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   itemButtonDetails: {
+    backgroundColor: "transparent",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    flex: 1,
+  },
+  itemButtonDetailsTxts: {
     backgroundColor: "transparent",
     flexDirection: "column",
     gap: 4,

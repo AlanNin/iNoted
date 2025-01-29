@@ -127,7 +127,7 @@ const AppearanceScreen = () => {
             <View style={styles.section}>
               <Text
                 style={styles.label}
-                customTextColor={colors[theme].primary}
+                customBackgroundColor={colors[theme].foggier}
               >
                 Theme
               </Text>
@@ -136,13 +136,13 @@ const AppearanceScreen = () => {
                 onPress={handleToggleBottomThemeDrawer}
               >
                 <View style={styles.itemButtonDetails}>
-                  <Text>App Theme</Text>
+                  <Text>Select Your Theme</Text>
                   <Text style={styles.itemButtonDetailsDescription} disabled>
                     {appTheme === "system"
-                      ? "Use System Theme"
+                      ? "Currently following your system's theme preference"
                       : appTheme === "light"
-                      ? "Use Light Theme"
-                      : "Use Dark Theme"}
+                      ? "Currently using light mode"
+                      : "Currently using dark mode"}
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -150,7 +150,7 @@ const AppearanceScreen = () => {
             <View style={styles.section}>
               <Text
                 style={styles.label}
-                customTextColor={colors[theme].primary}
+                customBackgroundColor={colors[theme].foggier}
               >
                 Sorting
               </Text>
@@ -184,7 +184,7 @@ const AppearanceScreen = () => {
             <View style={styles.section}>
               <Text
                 style={styles.label}
-                customTextColor={colors[theme].primary}
+                customBackgroundColor={colors[theme].foggier}
               >
                 Layout
               </Text>
@@ -277,7 +277,11 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   label: {
-    paddingHorizontal: 16,
+    alignSelf: "flex-start",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    marginLeft: 16,
     marginBottom: 8,
   },
   itemsButton: {

@@ -1,6 +1,7 @@
 const colors: Colors = {
   light: {
     text: "#000",
+    text_bit_muted: "rgba(0, 0, 0, 0.8)",
     text_muted: "rgba(0, 0, 0, 0.7)",
     background: "#f2f3f4",
     tint: "#000",
@@ -10,12 +11,12 @@ const colors: Colors = {
     primary_dark: "#d1345b",
     primary_light: "#ff3366",
     primary_foggy: "rgba(255, 87, 129, 0.5)",
+    primary_foggier: "rgba(255, 87, 129, 0.2)",
     foggy: "rgba(0, 0, 0, 0.3)",
-    foggier: "rgba(0, 0, 0, 0.05)",
-    foggiest: "rgba(0, 0, 0, 0.03)",
+    foggier: "rgba(0, 0, 0, 0.06)",
+    foggiest: "rgba(0, 0, 0, 0.04)",
     danger: "#ff0000",
     calendar_background: "#f5edf1",
-
     editor: {
       background: "#f2f3f4",
       text: "#000",
@@ -31,6 +32,7 @@ const colors: Colors = {
   },
   dark: {
     text: "#fff",
+    text_bit_muted: "rgba(255, 255, 255, 0.8)",
     text_muted: "rgba(255, 255, 255, 0.5)",
     background: "#0f0f0f",
     tint: "#fff",
@@ -40,6 +42,7 @@ const colors: Colors = {
     primary_dark: "#c23659",
     primary_light: "#fa3c6c",
     primary_foggy: "rgba(255, 87, 129, 0.5)",
+    primary_foggier: "rgba(255, 87, 129, 0.2)",
     foggy: "rgba(255, 255, 255, 0.3)",
     foggier: "rgba(255, 255, 255, 0.15)",
     foggiest: "rgba(255, 255, 255, 0.1)",

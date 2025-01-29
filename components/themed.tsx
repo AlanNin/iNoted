@@ -34,14 +34,28 @@ export function useThemeColor(
 }
 
 export function Text(props: TextProps) {
-  const { style, customTextColor, disabled, ...otherProps } = props;
+  const {
+    style,
+    customTextColor,
+    customBackgroundColor,
+    disabled,
+    ...otherProps
+  } = props;
   const color = disabled
     ? useThemeColor({}, "text_muted")
     : useThemeColor({ light: customTextColor, dark: customTextColor }, "text");
 
   return (
     <DefaultText
-      style={[{ color, fontFamily: "Geist-Regular", fontSize: 16 }, style]}
+      style={[
+        {
+          color,
+          fontFamily: "Geist-Regular",
+          backgroundColor: customBackgroundColor,
+          fontSize: 16,
+        },
+        style,
+      ]}
       {...otherProps}
     />
   );

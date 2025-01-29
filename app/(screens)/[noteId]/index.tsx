@@ -224,6 +224,7 @@ export default function NoteScreen() {
           onKeyboardDidHide={() => setIsKeyboardVisible(false)}
         >
           <LexicalEditorComponent
+            key={theme}
             handleBack={handleBack}
             isKeyboardVisible={isKeyboardVisible}
             isShowMoreModalOpen={isShowMoreModalOpen}
