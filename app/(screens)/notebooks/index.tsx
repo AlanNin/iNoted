@@ -371,7 +371,7 @@ export default function NotebooksScreen() {
 
       <BottomDrawerSort
         ref={sortBottomDrawerRef}
-        title="Sort your notebooks"
+        title="Sort Your Notebooks"
         options={[sortTypes[0], sortTypes[1]]}
         selectedSort={notebooksSortBy}
         handleSortOrder={handleSaveNotebooksSortOrder}
@@ -386,8 +386,8 @@ export default function NotebooksScreen() {
 
       <BottomDrawerConfirm
         ref={bottomDeleteMultipleDrawerRef}
-        title={`Delete selected ${
-          selectedNotebooks.length > 1 ? "notebooks" : "notebook"
+        title={`Delete Selected ${
+          selectedNotebooks.length > 1 ? "Notebooks" : "Notebook"
         }?`}
         description={`This ${
           selectedNotebooks.length > 1 ? "notebooks" : "notebook"

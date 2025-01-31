@@ -123,12 +123,18 @@ const BottomDrawerTheme = React.forwardRef<
                         {themeItem.charAt(0).toUpperCase() +
                           themeItem.slice(1).toLowerCase()}
                       </Text>
-                      <Text
-                        style={styles.itemButtonDetailsDescription}
-                        customTextColor={colors.dark.text_bit_muted}
-                      >
-                        {themeItem === selectedTheme ? "Selected" : ""}
-                      </Text>
+                      {themeItem === selectedTheme && (
+                        <Text
+                          style={styles.itemButtonDetailsDescription}
+                          customTextColor={colors.dark.text_bit_muted}
+                        >
+                          {selectedTheme === "system"
+                            ? "Follows your device’s theme for a smooth look"
+                            : selectedTheme === "light"
+                            ? "Fresh and bright, keeps everything clear"
+                            : "Cool and cozy, perfect for a comfortable vibe"}
+                        </Text>
+                      )}
                     </View>
                     {themeItem === selectedTheme && (
                       <Icon
@@ -219,11 +225,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     flex: 1,
+    gap: 24,
   },
   itemButtonDetailsTxts: {
     backgroundColor: "transparent",
     flexDirection: "column",
     gap: 4,
+    flex: 1,
   },
   itemButtonDetailsDescription: {
     fontSize: 12,

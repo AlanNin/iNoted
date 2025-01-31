@@ -29,6 +29,17 @@ const colors: Colors = {
       toolbar_divider: "#d0d0d0",
       checklist: "#FF5781",
     },
+    switch: {
+      bg_active: "#FF5781",
+      bg_inactive: "#cfcfcf",
+      thumb_active: "#fff",
+      thumb_inactive: "#949494",
+    },
+    chart: {
+      background: "#d4d4d4",
+      primary: "#FF5781",
+      secondary: "#ff57d2",
+    },
   },
   dark: {
     text: "#fff",
@@ -60,6 +71,17 @@ const colors: Colors = {
       toolbar_active: "#C44565",
       toolbar_divider: "#424242",
       checklist: "#FF5781",
+    },
+    switch: {
+      bg_active: "#C44565",
+      bg_inactive: "#363636",
+      thumb_active: "#fff",
+      thumb_inactive: "#5e5e5e",
+    },
+    chart: {
+      background: "#4d4d4d",
+      primary: "#FF5781",
+      secondary: "#c4458b",
     },
   },
 };

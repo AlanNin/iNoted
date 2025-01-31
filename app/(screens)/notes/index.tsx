@@ -464,14 +464,14 @@ export default function NotesScreen() {
       </SafeAreaView>
       <BottomDrawerSort
         ref={sortBottomDrawerRef}
-        title="Sort your notes"
+        title="Sort Your Notes"
         options={[sortTypes[0], sortTypes[1]]}
         selectedSort={notesSortBy}
         handleSortOrder={handleSaveNotesSortOrder}
       />
       <BottomDrawerConfirm
         ref={bottomDeleteMultipleDrawerRef}
-        title="Delete selected notes?"
+        title="Delete Selected Notes?"
         description={`This notes will be permanently deleted from this device. You have selected ${selectedNotes.length} notes.`}
         submitButtonText="Delete"
         onSubmit={handleDeleteMultipleNotes}
@@ -479,14 +479,14 @@ export default function NotesScreen() {
 
       <BottomDrawerMoveNote
         ref={bottomMoveNoteDrawerRef}
-        title="Move notes"
+        title="Move Notes"
         description={`Make your selected notes part of a notebook.`}
         onSubmit={handleMoveMultipleNotes}
       />
 
       <BottomDrawerSelectNotebook
         ref={bottomSelectNotebookDrawerRef}
-        title="Select notebook"
+        title="Select Notebook"
         description={`Choose a notebook to show your notes from.`}
       />
     </>

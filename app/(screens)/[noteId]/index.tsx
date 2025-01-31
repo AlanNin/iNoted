@@ -251,7 +251,7 @@ export default function NoteScreen() {
 
       <BottomDrawerConfirm
         ref={bottomDeleteNoteDrawerRef}
-        title="Delete this note?"
+        title="Delete This Note?"
         description="This note will be permanently deleted from this device."
         submitButtonText="Delete"
         onSubmit={() => handleDeleteNote()}

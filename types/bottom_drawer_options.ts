@@ -1,5 +1,6 @@
 type BottomDrawerOptionProps = {
-  name: "list" | "grid";
+  key: string;
+  label: string;
   icon?: string;
 };
 

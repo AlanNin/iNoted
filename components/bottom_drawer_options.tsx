@@ -93,12 +93,12 @@ const BottomDrawerOptions = React.forwardRef<
             )}
             <View style={styles.actionsContainer}>
               {options.map((option, index) => {
-                const isSelected = option.name === temporalSelection;
+                const isSelected = option.key === temporalSelection;
 
                 return (
                   <TouchableOpacity
                     key={`${option}-${index}`}
-                    onPress={() => setTemporalSelection(option.name)}
+                    onPress={() => setTemporalSelection(option.key)}
                     style={styles.actionsButton}
                     customBackgroundColor={
                       isSelected ? colors[theme].foggiest : ""
@@ -122,8 +122,7 @@ const BottomDrawerOptions = React.forwardRef<
                           : colors[theme].text_muted
                       }
                     >
-                      {option.name.charAt(0).toUpperCase() +
-                        option.name.slice(1)}
+                      {option.label}
                     </Text>
                   </TouchableOpacity>
                 );

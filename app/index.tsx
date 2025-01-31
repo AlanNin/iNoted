@@ -42,9 +42,13 @@ export default function StartScreen() {
     "isFirstAppLaunch",
     true
   );
+  const [appStartScreen] = useConfig<"notes" | "notebooks">(
+    "appStartScreen",
+    "notes"
+  );
 
   if (isFirstAppLaunch === false) {
-    return <Redirect href="./notes" />;
+    return <Redirect href={`./${appStartScreen}`} />;
   }
 
   const handleNextStep = () => {

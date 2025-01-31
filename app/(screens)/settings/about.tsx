@@ -73,7 +73,7 @@ const AboutScreen = () => {
             </TouchableOpacity>
           ))}
           <Text style={styles.prettyGirlText} disabled>
-            Made with much love for my girlfriend, Emily ♥️
+            Made with much much love for my girlfriend, Emily ♥️
           </Text>
         </View>
       </View>

@@ -581,7 +581,7 @@ export default function NotebookScreen() {
       </SafeAreaView>
       <BottomDrawerConfirm
         ref={bottomDeleteNotebookDrawerRef}
-        title="Delete this notebook?"
+        title="Delete This Notebook?"
         description="This notebook will be permanently deleted from this device."
         submitButtonText="Delete"
         onSubmit={handleDeleteNotebook}

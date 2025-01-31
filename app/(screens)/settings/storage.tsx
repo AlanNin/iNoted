@@ -12,14 +12,34 @@ import * as DocumentPicker from "expo-document-picker";
 import AppBackupManager from "@/lib/backup";
 import { expo_db } from "@/db/client";
 import { reloadAppAsync } from "expo";
-import { toast } from "@backpackapp-io/react-native-toast";
 import BottomDrawerConfirm from "@/components/bottom_drawer_confirm";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import * as FileSystem from "expo-file-system";
+import useColorScheme from "@/hooks/useColorScheme";
+import colors from "@/constants/colors";
+
+type StorageInfo = {
+  appUsed: number;
+  deviceUsed: number;
+  deviceFree: number;
+  deviceTotal: number;
+  loading: boolean;
+  error: string | null;
+};
 
 const StorageScreen = () => {
+  const theme = useColorScheme();
   const bottomConfirmRestoreDrawerRef = React.useRef<BottomSheetModal>(null);
   const backupManager = new AppBackupManager(expo_db);
   const [result, setResult] = React.useState<any>();
+  const [storageInfo, setStorageInfo] = React.useState<StorageInfo>({
+    appUsed: 0,
+    deviceUsed: 0,
+    deviceFree: 0,
+    deviceTotal: 0,
+    loading: true,
+    error: null,
+  });
 
   const handleToggleBottomConfirmRestoreDrawer = () => {
     bottomConfirmRestoreDrawerRef.current?.present();
@@ -51,6 +71,116 @@ const StorageScreen = () => {
 
     reloadAppAsync();
   };
+
+  const storageBackupItems = [
+    {
+      title: "Create Backup",
+      icon: "Backup",
+      description: "Save your data to ensure it's safe and easily recoverable.",
+      onPress: handleCreateBackup,
+    },
+    {
+      title: "Restore Backup",
+      icon: "Restore",
+      description:
+        "Recover your saved data from a previous backup to restore your settings and files.",
+      onPress: handleRestoreBackupConfirmation,
+    },
+  ];
+
+  const getDirectorySize = async (dirPath: string): Promise<number> => {
+    try {
+      let totalSize = 0;
+      const items = await FileSystem.readDirectoryAsync(dirPath);
+
+      for (const item of items) {
+        const itemPath = `${dirPath}${item}`;
+        const itemInfo = await FileSystem.getInfoAsync(itemPath, {
+          size: true,
+        });
+
+        if (itemInfo.exists) {
+          if (itemInfo.isDirectory) {
+            totalSize += await getDirectorySize(itemPath + "/");
+          } else {
+            totalSize += itemInfo.size || 0;
+          }
+        }
+      }
+
+      return totalSize;
+    } catch (error) {
+      console.error(`Error reading directory ${dirPath}:`, error);
+      return 0;
+    }
+  };
+
+  React.useEffect(() => {
+    const getAppStorageSize = async (): Promise<number> => {
+      let totalSize = 0;
+
+      try {
+        if (FileSystem.documentDirectory) {
+          const docDirSize = await getDirectorySize(
+            FileSystem.documentDirectory
+          );
+          totalSize += docDirSize;
+        }
+
+        if (FileSystem.cacheDirectory) {
+          const cacheDirInfo = await FileSystem.getInfoAsync(
+            FileSystem.cacheDirectory,
+            { size: true }
+          );
+          if (cacheDirInfo.exists && cacheDirInfo.size) {
+            totalSize += cacheDirInfo.size;
+          }
+        }
+      } catch (error) {
+        //
+      }
+
+      return totalSize;
+    };
+
+    const getStorageInfo = async () => {
+      try {
+        const totalBytes = await FileSystem.getTotalDiskCapacityAsync();
+        const freeBytes = await FileSystem.getFreeDiskStorageAsync();
+        const usedBytes = totalBytes - freeBytes;
+
+        const appUsedBytes = await getAppStorageSize();
+
+        setStorageInfo({
+          appUsed: appUsedBytes,
+          deviceUsed: usedBytes,
+          deviceFree: freeBytes,
+          deviceTotal: totalBytes,
+          loading: false,
+          error: null,
+        });
+      } catch (error) {
+        setStorageInfo((prev) => ({
+          ...prev,
+          loading: false,
+          error: error instanceof Error ? error.message : "Unknown error",
+        }));
+      }
+    };
+
+    getStorageInfo();
+  }, []);
+
+  const formatStorage = (bytes: number) => {
+    const gb = bytes / (1000 * 1000 * 1000);
+    const mb = bytes / (1000 * 1000);
+
+    if (gb >= 1) {
+      return `${gb.toFixed(0)} GB`;
+    }
+    return `${mb.toFixed(0)} MB`;
+  };
+
   return (
     <>
       <SafeAreaView style={styles.container}>
@@ -64,29 +194,107 @@ const StorageScreen = () => {
             </View>
           </View>
           <View style={styles.contentContainer}>
-            <TouchableOpacity
-              style={styles.itemsButton}
-              onPress={handleCreateBackup}
-            >
-              <View style={styles.itemButtonDetails}>
-                <Text>Create backup</Text>
-                <Text style={styles.itemButtonDetailsDescription} disabled>
-                  Save your data to ensure it's safe and easily recoverable.
-                </Text>
+            <View style={styles.section}>
+              <Text
+                style={styles.label}
+                customBackgroundColor={colors[theme].foggier}
+              >
+                Backup
+              </Text>
+              {storageBackupItems.map((item) => (
+                <TouchableOpacity
+                  key={item.title}
+                  style={styles.itemsButton}
+                  onPress={item.onPress}
+                >
+                  {item.icon && <Icon name={item.icon} size={24} />}
+
+                  <View style={styles.itemButtonDetails}>
+                    <Text>{item.title}</Text>
+                    {item.description && (
+                      <Text
+                        style={styles.itemButtonDetailsDescription}
+                        disabled
+                      >
+                        {item.description}
+                      </Text>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <View style={styles.section}>
+              <Text
+                style={styles.label}
+                customBackgroundColor={colors[theme].foggier}
+              >
+                Usage
+              </Text>
+              {/* Chart */}
+              <View style={styles.storageContainer}>
+                <View
+                  style={styles.progressBar}
+                  customBackgroundColor={colors[theme].chart.background}
+                >
+                  <View
+                    style={[
+                      styles.progressFill,
+                      {
+                        width: `${
+                          (storageInfo.appUsed / storageInfo.deviceTotal) * 100
+                        }%`,
+                        backgroundColor: colors[theme].chart.secondary,
+                        zIndex: 2,
+                      },
+                    ]}
+                  />
+                  <View
+                    style={[
+                      styles.progressFill,
+                      {
+                        width: `${
+                          (storageInfo.deviceUsed / storageInfo.deviceTotal) *
+                          100
+                        }%`,
+                        backgroundColor: colors[theme].chart.primary,
+                        zIndex: 1,
+                      },
+                    ]}
+                  />
+                </View>
+                <View style={styles.storageLegendContainer}>
+                  <View style={styles.storageLegend}>
+                    <View
+                      style={styles.storageLegendSquare}
+                      customBackgroundColor={colors[theme].chart.secondary}
+                    />
+                    <Text style={styles.storageLegendText}>
+                      iNoted Used: {formatStorage(storageInfo.appUsed)}
+                    </Text>
+                  </View>
+                  <View style={styles.storageLegend}>
+                    <View
+                      style={styles.storageLegendSquare}
+                      customBackgroundColor={colors[theme].chart.primary}
+                    />
+                    <Text style={styles.storageLegendText}>
+                      Device Used: {formatStorage(storageInfo.deviceUsed)}
+                    </Text>
+                  </View>
+
+                  <View style={styles.storageLegend}>
+                    <View
+                      style={styles.storageLegendSquare}
+                      customBackgroundColor={colors[theme].chart.background}
+                    />
+                    <Text style={styles.storageLegendText}>
+                      Device Free: {formatStorage(storageInfo.deviceFree)} /{" "}
+                      {formatStorage(storageInfo.deviceTotal)}
+                    </Text>
+                  </View>
+                </View>
               </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.itemsButton}
-              onPress={handleRestoreBackupConfirmation}
-            >
-              <View style={styles.itemButtonDetails}>
-                <Text>Restore backup</Text>
-                <Text style={styles.itemButtonDetailsDescription} disabled>
-                  Recover your saved data from a previous backup to restore your
-                  settings and files.
-                </Text>
-              </View>
-            </TouchableOpacity>
+            </View>
           </View>
         </View>
       </SafeAreaView>
@@ -130,12 +338,24 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     flexDirection: "column",
-    gap: 16,
+    gap: 20,
     paddingHorizontal: 8,
+    paddingVertical: 8,
+  },
+  section: {
+    flexDirection: "column",
+    gap: 2,
+  },
+  label: {
+    alignSelf: "flex-start",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    marginLeft: 16,
+    marginBottom: 8,
   },
   itemsButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    padding: 16,
     borderRadius: 8,
     width: "100%",
     display: "flex",
@@ -148,6 +368,46 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   itemButtonDetailsDescription: {
+    fontSize: 12,
+  },
+  storageContainer: {
+    paddingVertical: 16,
+    borderRadius: 8,
+    marginHorizontal: 16,
+    flexDirection: "column",
+    gap: 20,
+  },
+  progressBar: {
+    height: 12,
+    borderRadius: 6,
+    overflow: "hidden",
+    position: "relative",
+  },
+  progressFill: {
+    height: "100%",
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: 0,
+  },
+  storageLegendContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 20,
+  },
+  storageLegend: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  storageLegendSquare: {
+    width: 14,
+    height: 14,
+    borderRadius: 4,
+  },
+  storageLegendText: {
     fontSize: 12,
   },
 });

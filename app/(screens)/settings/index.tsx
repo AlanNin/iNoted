@@ -11,6 +11,14 @@ import { router } from "expo-router";
 
 const settings = [
   {
+    title: "General",
+    icon: "Wrench",
+    description:
+      "Customize basic settings, preferences, and other app options to suit your needs.",
+    route: "settings/general",
+    isEnabled: true,
+  },
+  {
     title: "Appearance",
     icon: "Palette",
     description:

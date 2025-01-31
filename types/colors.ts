@@ -28,6 +28,17 @@ type ColorScheme = {
     toolbar_divider: string;
     checklist: string;
   };
+  switch: {
+    bg_active: string;
+    bg_inactive: string;
+    thumb_active: string;
+    thumb_inactive: string;
+  };
+  chart: {
+    background: string;
+    primary: string;
+    secondary: string;
+  };
 };
 
 type Colors = {

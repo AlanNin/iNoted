@@ -128,10 +128,10 @@ const AppearanceScreen = () => {
                   <Text>Select Your Theme</Text>
                   <Text style={styles.itemButtonDetailsDescription} disabled>
                     {appTheme === "system"
-                      ? "Currently following your system's theme preference"
+                      ? "Currently using System Mode. Follows your device’s theme for a smooth look"
                       : appTheme === "light"
-                      ? "Currently using light mode"
-                      : "Currently using dark mode"}
+                      ? "Currently using Light Mode. Fresh and bright, keeps everything clear"
+                      : "Currently using Dark Mode. Cool and cozy, perfect for a comfortable vibe"}
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -195,7 +195,7 @@ const AppearanceScreen = () => {
       </SafeAreaView>
       <BottomDrawerTheme
         ref={bottomThemeDrawerRef}
-        title="Select theme"
+        title="Select Theme"
         description="Choose a theme for your app."
         themes={mutableThemeOptions}
         selectedTheme={selectedTheme}
@@ -206,28 +206,30 @@ const AppearanceScreen = () => {
       />
       <BottomDrawerSort
         ref={notesSortBottomDrawerRef}
-        title="Sort your notes"
+        title="Sort Your Notes"
         options={[sortTypes[0], sortTypes[1]]}
         selectedSort={notesSortBy}
         handleSortOrder={handleSaveNotesSortOrder}
       />
       <BottomDrawerSort
         ref={notebooksSortBottomDrawerRef}
-        title="Sort your notebooks"
+        title="Sort Your Notebooks"
         options={[sortTypes[0], sortTypes[1]]}
         selectedSort={notebooksSortBy}
         handleSortOrder={handleSaveNotebooksSortOrder}
       />
       <BottomDrawerOptions
         ref={layoutOptionsBottomDrawerRef}
-        title="Choose your notes layout"
+        title="Choose Your Notes Layout"
         options={[
           {
-            name: "grid",
+            key: "grid",
+            label: "Grid",
             icon: "LayoutGrid",
           },
           {
-            name: "list",
+            key: "list",
+            label: "List",
             icon: "Rows2",
           },
         ]}
