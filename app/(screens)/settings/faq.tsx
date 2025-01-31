@@ -88,6 +88,12 @@ const FAQScreen = () => {
       answer:
         "You can easily back up your data by exporting it to a file. Here's how:\n\n1. Go to Settings > Data and Storage > Create Backup.\n2. Choose a folder on your device or external storage where you want to save the backup file.\n3. Give iNoted permissions to save this file.\n\nFor added security, store your backup file in a safe location, such as cloud storage (e.g., Google Drive, iCloud) or an external drive. Regularly creating backups ensures that your data is protected in case of device loss or failure.",
     },
+    {
+      question:
+        "Why does iNoted's usage differ from the storage information in settings?",
+      answer:
+        "The storage usage displayed in the Settings > Data and Storage screen reflects the app's data usage, excluding the app's installation size.",
+    },
   ];
 
   return (
