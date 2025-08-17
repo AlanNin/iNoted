@@ -4,29 +4,30 @@ import {
   BottomSheetView,
   BottomSheetModalProvider,
 } from "@gorhom/bottom-sheet";
-import { Text, TouchableOpacity, View } from "./themed";
+import { Text, TouchableOpacity, View } from "../themed";
 import { BackHandler, StyleSheet } from "react-native";
 import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
-import { formatLongDate } from "@/lib/format_date";
-import { getNotebookById } from "@/queries/notebooks";
-import { useQuery } from "@tanstack/react-query";
-import * as NavigationBar from "expo-navigation-bar";
+import { BottomDrawerConfirmProps } from "@/types/bottom_drawer_confirm";
 
-const BottomDrawerNoteDetails = React.forwardRef<
+const BottomDrawerConfirm = React.forwardRef<
   BottomSheetModal,
-  Omit<BottomDrawerNoteDetailsProps, "ref">
->(({ note }, ref) => {
+  Omit<BottomDrawerConfirmProps, "ref">
+>(({ title, description, submitButtonText, onSubmit, onCancel }, ref) => {
   const theme = useColorScheme();
-
-  const { data: notebookData, isLoading: isLoadingNotebookData } = useQuery({
-    queryKey: ["notebook", note?.notebook_id],
-    queryFn: () => getNotebookById(note?.notebook_id!),
-    enabled: !!note?.notebook_id,
-  });
 
   const closeDrawer = () => {
     (ref as React.RefObject<BottomSheetModal>).current?.dismiss();
+  };
+
+  const handleCancel = () => {
+    onCancel?.();
+    closeDrawer();
+  };
+
+  const handleSubmit = () => {
+    onSubmit();
+    closeDrawer();
   };
 
   const [sheetStatus, setSheetStatus] = React.useState<"open" | "close">(
@@ -76,31 +77,22 @@ const BottomDrawerNoteDetails = React.forwardRef<
         }}
       >
         <BottomSheetView style={styles.contentContainer}>
-          <View style={styles.detailsContainer}>
-            <Text style={styles.detail} disabled>
-              Created at{" "}
-              {note?.created_at ? formatLongDate(note.created_at) : ""}
-            </Text>
-            <Text style={styles.detail} disabled>
-              Last update at{" "}
-              {note?.updated_at ? formatLongDate(note.updated_at) : ""}
-            </Text>
-            <Text style={styles.detail} disabled>
-              {isLoadingNotebookData
-                ? "Loading category..."
-                : notebookData
-                ? `Categorized as ${notebookData?.name}`
-                : "Uncategorized"}
-            </Text>
+          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.description}>{description}</Text>
+          <View style={styles.buttonsContainer}>
+            <TouchableOpacity onPress={handleCancel} style={styles.button}>
+              <Text>Cancel</Text>
+            </TouchableOpacity>
+            <View
+              style={styles.buttonsDivider}
+              customBackgroundColor={colors[theme].foggy}
+            />
+            <TouchableOpacity onPress={handleSubmit} style={styles.button}>
+              <Text style={{ color: colors[theme].primary }}>
+                {submitButtonText}
+              </Text>
+            </TouchableOpacity>
           </View>
-
-          <TouchableOpacity
-            onPress={closeDrawer}
-            style={styles.button}
-            customBackgroundColor={colors[theme].primary}
-          >
-            <Text customTextColor={colors.dark.text}>Close</Text>
-          </TouchableOpacity>
         </BottomSheetView>
       </BottomSheetModal>
     </BottomSheetModalProvider>
@@ -120,25 +112,26 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 20,
   },
-  detailsContainer: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 16,
-  },
-  detail: {
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
     textAlign: "center",
-    fontSize: 14,
+  },
+  description: {
+    textAlign: "center",
+  },
+  buttonsContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 20,
+    marginVertical: 8,
+  },
+  buttonsDivider: {
+    width: 1,
   },
   button: {
-    padding: 12,
-    marginVertical: 4,
-    borderRadius: 8,
-    width: "80%",
-    alignSelf: "center",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
+    padding: 4,
   },
 });
 
-export default BottomDrawerNoteDetails;
+export default BottomDrawerConfirm;

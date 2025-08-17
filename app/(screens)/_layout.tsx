@@ -2,7 +2,7 @@ import useColorScheme from "@/hooks/useColorScheme";
 import { Drawer } from "expo-router/drawer";
 import colors from "@/constants/colors";
 import Icon from "@/components/icon";
-import CustomDrawerContent from "@/components/custom_drawer_content";
+import CustomDrawerContent from "@/components/drawers/custom_drawer_content";
 import React from "react";
 import {
   setStatusBarStyle,

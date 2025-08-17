@@ -12,7 +12,7 @@ import * as DocumentPicker from "expo-document-picker";
 import AppBackupManager from "@/lib/backup";
 import { expo_db } from "@/db/client";
 import { reloadAppAsync } from "expo";
-import BottomDrawerConfirm from "@/components/bottom_drawer_confirm";
+import BottomDrawerConfirm from "@/components/drawers/bottom_drawer_confirm";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import * as FileSystem from "expo-file-system";
 import useColorScheme from "@/hooks/useColorScheme";

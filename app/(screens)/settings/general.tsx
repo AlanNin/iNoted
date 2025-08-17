@@ -10,7 +10,7 @@ import { router } from "expo-router";
 import Icon from "@/components/icon";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useConfig } from "@/providers/config";
-import BottomDrawerOptions from "@/components/bottom_drawer_options";
+import BottomDrawerOptions from "@/components/drawers/bottom_drawer_options";
 import BooleanSwitch from "@/components/boolean_switch";
 import useColorScheme from "@/hooks/useColorScheme";
 import colors from "@/constants/colors";

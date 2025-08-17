@@ -1,7 +1,7 @@
 // dom component, use inside existing dom component or specify "use dom" in the file
 import colors from "@/constants/colors";
-import useColorScheme from "@/hooks/useColorScheme";
 import { formatLongDate } from "@/lib/format_date";
+import { useEffect } from "react";
 
 export default function ContentTop({
   title,
@@ -9,13 +9,21 @@ export default function ContentTop({
   setTitle,
   isTitleEditable,
   theme,
+  setIsTitleFocused,
 }: {
   title: string;
   noteDate: string;
   setTitle: React.Dispatch<React.SetStateAction<string>>;
   isTitleEditable: boolean;
   theme: "light" | "dark";
+  setIsTitleFocused: (value: boolean) => void;
 }) {
+  useEffect(() => {
+    if (!isTitleEditable) {
+      setIsTitleFocused(false);
+    }
+  }, [isTitleEditable]);
+
   return (
     <div className="content-top">
       <p style={{ color: colors[theme].grayscale }} className="last-edited">
@@ -23,9 +31,9 @@ export default function ContentTop({
       </p>
       <input
         placeholder="Untitled note"
-        autoComplete="off"
-        spellCheck="false"
-        autoCorrect="off"
+        autoComplete="on"
+        spellCheck="true"
+        autoCorrect="on"
         className="title-input"
         style={{
           color: colors[theme].text,
@@ -33,6 +41,8 @@ export default function ContentTop({
         defaultValue={title}
         onChange={(e) => setTitle(e.target.value)}
         disabled={!isTitleEditable}
+        onFocus={() => setIsTitleFocused(true)}
+        onBlur={() => setIsTitleFocused(false)}
       />
     </div>
   );

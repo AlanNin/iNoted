@@ -5,14 +5,14 @@ import {
   BottomSheetModalProvider,
   BottomSheetTextInput,
 } from "@gorhom/bottom-sheet";
-import { Text, TouchableOpacity, View } from "./themed";
+import { Text, TouchableOpacity, View } from "../themed";
 import { BackHandler, Keyboard, StyleSheet } from "react-native";
 import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
-import NotebookCard from "./notebook_card";
-import Icon from "./icon";
+import NotebookCard from "../notebook_card";
+import Icon from "../icon";
 import { LinearGradient } from "expo-linear-gradient";
-import ColorPickerComponent from "./color_picker";
+import ColorPickerComponent from "../color_picker";
 import { pickImage } from "@/lib/pick_image";
 import { Image } from "expo-image";
 
@@ -191,8 +191,6 @@ const BottomDrawerCreateNotebook = React.forwardRef<
               maxLength={nameMaxLength}
               placeholderTextColor={colors[theme].text_muted}
               placeholder="Type a name for your notebook..."
-              keyboardType={"visible-password"}
-              autoCorrect={false}
             />
             <Text style={styles.inputCounter}>
               {name.length}/{nameMaxLength}

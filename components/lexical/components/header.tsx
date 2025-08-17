@@ -1,9 +1,8 @@
 // dom component, use inside existing dom component or specify "use dom" in the file
 import Icon from "@/components/icon";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import React, { useEffect } from "react";
+import React from "react";
 import colors from "@/constants/colors";
-import useColorScheme from "@/hooks/useColorScheme";
 import { MotiView } from "moti";
 
 export default function Header({

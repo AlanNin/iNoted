@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 import useColorScheme from "@/hooks/useColorScheme";
-import { MotiView, Text, TouchableOpacity, View } from "./themed";
+import { Text, TouchableOpacity, View } from "./themed";
 import colors from "@/constants/colors";
 import {
   formatLongDate,
@@ -90,7 +90,6 @@ const NoteCard = React.memo(
     index,
     viewMode,
     onPress,
-    animated = true,
     selectDisabled = false,
     dateType = "date",
   }: NoteCardProps) => {
@@ -100,24 +99,10 @@ const NoteCard = React.memo(
 
     const theme = useColorScheme();
 
-    const delay = index ? index * 50 : 0;
-
-    const animationProps = animated
-      ? ({
-          from: { opacity: 0, translateY: 10 },
-          animate: { opacity: 1, translateY: 0 },
-          transition: {
-            type: "timing",
-            duration: 250,
-            delay,
-          },
-        } as any)
-      : {};
-
     if (viewMode === "grid") {
       return (
         <View style={gridStyles.outerContainer}>
-          <MotiView {...animationProps} style={gridStyles.innerContainer}>
+          <View style={gridStyles.innerContainer}>
             <SelectedIndicator
               noteId={note.id}
               viewMode="grid"
@@ -156,13 +141,13 @@ const NoteCard = React.memo(
                   : formatTime(note.created_at)}
               </Text>
             </View>
-          </MotiView>
+          </View>
         </View>
       );
     } else {
       return (
         <TouchableOpacity style={listStyles.outerContainer}>
-          <MotiView {...animationProps} style={listStyles.innerContainer}>
+          <View style={listStyles.innerContainer}>
             <SelectedIndicator
               noteId={note.id}
               viewMode="list"
@@ -198,7 +183,7 @@ const NoteCard = React.memo(
                 ? formatLongDate(note.created_at)
                 : formatTime(note.created_at)}
             </Text>
-          </MotiView>
+          </View>
         </TouchableOpacity>
       );
     }

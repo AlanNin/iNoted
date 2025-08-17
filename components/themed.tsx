@@ -17,20 +17,38 @@ import {
   SafeAreaViewProps,
 } from "@/types/themed";
 
+type Theme = keyof typeof colors;
+
+function hasTextProp(x: unknown): x is { text: string } {
+  return (
+    !!x &&
+    typeof x === "object" &&
+    "text" in x &&
+    typeof (x as any).text === "string"
+  );
+}
+
 export function useThemeColor(
   props: { light?: string; dark?: string },
-  colorName: keyof typeof colors.light & keyof typeof colors.dark
+  colorName: keyof typeof colors["light"] & keyof typeof colors["dark"]
 ) {
-  const theme = useColorScheme();
+  const theme = useColorScheme() as Theme;
   const colorFromProps = props[theme];
 
   if (colorFromProps) {
     return colorFromProps;
-  } else {
-    const color = colors[theme][colorName];
-
-    return typeof color === "string" ? color : color?.text || "black";
   }
+
+  const raw = (colors as any)[theme][colorName] as unknown;
+
+  if (typeof raw === "string") {
+    return raw;
+  }
+  if (hasTextProp(raw)) {
+    return raw.text;
+  }
+
+  return "black";
 }
 
 export function Text(props: TextProps) {
@@ -133,8 +151,6 @@ export function TextInput(props: TextInputProps) {
       selectionColor={colors[theme].primary}
       placeholderTextColor={placeholderTextColor}
       {...otherProps}
-      keyboardType={"visible-password"}
-      autoCorrect={false}
     />
   );
 }

@@ -3,8 +3,8 @@ import {
   DrawerItem,
   DrawerItemList,
 } from "@react-navigation/drawer";
-import { Text, View } from "./themed";
-import Icon from "./icon";
+import { Text, View } from "../themed";
+import Icon from "../icon";
 import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
 import { StyleSheet } from "react-native";
@@ -66,7 +66,8 @@ export default function CustomDrawerContent(props: any) {
         ]}
       >
         <Text style={styles.versionText} disabled>
-          Version: {Application.nativeApplicationVersion} - © 2024 NinCloud
+          Version: {Application.nativeApplicationVersion} - ©{" "}
+          {new Date().getFullYear()} NinCloud
         </Text>
       </View>
     </View>

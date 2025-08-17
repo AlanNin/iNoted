@@ -4,11 +4,11 @@ import {
   BottomSheetView,
   BottomSheetModalProvider,
 } from "@gorhom/bottom-sheet";
-import { Text, TouchableOpacity, View } from "./themed";
+import { Text, TouchableOpacity, View } from "../themed";
 import { BackHandler, StyleSheet } from "react-native";
 import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
-import Icon from "./icon";
+import Icon from "../icon";
 import {
   BottomDrawerSortOptionProps,
   BottomDrawerSortProps,

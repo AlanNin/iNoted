@@ -17,9 +17,9 @@ import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { deleteNote, getNoteById, updateNote } from "@/queries/notes";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { addNotesToNotebook } from "@/queries/notebooks";
-import BottomDrawerConfirm from "@/components/bottom_drawer_confirm";
-import BottomDrawerMoveNote from "@/components/bottom_drawer_move_note";
-import BottomDrawerNoteDetails from "@/components/bottom_drawer_note_details";
+import BottomDrawerConfirm from "@/components/drawers/bottom_drawer_confirm";
+import BottomDrawerMoveNote from "@/components/drawers/bottom_drawer_move_note";
+import BottomDrawerNoteDetails from "@/components/drawers/bottom_drawer_note_details";
 import { convertToJson, parseEditorState } from "@/lib/text_editor";
 import { getNavigationBarType } from "react-native-navigation-bar-detector";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -35,7 +35,6 @@ export default function NoteScreen() {
   const bottomNoteDetailsDrawerRef = React.useRef<BottomSheetModal>(null);
   const bottomDeleteNoteDrawerRef = React.useRef<BottomSheetModal>(null);
   const navigationType = getNavigationBarType();
-  const [key, setKey] = React.useState("");
 
   const { data: noteData, isLoading: isLoadingNoteData } = useQuery({
     queryKey: ["note", Number(noteId)],
@@ -45,16 +44,24 @@ export default function NoteScreen() {
 
   const noteDate = noteData?.updated_at;
 
-  const initialContent = convertToJson(noteData?.content);
+  const initialTitle = React.useMemo(() => {
+    return noteData?.title;
+  }, [noteData?.title]);
 
-  const [title, setTitle] = React.useState(noteData?.title ?? "");
+  const initialContent = React.useMemo(() => {
+    return convertToJson(noteData?.content);
+  }, [noteData?.content]);
+
+  const stableKey = React.useMemo(() => {
+    return `${noteId}-${initialTitle}-${initialContent}-${noteDate}`;
+  }, [noteId, initialTitle, initialContent, noteDate]);
+
+  const [title, setTitle] = React.useState(initialTitle ?? "");
   const [content, setContent] = React.useState(initialContent ?? "");
 
   React.useEffect(() => {
     setTitle(noteData?.title || "");
     setContent(initialContent!);
-
-    setKey(`${noteId}-${noteData?.title}-${initialContent}-${noteDate}`);
   }, [noteData]);
 
   // save note on back press
@@ -145,13 +152,12 @@ export default function NoteScreen() {
     isUncategorized?: boolean
   ) {
     try {
+      handleUpdateNote();
       await addNotesToNotebook({
         noteIds: [Number(noteId)],
         notebookId,
         isUncategorized: isUncategorized,
       });
-      refetchNotebooks();
-      refetchNotes();
       toast.success("Moved successfully");
     } catch (error) {
       console.error("Error moving notes:", error);
@@ -214,7 +220,7 @@ export default function NoteScreen() {
       <SafeAreaView
         style={styles.container}
         customBackgroundColor={colors[theme].background}
-        key={key}
+        key={stableKey}
       >
         <KeyboardAwareScrollView
           contentContainerStyle={{ flexGrow: 1 }}
@@ -224,7 +230,6 @@ export default function NoteScreen() {
           onKeyboardDidHide={() => setIsKeyboardVisible(false)}
         >
           <LexicalEditorComponent
-            key={theme}
             handleBack={handleBack}
             isKeyboardVisible={isKeyboardVisible}
             isShowMoreModalOpen={isShowMoreModalOpen}
@@ -239,7 +244,7 @@ export default function NoteScreen() {
             }
             setTitle={setTitle}
             setContent={setContent}
-            title={title}
+            title={initialTitle!}
             content={initialContent!}
             noteDate={noteDate!}
             navigationType={navigationType}

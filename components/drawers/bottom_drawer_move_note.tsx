@@ -4,18 +4,17 @@ import {
   BottomSheetView,
   BottomSheetModalProvider,
 } from "@gorhom/bottom-sheet";
-import { Text, TouchableOpacity, View } from "./themed";
+import { Text, TouchableOpacity, View } from "../themed";
 import { BackHandler, Dimensions, StyleSheet } from "react-native";
 import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
-import NotebookCard from "./notebook_card";
+import NotebookCard from "../notebook_card";
 import { useQuery } from "@tanstack/react-query";
 import { getAllNotebooks } from "@/queries/notebooks";
 import { FlashList } from "@shopify/flash-list";
 import { useNotebooksSelectedToMoveMode } from "@/hooks/useNotebookSelectedToMove";
-import Icon from "./icon";
-import Loader from "./loading";
-import * as NavigationBar from "expo-navigation-bar";
+import Icon from "../icon";
+import Loader from "../loading";
 
 const BottomDrawerMoveNote = React.forwardRef<
   BottomSheetModal,

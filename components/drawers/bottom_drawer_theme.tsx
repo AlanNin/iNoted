@@ -4,37 +4,43 @@ import {
   BottomSheetView,
   BottomSheetModalProvider,
 } from "@gorhom/bottom-sheet";
-import { Text, TouchableOpacity, View } from "./themed";
+import { Text, TouchableOpacity, View } from "../themed";
 import { BackHandler, StyleSheet } from "react-native";
 import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
-import Icon from "./icon";
+import { BottomDrawerThemeProps } from "@/types/bottom_drawer_theme";
+import Icon from "../icon";
 
-const BottomDrawerOptions = React.forwardRef<
+const BottomDrawerTheme = React.forwardRef<
   BottomSheetModal,
-  Omit<BottomDrawerOptionsProps, "ref">
+  Omit<BottomDrawerThemeProps, "ref">
 >(
   (
-    { title, description, options, selectedOption, handleSelectOption },
+    {
+      title,
+      description,
+      themes,
+      selectedTheme,
+      setSelectedTheme,
+      onApply,
+      onCancel,
+      isApplyDisabled,
+    },
     ref
   ) => {
     const theme = useColorScheme();
-    const [temporalSelection, setTemporalSelection] = React.useState<string>(
-      selectedOption
-    );
-    const isApplyDisabled = temporalSelection === selectedOption;
 
     const closeDrawer = () => {
       (ref as React.RefObject<BottomSheetModal>).current?.dismiss();
     };
 
     const handleCancel = () => {
+      onCancel();
       closeDrawer();
-      setTemporalSelection(selectedOption);
     };
 
     const handleSubmit = () => {
-      handleSelectOption(temporalSelection);
+      onApply(selectedTheme);
       closeDrawer();
     };
 
@@ -62,7 +68,6 @@ const BottomDrawerOptions = React.forwardRef<
     return (
       <BottomSheetModalProvider>
         <BottomSheetModal
-          ref={ref}
           onChange={(status) => {
             if (status === 0) {
               setSheetStatus("open");
@@ -70,6 +75,7 @@ const BottomDrawerOptions = React.forwardRef<
               setSheetStatus("close");
             }
           }}
+          ref={ref}
           backdropComponent={() => (
             <TouchableOpacity
               style={[styles.backdrop]}
@@ -87,46 +93,60 @@ const BottomDrawerOptions = React.forwardRef<
           }}
         >
           <BottomSheetView style={styles.contentContainer}>
-            <Text style={styles.title}>{title}</Text>
-            {description && (
+            <View style={styles.header}>
+              <Text style={styles.title}>{title}</Text>
               <Text style={styles.description}>{description}</Text>
-            )}
-            <View style={styles.actionsContainer}>
-              {options.map((option, index) => {
-                const isSelected = option.key === temporalSelection;
-
-                return (
-                  <TouchableOpacity
-                    key={`${option}-${index}`}
-                    onPress={() => setTemporalSelection(option.key)}
-                    style={styles.actionsButton}
-                    customBackgroundColor={
-                      isSelected ? colors[theme].foggiest : ""
-                    }
-                  >
-                    {option.icon && (
-                      <Icon
-                        name={option.icon}
-                        size={16}
-                        customColor={
-                          isSelected
-                            ? colors[theme].tint
+            </View>
+            <View style={styles.themesContainer}>
+              {themes.map((themeItem) => (
+                <TouchableOpacity
+                  key={themeItem}
+                  style={[
+                    styles.itemsButton,
+                    themeItem === selectedTheme && {
+                      backgroundColor: colors[theme].primary_dark,
+                    },
+                  ]}
+                  onPress={() => {
+                    setSelectedTheme(themeItem);
+                  }}
+                >
+                  <View style={styles.itemButtonDetails}>
+                    <View style={styles.itemButtonDetailsTxts}>
+                      <Text
+                        customTextColor={
+                          themeItem === selectedTheme
+                            ? colors.dark.text
                             : colors[theme].text_muted
                         }
+                      >
+                        {themeItem.charAt(0).toUpperCase() +
+                          themeItem.slice(1).toLowerCase()}
+                      </Text>
+                      {themeItem === selectedTheme && (
+                        <Text
+                          style={styles.itemButtonDetailsDescription}
+                          customTextColor={colors.dark.text_bit_muted}
+                        >
+                          {selectedTheme === "system"
+                            ? "Follows your device’s theme for a smooth look"
+                            : selectedTheme === "light"
+                            ? "Fresh and bright, keeps everything clear"
+                            : "Cool and cozy, perfect for a comfortable vibe"}
+                        </Text>
+                      )}
+                    </View>
+                    {themeItem === selectedTheme && (
+                      <Icon
+                        name="CircleCheckBig"
+                        size={20}
+                        strokeWidth={1}
+                        customColor={colors.dark.tint}
                       />
                     )}
-                    <Text
-                      customTextColor={
-                        isSelected
-                          ? colors[theme].tint
-                          : colors[theme].text_muted
-                      }
-                    >
-                      {option.label}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
+                  </View>
+                </TouchableOpacity>
+              ))}
             </View>
             <View style={styles.buttonsContainer}>
               <TouchableOpacity onPress={handleCancel} style={styles.button}>
@@ -172,6 +192,10 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 20,
   },
+  header: {
+    flexDirection: "column",
+    gap: 16,
+  },
   title: {
     fontSize: 20,
     fontWeight: "bold",
@@ -179,23 +203,38 @@ const styles = StyleSheet.create({
   },
   description: {
     textAlign: "center",
+    marginTop: -8,
   },
-  actionsContainer: {
+  themesContainer: {
+    marginTop: 12,
     flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
     gap: 12,
   },
-  actionsButton: {
-    width: "100%",
+  itemsButton: {
     padding: 16,
     borderRadius: 8,
+    width: "100%",
     display: "flex",
     flexDirection: "row",
-    justifyContent: "center",
     alignItems: "center",
-    gap: 8,
+    gap: 16,
+  },
+  itemButtonDetails: {
+    backgroundColor: "transparent",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    flex: 1,
+    gap: 24,
+  },
+  itemButtonDetailsTxts: {
+    backgroundColor: "transparent",
+    flexDirection: "column",
+    gap: 4,
+    flex: 1,
+  },
+  itemButtonDetailsDescription: {
+    fontSize: 12,
   },
   buttonsContainer: {
     flexDirection: "row",
@@ -211,4 +250,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BottomDrawerOptions;
+export default BottomDrawerTheme;

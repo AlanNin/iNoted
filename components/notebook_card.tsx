@@ -1,5 +1,5 @@
 import { Dimensions, StyleSheet } from "react-native";
-import { MotiView, Text, TouchableOpacity, View } from "./themed";
+import { Text, TouchableOpacity, View } from "./themed";
 import React from "react";
 import { useNotebooksEditMode } from "@/hooks/useNotebooksEditMode";
 import useColorScheme from "@/hooks/useColorScheme";
@@ -156,17 +156,6 @@ const NotebookCard = React.memo(
       typeof notebook.background === "string" &&
       notebook.background.includes("#");
 
-    const delay = index ? index * 50 : 0;
-    const animationProps = {
-      from: { opacity: 0, translateY: 10 },
-      animate: { opacity: 1, translateY: 0 },
-      transition: {
-        type: "timing",
-        duration: 250,
-        delay,
-      },
-    } as any;
-
     const colorSource = isLoading
       ? colors.dark.grayscale
       : isBackgroundAColor
@@ -182,8 +171,7 @@ const NotebookCard = React.memo(
     const { width } = Dimensions.get("screen");
 
     return (
-      <MotiView
-        {...animationProps}
+      <View
         style={[
           styles.container,
           isAdding && { minWidth: !mini && width > 400 ? 120 : 104 },
@@ -229,7 +217,7 @@ const NotebookCard = React.memo(
           )}
           <View style={styles.bookBorder} />
         </View>
-      </MotiView>
+      </View>
     );
   },
   (prevProps, nextProps) => {

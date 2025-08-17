@@ -24,12 +24,32 @@ import { HashtagNode } from "@lexical/hashtag";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 import { TRANSFORMERS } from "@lexical/markdown";
 import { CodeNode } from "@lexical/code";
-import { LinkNode } from "@lexical/link";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
 import EditablePlugin from "@/components/lexical/plugins/EditablePlugin";
+import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
+import { AutoLinkPlugin } from "@lexical/react/LexicalAutoLinkPlugin";
+import { LinkNode, AutoLinkNode } from "@lexical/link";
 
 const placeholder = "Capture your thoughts...";
+
+const URL_MATCHER = /((https?:\/\/(www\.)?)|(www\.))[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
+
+const MATCHERS = [
+  (text: string) => {
+    const match = URL_MATCHER.exec(text);
+    if (match === null) {
+      return null;
+    }
+    const fullMatch = match[0];
+    return {
+      index: match.index,
+      length: fullMatch.length,
+      text: fullMatch,
+      url: fullMatch.startsWith("http") ? fullMatch : `https://${fullMatch}`,
+    };
+  },
+];
 
 export default function LexicalEditorComponent({
   isShowMoreModalOpen,
@@ -50,7 +70,8 @@ export default function LexicalEditorComponent({
   theme,
 }: LexicalProps) {
   const [mode, SetMode] = React.useState<"edit" | "view">("edit");
-  const [isTitleEditable, setIsTitleEditable] = React.useState(true);
+  const [isTitleEditable, setIsTitleEditable] = React.useState<boolean>(true);
+  const [isTitleFocused, setIsTitleFocused] = React.useState<boolean>(false);
 
   const editorConfig = {
     namespace: "Lexical Editor",
@@ -64,11 +85,22 @@ export default function LexicalEditorComponent({
       HeadingNode,
       QuoteNode,
       HashtagNode,
+      AutoLinkNode,
     ],
     onError(error: Error) {
       throw error;
     },
     theme: theme === "light" ? lexicalTheme : lexicalDarkTheme,
+  };
+
+  const isSafeUrl = (url: string) => {
+    try {
+      const parsed = new URL(url, "https://example.com");
+      const allowed = ["http:", "https:", "mailto:", "tel:"];
+      return allowed.includes(parsed.protocol);
+    } catch {
+      return false;
+    }
   };
 
   return (
@@ -104,6 +136,7 @@ export default function LexicalEditorComponent({
           title={title}
           isTitleEditable={isTitleEditable}
           theme={theme}
+          setIsTitleFocused={setIsTitleFocused}
         />
 
         <div className="editor-container">
@@ -118,9 +151,9 @@ export default function LexicalEditorComponent({
               contentEditable={
                 <ContentEditable
                   id="editor-input-content"
-                  autoComplete="off"
-                  spellCheck="false"
-                  autoCorrect="off"
+                  autoComplete="on"
+                  spellCheck="true"
+                  autoCorrect="on"
                   className={`editor-input${
                     theme === "dark" ? " dark-editor-input" : ""
                   }`}
@@ -157,10 +190,15 @@ export default function LexicalEditorComponent({
               mode={mode}
             />
             <HashtagPlugin />
+            <LinkPlugin
+              validateUrl={isSafeUrl}
+              attributes={{ rel: "noreferrer", target: "_blank" }}
+            />
+            <AutoLinkPlugin matchers={MATCHERS} />
             {/* <TreeViewPlugin /> */}
           </div>
         </div>
-        {mode === "edit" && isKeyboardVisible && (
+        {mode === "edit" && isKeyboardVisible && !isTitleFocused && (
           <ToolbarPlugin theme={theme} />
         )}
       </main>

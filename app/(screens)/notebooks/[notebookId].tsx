@@ -31,11 +31,11 @@ import NoteCard from "@/components/note_card";
 import { FlashList } from "@shopify/flash-list";
 import { createNote } from "@/queries/notes";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
-import BottomDrawerConfirm from "@/components/bottom_drawer_confirm";
+import BottomDrawerConfirm from "@/components/drawers/bottom_drawer_confirm";
 import { toast } from "@backpackapp-io/react-native-toast";
-import BottomDrawerEditNotebook from "@/components/bottom_drawer_edit_notebook";
+import BottomDrawerEditNotebook from "@/components/drawers/bottom_drawer_edit_notebook";
 import { useNotesEditMode } from "@/hooks/useNotesEditMode";
-import BottomDrawerMoveNote from "@/components/bottom_drawer_move_note";
+import BottomDrawerMoveNote from "@/components/drawers/bottom_drawer_move_note";
 import { useConfig } from "@/providers/config";
 
 const MemoizedNoteCard = React.memo(NoteCard);

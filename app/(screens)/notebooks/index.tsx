@@ -15,8 +15,8 @@ import Loader from "@/components/loading";
 import Icon from "@/components/icon";
 import useColorScheme from "@/hooks/useColorScheme";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
-import BottomDrawerSort from "@/components/bottom_drawer_sort";
-import BottomDrawerConfirm from "@/components/bottom_drawer_confirm";
+import BottomDrawerSort from "@/components/drawers/bottom_drawer_sort";
+import BottomDrawerConfirm from "@/components/drawers/bottom_drawer_confirm";
 import { toast } from "@backpackapp-io/react-native-toast";
 import { FlashList } from "@shopify/flash-list";
 import { DrawerActions } from "@react-navigation/native";
@@ -26,7 +26,7 @@ import {
   getAllNotebooks,
 } from "@/queries/notebooks";
 import { useNotebooksEditMode } from "@/hooks/useNotebooksEditMode";
-import BottomDrawerCreateNotebook from "@/components/bottom_drawer_create_notebook";
+import BottomDrawerCreateNotebook from "@/components/drawers/bottom_drawer_create_notebook";
 import NotebookCard from "@/components/notebook_card";
 import { useConfig } from "@/providers/config";
 import { sortTypes } from "@/types/bottom_drawer_sort";
