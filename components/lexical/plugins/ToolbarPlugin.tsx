@@ -29,10 +29,8 @@ import {
   $getListDepth,
 } from "@lexical/list";
 import { motion } from "motion/react";
-
 import colors from "@/constants/colors";
 import * as React from "react";
-import useColorScheme from "@/hooks/useColorScheme";
 import {
   Divider,
   OLIcon,
@@ -70,14 +68,30 @@ import { MotiView } from "@/components/themed";
 import ColorPicker, { HueSlider, Panel1 } from "reanimated-color-picker";
 export const SET_FONT_SIZE_COMMAND: LexicalCommand<number> = createCommand();
 export const SET_FONT_COLOR_COMMAND: LexicalCommand<string> = createCommand();
-export const SET_HIGHLIGHT_COLOR_COMMAND: LexicalCommand<string> = createCommand();
-export const SET_IS_SHOWING_FONT_SIZE_OPTIONS_COMMAND: LexicalCommand<boolean> = createCommand();
-export const SET_IS_SHOWING_FONT_COLOR_OPTIONS_COMMAND: LexicalCommand<boolean> = createCommand();
-export const SET_IS_SHOWING_HIGHLIGHT_COLOR_OPTIONS_COMMAND: LexicalCommand<boolean> = createCommand();
+export const SET_HIGHLIGHT_COLOR_COMMAND: LexicalCommand<string> =
+  createCommand();
+export const SET_IS_SHOWING_FONT_SIZE_OPTIONS_COMMAND: LexicalCommand<boolean> =
+  createCommand();
+export const SET_IS_SHOWING_FONT_COLOR_OPTIONS_COMMAND: LexicalCommand<boolean> =
+  createCommand();
+export const SET_IS_SHOWING_HIGHLIGHT_COLOR_OPTIONS_COMMAND: LexicalCommand<boolean> =
+  createCommand();
 const LowPriority = 1;
 const MAX_LIST_DEPTH = 5;
 
-export default function ToolbarPlugin({ theme }: { theme: "light" | "dark" }) {
+export default function ToolbarPlugin({
+  theme,
+  canUndo,
+  canRedo,
+  setCanUndo,
+  setCanRedo,
+}: {
+  theme: "light" | "dark";
+  canUndo: boolean;
+  canRedo: boolean;
+  setCanUndo: (value: boolean) => void;
+  setCanRedo: (value: boolean) => void;
+}) {
   const [editor] = useLexicalComposerContext();
   const [isBold, setIsBold] = React.useState(false);
   const [isItalic, setIsItalic] = React.useState(false);
@@ -85,8 +99,7 @@ export default function ToolbarPlugin({ theme }: { theme: "light" | "dark" }) {
   const [isStrikethrough, setIsStrikethrough] = React.useState(false);
   const [isSuperScript, setIsSuperScript] = React.useState(false);
   const [isSubScript, setIsSubScript] = React.useState(false);
-  const [canUndo, setCanUndo] = React.useState(false);
-  const [canRedo, setCanRedo] = React.useState(false);
+
   const [isUnorderedList, setIsUnorderedList] = React.useState(false);
   const [isOrderedList, setIsOrderedList] = React.useState(false);
   const [isCheckList, setIsCheckList] = React.useState(false);
@@ -98,13 +111,10 @@ export default function ToolbarPlugin({ theme }: { theme: "light" | "dark" }) {
   );
   const [showFontSizeOptions, setShowFontSizeOptions] = React.useState(false);
   const [showFontColorOptions, setShowFontColorOptions] = React.useState(false);
-  const [
-    showHighlightColorOptions,
-    setShowHighlightColorOptions,
-  ] = React.useState(false);
-  const [pickerTemporaryColor, setPickerTemporaryColor] = React.useState<
-    string
-  >("");
+  const [showHighlightColorOptions, setShowHighlightColorOptions] =
+    React.useState(false);
+  const [pickerTemporaryColor, setPickerTemporaryColor] =
+    React.useState<string>("");
   const [colorPicker, setColorPicker] = React.useState<
     "font" | "highlight" | null
   >(null);

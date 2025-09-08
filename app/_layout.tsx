@@ -32,9 +32,13 @@ export default function RootLayout() {
   useDrizzleStudio(expo_db);
 
   React.useEffect(() => {
-    if (fontsLoaded || fontsError) {
-      SplashScreen.hideAsync();
+    async function prepare() {
+      if (fontsLoaded || fontsError) {
+        await SplashScreen.hideAsync();
+      }
     }
+
+    prepare();
   }, [fontsLoaded, fontsError]);
 
   if ((!fontsLoaded && !fontsError) || !success) {

@@ -165,18 +165,23 @@ const BottomDrawerEditNotebook = React.forwardRef<
                 ))}
                 <TouchableOpacity
                   key="select-color"
-                  style={styles.selectContainer}
+                  style={[
+                    styles.selectContainer,
+                    {
+                      borderColor: colors[theme].grayscale,
+                      borderWidth: 1,
+                      padding: 8,
+                      width: 24,
+                      height: 24,
+                    },
+                  ]}
                   onPress={() => setShowColorPickerModal(true)}
                 >
-                  <LinearGradient
-                    colors={["#4A00E0", "#8E2DE2"]}
-                    style={styles.selectContainer}
-                  />
                   <Icon
                     name="Palette"
-                    size={12}
+                    strokeWidth={1.8}
+                    size={14}
                     customColor={colors[theme].tint}
-                    style={styles.selectIcon}
                   />
                 </TouchableOpacity>
 
@@ -191,15 +196,23 @@ const BottomDrawerEditNotebook = React.forwardRef<
                 ))}
                 <TouchableOpacity
                   key="select-image"
-                  style={styles.selectContainer}
+                  style={[
+                    styles.selectContainer,
+                    {
+                      borderColor: colors[theme].grayscale,
+                      borderWidth: 1,
+                      padding: 8,
+                      width: 24,
+                      height: 24,
+                    },
+                  ]}
                   onPress={handlePickImage}
                 >
-                  <Image source={"notebook_select"} style={styles.image} />
                   <Icon
-                    name="Image"
-                    size={12}
+                    name="ImagePlus"
+                    size={14}
                     customColor={colors[theme].tint}
-                    style={styles.selectIcon}
+                    strokeWidth={1.8}
                   />
                 </TouchableOpacity>
               </View>

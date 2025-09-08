@@ -53,8 +53,8 @@ export default function NoteScreen() {
   }, [noteData?.content]);
 
   const stableKey = React.useMemo(() => {
-    return `${noteId}-${initialTitle}-${initialContent}-${noteDate}`;
-  }, [noteId, initialTitle, initialContent, noteDate]);
+    return noteId.toString();
+  }, [noteId]);
 
   const [title, setTitle] = React.useState(initialTitle ?? "");
   const [content, setContent] = React.useState(initialContent ?? "");

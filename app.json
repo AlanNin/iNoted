@@ -3,7 +3,7 @@
     "name": "iNoted",
     "slug": "iNoted",
     "platforms": ["ios", "android"],
-    "version": "1.0.5",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -44,8 +44,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "The app only accesses your photos to let you personalize and enjoy your notes as you wish.",
-          "cameraPermission": "The app only accesses your camera to let you personalize and enjoy your notes as you wish."
+          "photosPermission": "Allow iNoted to access your photos.",
+          "cameraPermission": "Allow iNoted to access your camera."
         }
       ],
       [
@@ -69,7 +69,10 @@
         {
           "android": {
             "enableProguardInReleaseBuilds": true,
-            "enableShrinkResourcesInReleaseBuilds": true
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "buildToolsVersion": "35.0.0"
           }
         }
       ]

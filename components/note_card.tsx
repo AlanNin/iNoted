@@ -87,7 +87,6 @@ const SelectedIndicator = ({
 const NoteCard = React.memo(
   ({
     note,
-    index,
     viewMode,
     onPress,
     selectDisabled = false,
@@ -98,6 +97,10 @@ const NoteCard = React.memo(
     }
 
     const theme = useColorScheme();
+
+    const preview = React.useMemo(() => parseEditorState(note.content), [
+      note.content,
+    ]);
 
     if (viewMode === "grid") {
       return (
@@ -110,9 +113,9 @@ const NoteCard = React.memo(
               selectDisabled={selectDisabled}
             />
             <View style={gridStyles.contentContainer}>
-              {parseEditorState(note.content).length > 0 ? (
+              {preview.length > 0 ? (
                 <Text style={gridStyles.content} numberOfLines={9}>
-                  {parseEditorState(note.content)}
+                  {preview}
                 </Text>
               ) : (
                 <Text style={gridStyles.noContent} numberOfLines={9} disabled>
@@ -158,9 +161,9 @@ const NoteCard = React.memo(
               {note.title}
             </Text>
 
-            {parseEditorState(note.content).length > 0 ? (
+            {preview.length > 0 ? (
               <Text style={listStyles.content} numberOfLines={3}>
-                {parseEditorState(note.content)}
+                {preview}
               </Text>
             ) : (
               <Text style={listStyles.noContent} numberOfLines={3} disabled>

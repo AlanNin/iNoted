@@ -37,6 +37,8 @@ import BottomDrawerEditNotebook from "@/components/drawers/bottom_drawer_edit_no
 import { useNotesEditMode } from "@/hooks/useNotesEditMode";
 import BottomDrawerMoveNote from "@/components/drawers/bottom_drawer_move_note";
 import { useConfig } from "@/providers/config";
+import { sortTypes } from "@/types/bottom_drawer_sort";
+import BottomDrawerSort from "@/components/drawers/bottom_drawer_sort";
 
 const MemoizedNoteCard = React.memo(NoteCard);
 
@@ -48,6 +50,7 @@ export default function NotebookScreen() {
   const bottomDeleteNotebookDrawerRef = React.useRef<BottomSheetModal>(null);
   const bottomRemoveNotesDrawerRef = React.useRef<BottomSheetModal>(null);
   const bottomMoveNotesDrawerRef = React.useRef<BottomSheetModal>(null);
+  const bottomSortNotesDrawerRef = React.useRef<BottomSheetModal>(null);
   const queryClient = useQueryClient();
   const theme = useColorScheme();
   const [isFirstNote, saveIsFirstNote] = useConfig<boolean>(
@@ -55,6 +58,13 @@ export default function NotebookScreen() {
     true
   );
   const [notesViewMode] = useConfig<"grid" | "list">("notesViewMode", "grid");
+  const [notebooksNotesSortBy, saveNotebooksNotesSortBy] = useConfig<{
+    key: typeof sortTypes[number];
+    order: "asc" | "desc";
+  }>(`notebookNotesSortBy-${notebookId}`, {
+    key: sortTypes[0],
+    order: "desc",
+  });
   const {
     isNotesEditMode,
     toggleNotesEditMode,
@@ -67,6 +77,44 @@ export default function NotebookScreen() {
     queryFn: () => getNotebookById(Number(notebookId)),
     enabled: !!notebookId,
   });
+
+  const sortedNotebookNotes = React.useMemo(() => {
+    const notes = notebookData?.notes ?? [];
+    if (notes.length === 0) return notes;
+
+    const sorted = [...notes];
+
+    sorted.sort((a, b) => {
+      let compareResult = 0;
+
+      switch (notebooksNotesSortBy.key) {
+        case sortTypes[0]:
+          compareResult =
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+          break;
+
+        case sortTypes[1]:
+          compareResult = (a.title ?? "").localeCompare(
+            b.title ?? "",
+            undefined,
+            {
+              sensitivity: "base",
+              numeric: true,
+            }
+          );
+          break;
+
+        default:
+          compareResult = 0;
+      }
+
+      return notebooksNotesSortBy.order === "asc"
+        ? compareResult
+        : -compareResult;
+    });
+
+    return sorted;
+  }, [notebookData?.notes, notebooksNotesSortBy]);
 
   const isBackgroundAColor =
     typeof notebookData?.background === "string" &&
@@ -107,7 +155,6 @@ export default function NotebookScreen() {
         key={`${item.id}-${item.title}-${item.content}`}
         note={item}
         viewMode={notesViewMode}
-        index={index}
       />
     ),
     [notesViewMode]
@@ -201,6 +248,11 @@ export default function NotebookScreen() {
       toast.error("An error occurred. Please try again.");
     }
   };
+
+  const handleSaveNotebookNotesSortOrder = (sort: any) => {
+    saveNotebooksNotesSortBy(sort);
+  };
+
   React.useEffect(() => {
     const backAction = () => {
       if (isNotesEditMode) {
@@ -329,6 +381,27 @@ export default function NotebookScreen() {
                           disabled={notebookData?.notes.length === 0}
                         >
                           {isNotesEditMode ? "Cancel" : "Manage Notes"}
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.moreModalButton}
+                        onPress={() => {
+                          setIsMoreModalOpen(false);
+                          bottomSortNotesDrawerRef.current?.present();
+                        }}
+                        disabled={notebookData?.notes.length === 0}
+                      >
+                        <Icon
+                          name="ArrowDownUp"
+                          strokeWidth={1.2}
+                          size={18}
+                          muted={notebookData?.notes.length === 0}
+                        />
+                        <Text
+                          style={styles.moreModalButtonText}
+                          disabled={notebookData?.notes.length === 0}
+                        >
+                          Sort Notes
                         </Text>
                       </TouchableOpacity>
 
@@ -495,7 +568,7 @@ export default function NotebookScreen() {
                   keyExtractor={(item, index) =>
                     item.id ? item.id?.toString() : `placeholder-${index}`
                   }
-                  data={notebookData?.notes}
+                  data={sortedNotebookNotes}
                   renderItem={renderItem}
                   numColumns={notesViewMode === "grid" ? 3 : 1}
                   removeClippedSubviews={true}
@@ -579,6 +652,14 @@ export default function NotebookScreen() {
           </MotiView>
         )}
       </SafeAreaView>
+      <BottomDrawerSort
+        ref={bottomSortNotesDrawerRef}
+        title="Sort Your Notes"
+        options={[sortTypes[0], sortTypes[1]]}
+        selectedSort={notebooksNotesSortBy}
+        handleSortOrder={handleSaveNotebookNotesSortOrder}
+      />
+
       <BottomDrawerConfirm
         ref={bottomDeleteNotebookDrawerRef}
         title="Delete This Notebook?"

@@ -13,12 +13,12 @@ import {
   theme as lexicalTheme,
   dark_theme as lexicalDarkTheme,
 } from "@/components/lexical/theme";
-import ToolbarPlugin from "@/components/lexical/plugins/ToolbarPlugin";
+import ToolbarPlugin from "@/components/lexical/plugins/toolbarPlugin";
 import colors from "@/constants/colors";
 import React from "react";
 import Header from "./components/header";
 import ContentTop from "./components/contentTop";
-import TreeViewPlugin from "./plugins/TreeViewPlugin";
+import TreeViewPlugin from "./plugins/treeViewPlugin";
 import { HashtagPlugin } from "@lexical/react/LexicalHashtagPlugin";
 import { HashtagNode } from "@lexical/hashtag";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
@@ -26,14 +26,15 @@ import { TRANSFORMERS } from "@lexical/markdown";
 import { CodeNode } from "@lexical/code";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
-import EditablePlugin from "@/components/lexical/plugins/EditablePlugin";
+import EditablePlugin from "@/components/lexical/plugins/editablePlugin";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 import { AutoLinkPlugin } from "@lexical/react/LexicalAutoLinkPlugin";
 import { LinkNode, AutoLinkNode } from "@lexical/link";
 
 const placeholder = "Capture your thoughts...";
 
-const URL_MATCHER = /((https?:\/\/(www\.)?)|(www\.))[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
+const URL_MATCHER =
+  /((https?:\/\/(www\.)?)|(www\.))[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/;
 
 const MATCHERS = [
   (text: string) => {
@@ -72,6 +73,8 @@ export default function LexicalEditorComponent({
   const [mode, SetMode] = React.useState<"edit" | "view">("edit");
   const [isTitleEditable, setIsTitleEditable] = React.useState<boolean>(true);
   const [isTitleFocused, setIsTitleFocused] = React.useState<boolean>(false);
+  const [canUndo, setCanUndo] = React.useState(false);
+  const [canRedo, setCanRedo] = React.useState(false);
 
   const editorConfig = {
     namespace: "Lexical Editor",
@@ -199,7 +202,13 @@ export default function LexicalEditorComponent({
           </div>
         </div>
         {mode === "edit" && isKeyboardVisible && !isTitleFocused && (
-          <ToolbarPlugin theme={theme} />
+          <ToolbarPlugin
+            theme={theme}
+            canUndo={canUndo}
+            canRedo={canRedo}
+            setCanUndo={setCanUndo}
+            setCanRedo={setCanRedo}
+          />
         )}
       </main>
     </LexicalComposer>

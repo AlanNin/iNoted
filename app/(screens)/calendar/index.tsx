@@ -107,11 +107,10 @@ export default function CalendarScreen() {
   }, [isCalendarModalOpen]);
 
   const renderNote = React.useCallback(
-    ({ item, index }: { item: NoteProps; index: number }) => (
+    ({ item }: { item: NoteProps; index: number }) => (
       <MemoizedNoteCard
         note={item}
         viewMode={notesViewMode}
-        index={index}
         selectDisabled={true}
         dateType="hour"
         key={`${item.id}-${item.title}-${item.content}-${item.updated_at}`}

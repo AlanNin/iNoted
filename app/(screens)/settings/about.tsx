@@ -23,7 +23,7 @@ const aboutItems = [
     title: "Consider buying me a coffee",
     icon: "Coffee",
     description: "Tap here to support me",
-    href: "https://paypal.me/alanbusinessnin?country.x=DO&locale.x=es_XC",
+    href: "https://www.paypal.com/paypalme/alanninm",
     disabled: false,
   },
 ];

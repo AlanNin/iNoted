@@ -208,7 +208,6 @@ export default function NotesScreen() {
       key={`${item.id}-${item.title}-${item.content}`}
       note={item}
       viewMode={notesViewMode}
-      index={index}
     />
   );
 
