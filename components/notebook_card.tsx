@@ -16,7 +16,7 @@ const SelectedIndicator = ({
   isLoading,
 }: {
   notebookId: number;
-  onPress: (notebookId: number) => void;
+  onPress?: (notebookId: number) => void;
   disabled?: boolean;
   name: string;
   numberOfLinesName: number;
@@ -37,7 +37,7 @@ const SelectedIndicator = ({
     if (isNotebooksEditMode) {
       selectNotebook(notebookId);
     } else {
-      onPress(notebookId!);
+      onPress?.(notebookId!);
     }
   }, [isNotebooksEditMode, selectNotebook, notebookId]);
 
@@ -142,7 +142,6 @@ const SelectedIndicatorToMove = ({
 const NotebookCard = React.memo(
   ({
     notebook,
-    index,
     isAdding = false,
     numberOfLinesName = 1,
     onPress,
@@ -191,7 +190,7 @@ const NotebookCard = React.memo(
             ) : (
               <SelectedIndicator
                 notebookId={notebook.id!}
-                onPress={onPress!}
+                onPress={onPress ? onPress : undefined}
                 disabled={disabled}
                 name={notebook.name}
                 numberOfLinesName={numberOfLinesName}

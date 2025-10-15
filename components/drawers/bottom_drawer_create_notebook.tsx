@@ -11,7 +11,6 @@ import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
 import NotebookCard from "../notebook_card";
 import Icon from "../icon";
-import { LinearGradient } from "expo-linear-gradient";
 import ColorPickerComponent from "../color_picker";
 import { pickImage } from "@/lib/pick_image";
 import { Image } from "expo-image";
@@ -126,6 +125,7 @@ const BottomDrawerCreateNotebook = React.forwardRef<
               notebook={{ name: name || "Untitled", background: background }}
               isAdding
               numberOfLinesName={2}
+              disabled={true}
             />
           </View>
 
