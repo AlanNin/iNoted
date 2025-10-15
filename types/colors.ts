@@ -6,6 +6,7 @@ type ColorScheme = {
   tint: string;
   grayscale: string;
   grayscale_light: string;
+  primary_text: string;
   primary: string;
   primary_dark: string;
   primary_light: string;
@@ -39,6 +40,7 @@ type ColorScheme = {
     primary: string;
     secondary: string;
   };
+  notebook_indicator: string;
 };
 
 type Colors = {

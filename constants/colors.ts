@@ -7,6 +7,7 @@ const colors: Colors = {
     tint: "#000",
     grayscale: "#333333",
     grayscale_light: "#e8e8e8",
+    primary_text: "#fff",
     primary: "#FF5781",
     primary_dark: "#d1345b",
     primary_light: "#ff3366",
@@ -40,6 +41,7 @@ const colors: Colors = {
       primary: "#FF5781",
       secondary: "#ff57d2",
     },
+    notebook_indicator: "#d1345b",
   },
   dark: {
     text: "#fff",
@@ -49,6 +51,7 @@ const colors: Colors = {
     tint: "#fff",
     grayscale: "#CCCCCC",
     grayscale_light: "#363636",
+    primary_text: "#fff",
     primary: "#C44565",
     primary_dark: "#c23659",
     primary_light: "#fa3c6c",
@@ -83,6 +86,7 @@ const colors: Colors = {
       primary: "#FF5781",
       secondary: "#c4458b",
     },
+    notebook_indicator: "#FF5781",
   },
 };
 

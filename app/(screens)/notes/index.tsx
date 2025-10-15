@@ -50,12 +50,19 @@ export default function NotesScreen() {
     "notesViewMode",
     "grid"
   );
+
   const [notesSortBy, saveNotesSortBy] = useConfig<{
-    key: typeof sortTypes[number];
+    key: (typeof sortTypes)[number];
     order: "asc" | "desc";
   }>("notesSortBy", { key: sortTypes[0], order: "desc" });
+
   const [isFirstNote, saveIsFirstNote] = useConfig<boolean>(
     "isFirstNote",
+    true
+  );
+
+  const [isNotebookIndicatorNotesEnabled] = useConfig<boolean>(
+    "isNotebookIndicatorNotesEnabled",
     true
   );
 
@@ -203,11 +210,12 @@ export default function NotesScreen() {
     router.push(`${newNote[0].id}`);
   };
 
-  const renderItem = ({ item, index }: { item: NoteProps; index: number }) => (
+  const renderItem = ({ item }: { item: NoteProps }) => (
     <NoteCard
       key={`${item.id}-${item.title}-${item.content}`}
       note={item}
       viewMode={notesViewMode}
+      showNotebookIndicator={isNotebookIndicatorNotesEnabled}
     />
   );
 

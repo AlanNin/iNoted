@@ -17,7 +17,7 @@ import colors from "@/constants/colors";
 
 const themeOptions = ["system", "light", "dark"] as const;
 
-export type ThemeProps = typeof themeOptions[number];
+export type ThemeProps = (typeof themeOptions)[number];
 
 const AppearanceScreen = () => {
   const theme = useColorScheme();
@@ -39,12 +39,19 @@ const AppearanceScreen = () => {
   };
 
   // Exit Confirmation
-  const [isExitConfirmationEnabled, saveIsExitConfirmationEnabled] = useConfig<
-    boolean
-  >("isExitConfirmationEnabled", false);
+  const [isExitConfirmationEnabled, saveIsExitConfirmationEnabled] =
+    useConfig<boolean>("isExitConfirmationEnabled", false);
 
-  const handleExitConfirmationEnabled = (enabled: boolean) => {
-    saveIsExitConfirmationEnabled(enabled);
+  const toggleExitConfirmationEnabled = (value: boolean) => {
+    saveIsExitConfirmationEnabled(value);
+  };
+
+  // Indicators
+  const [isNotebookIndicatorNotesEnabled, saveIsNotebookIndicatorNotesEnabled] =
+    useConfig<boolean>("isNotebookIndicatorNotesEnabled", true);
+
+  const toggleNotebookIndicatorNotesEnabled = (value: boolean) => {
+    saveIsNotebookIndicatorNotesEnabled(value);
   };
 
   return (
@@ -90,7 +97,20 @@ const AppearanceScreen = () => {
               <BooleanSwitch
                 label="Ask For Exit Confirmation"
                 selectedValue={isExitConfirmationEnabled}
-                handleSelectValue={handleExitConfirmationEnabled}
+                handleSelectValue={toggleExitConfirmationEnabled}
+              />
+            </View>
+            <View style={styles.section}>
+              <Text
+                style={styles.label}
+                customBackgroundColor={colors[theme].foggier}
+              >
+                Indicators
+              </Text>
+              <BooleanSwitch
+                label="Show Notebook Indicator on Notes"
+                selectedValue={isNotebookIndicatorNotesEnabled}
+                handleSelectValue={toggleNotebookIndicatorNotesEnabled}
               />
             </View>
           </View>

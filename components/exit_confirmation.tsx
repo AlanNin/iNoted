@@ -36,11 +36,11 @@ const ExitConfirmationAlert = ({
               <TouchableOpacity
                 style={[
                   styles.buttonCancel,
-                  { borderColor: colors[theme].foggier },
+                  { borderColor: colors[theme].foggy },
                 ]}
                 onPress={onCancel}
               >
-                <Text style={styles.buttonText}>Cancel</Text>
+                <Text customTextColor={colors[theme].text}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
@@ -49,7 +49,7 @@ const ExitConfirmationAlert = ({
                 ]}
                 onPress={onConfirm}
               >
-                <Text style={styles.buttonText}>Yes</Text>
+                <Text customTextColor={colors[theme].primary_text}>Yes</Text>
               </TouchableOpacity>
             </View>
           </TouchableOpacity>
@@ -101,10 +101,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 4,
     alignItems: "center",
-  },
-  buttonText: {
-    color: "white",
-    fontWeight: "bold",
   },
 });
 

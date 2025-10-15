@@ -44,6 +44,10 @@ export default function CalendarScreen() {
     queryFn: getAllNotesCalendar,
   });
   const [notesViewMode] = useConfig<"grid" | "list">("notesViewMode", "grid");
+  const [isNotebookIndicatorNotesEnabled] = useConfig<boolean>(
+    "isNotebookIndicatorNotesEnabled",
+    true
+  );
   const theme = useColorScheme();
   const navigation = useNavigation();
   const openMenu = () => {
@@ -114,6 +118,7 @@ export default function CalendarScreen() {
         selectDisabled={true}
         dateType="hour"
         key={`${item.id}-${item.title}-${item.content}-${item.updated_at}`}
+        showNotebookIndicator={isNotebookIndicatorNotesEnabled}
       />
     ),
     [notesViewMode]

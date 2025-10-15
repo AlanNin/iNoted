@@ -18,11 +18,15 @@ export default function BooleanSwitch({
   const theme = useColorScheme();
   const [isEnabled, setIsEnabled] = React.useState(selectedValue);
 
-  const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
-
   React.useEffect(() => {
-    handleSelectValue(selectedValue);
-  }, [isEnabled]);
+    setIsEnabled(selectedValue);
+  }, [selectedValue]);
+
+  const toggleSwitch = () => {
+    const newValue = !isEnabled;
+    setIsEnabled(newValue);
+    handleSelectValue(newValue);
+  };
 
   return (
     <View style={styles.container}>
@@ -56,6 +60,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginVertical: 4,
+    gap: 32,
   },
   labelContainer: {
     flexDirection: "row",

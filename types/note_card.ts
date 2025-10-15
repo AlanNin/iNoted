@@ -4,4 +4,5 @@ type NoteCardProps = {
   onPress?: () => void;
   selectDisabled?: boolean;
   dateType?: "date" | "hour";
+  showNotebookIndicator?: boolean;
 };

@@ -146,21 +146,25 @@ export async function getAllNotes() {
 
 export async function getAllNotesCustom(notebookId?: number) {
   try {
+    const query = db_client
+      .select({
+        id: notes.id,
+        title: notes.title,
+        content: notes.content,
+        notebook_id: notes.notebook_id,
+        notebook_name: notebooks.name,
+        created_at: notes.created_at,
+        updated_at: notes.updated_at,
+      })
+      .from(notes)
+      .leftJoin(notebooks, eq(notes.notebook_id, notebooks.id));
+
     if (notebookId !== undefined) {
-      const result = await db_client
-        .select({
-          notes: notes,
-        })
-        .from(notes)
-        .leftJoin(notebooks, eq(notes.notebook_id, notebooks.id))
-        .where(eq(notes.notebook_id, notebookId));
-
-      return result.map((r) => r.notes);
-    } else {
-      const allNotes = await db_client.select().from(notes);
-
-      return allNotes;
+      query.where(eq(notes.notebook_id, notebookId));
     }
+
+    const result = await query;
+    return result;
   } catch (error) {
     console.error("Error fetching notes:", error);
     throw new Error("Could not fetch notes");
@@ -169,10 +173,21 @@ export async function getAllNotesCustom(notebookId?: number) {
 
 export async function getAllNotesCalendar() {
   try {
-    const allNotes: NoteProps[] = await db_client.select().from(notes);
+    const allNotes = await db_client
+      .select({
+        id: notes.id,
+        title: notes.title,
+        content: notes.content,
+        notebook_id: notes.notebook_id,
+        notebook_name: notebooks.name,
+        created_at: notes.created_at,
+        updated_at: notes.updated_at,
+      })
+      .from(notes)
+      .leftJoin(notebooks, eq(notes.notebook_id, notebooks.id));
 
     const groupedNotes = allNotes.reduce(
-      (acc: Record<string, NoteProps[]>, note: NoteProps) => {
+      (acc: Record<string, typeof allNotes>, note) => {
         const isoDate = note.created_at.replace(" ", "T") + "Z";
         const parsedDate = new Date(isoDate);
 
@@ -190,7 +205,7 @@ export async function getAllNotesCalendar() {
         acc[localDate].push(note);
         return acc;
       },
-      {} as Record<string, NoteProps[]>
+      {}
     );
 
     const result = Object.keys(groupedNotes)
@@ -201,6 +216,8 @@ export async function getAllNotesCalendar() {
           id: note.id,
           title: note.title,
           content: note.content,
+          notebook_id: note.notebook_id,
+          notebook_name: note.notebook_name,
           created_at: note.created_at,
           updated_at: note.updated_at,
         })),
@@ -208,6 +225,7 @@ export async function getAllNotesCalendar() {
 
     return result;
   } catch (error) {
+    console.error("Error fetching notes for calendar:", error);
     throw new Error("Could not fetch notes");
   }
 }
