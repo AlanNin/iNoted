@@ -12,10 +12,10 @@ import NotebookCard from "../notebook_card";
 import { useQuery } from "@tanstack/react-query";
 import { getAllNotebooks } from "@/queries/notebooks";
 import { FlashList } from "@shopify/flash-list";
-import { useNotebooksSelectedToMoveMode } from "@/hooks/useNotebookSelectedToMove";
 import Icon from "../icon";
 import Loader from "../loading";
 import { useNotebooksNotes } from "@/hooks/useNotebookNotes";
+import { useNotebooksSelectedToFilterMode } from "@/hooks/useNotebookSelectedToFilter";
 
 const BottomDrawerSelectNotebook = React.forwardRef<
   BottomSheetModal,
@@ -24,8 +24,10 @@ const BottomDrawerSelectNotebook = React.forwardRef<
   const theme = useColorScheme();
   const {
     selectedNotebookToShow,
+    uncategorizedToShowSelected,
     setSelectedNotebookToShow,
     clearSelectedNotebookToShow,
+    setUncategorizedToShowSelected,
   } = useNotebooksNotes();
 
   const { data: notebooks, isLoading: isLoadingNotebooks } = useQuery({
@@ -36,21 +38,31 @@ const BottomDrawerSelectNotebook = React.forwardRef<
   const {
     selectedNotebook,
     clearSelectedNotebook,
-  } = useNotebooksSelectedToMoveMode();
+    setUncategorizedSelected,
+    uncategorizedSelected,
+  } = useNotebooksSelectedToFilterMode();
 
   const closeDrawer = () => {
     (ref as React.RefObject<BottomSheetModal>).current?.dismiss();
     clearSelectedNotebook();
   };
 
-  const isButtonDisabled = !selectedNotebookToShow && selectedNotebook === null;
+  const isButtonDisabled =
+    !selectedNotebookToShow &&
+    selectedNotebook === null &&
+    !uncategorizedToShowSelected &&
+    !uncategorizedSelected;
+
+  const shouldShowAll =
+    (selectedNotebookToShow || uncategorizedToShowSelected) &&
+    !selectedNotebook &&
+    !uncategorizedSelected;
 
   const handleSelectNotebook = () => {
     if (isButtonDisabled) {
       return;
     }
-
-    if (selectedNotebookToShow && !selectedNotebook) {
+    if (shouldShowAll) {
       clearSelectedNotebookToShow();
       closeDrawer();
       return;
@@ -60,7 +72,11 @@ const BottomDrawerSelectNotebook = React.forwardRef<
       (notebook) => notebook.id === selectedNotebook!
     );
 
-    setSelectedNotebookToShow(dataNotebook!);
+    if (selectedNotebook) {
+      setSelectedNotebookToShow(dataNotebook!);
+    } else if (uncategorizedSelected) {
+      setUncategorizedToShowSelected(true);
+    }
     closeDrawer();
   };
 
@@ -93,15 +109,21 @@ const BottomDrawerSelectNotebook = React.forwardRef<
   }: {
     item: NotebookProps;
     index: number;
-  }) => (
-    <NotebookCard
-      key={`${item.id}-${item.name}-${item.background}`}
-      notebook={item}
-      index={index}
-      onPress={() => {}}
-      isToMove={true}
-    />
-  );
+  }) => {
+    const isDefaultSelected = item.id === selectedNotebookToShow?.id;
+
+    return (
+      <NotebookCard
+        key={`${item.id}-${item.name}-${item.background}`}
+        notebook={item}
+        index={index}
+        onPress={() => {}}
+        isToFilter={true}
+        defaultSelected={isDefaultSelected}
+        disabled={isDefaultSelected}
+      />
+    );
+  };
 
   return (
     <BottomSheetModalProvider>
@@ -153,9 +175,7 @@ const BottomDrawerSelectNotebook = React.forwardRef<
                     : colors[theme].primary_foggy
                 }
               >
-                {selectedNotebookToShow && !selectedNotebook
-                  ? "Show All"
-                  : "Confirm"}
+                {shouldShowAll ? "Show All" : "Confirm"}
               </Text>
             </TouchableOpacity>
           </View>
@@ -183,6 +203,47 @@ const BottomDrawerSelectNotebook = React.forwardRef<
                     renderItem={renderNotebooks}
                     numColumns={3}
                     estimatedItemSize={width > 400 ? 180 : 156}
+                    ListFooterComponent={
+                      <TouchableOpacity
+                        style={[
+                          styles.uncategorizedButton,
+                          notebooks.length > 3
+                            ? { marginTop: 8 }
+                            : { marginTop: 152 },
+                          { opacity: uncategorizedToShowSelected ? 0.6 : 1 },
+                        ]}
+                        customBackgroundColor={
+                          uncategorizedSelected || uncategorizedToShowSelected
+                            ? colors[theme].primary
+                            : colors[theme].foggier
+                        }
+                        onPress={() =>
+                          setUncategorizedSelected(!uncategorizedSelected)
+                        }
+                        disabled={uncategorizedToShowSelected}
+                      >
+                        <Icon
+                          name="Box"
+                          size={24}
+                          strokeWidth={1}
+                          customColor={
+                            uncategorizedSelected || uncategorizedToShowSelected
+                              ? colors.dark.text
+                              : colors[theme].text_muted
+                          }
+                        />
+                        <Text
+                          style={styles.uncategorizedButtonText}
+                          customTextColor={
+                            uncategorizedSelected || uncategorizedToShowSelected
+                              ? colors.dark.text
+                              : colors[theme].text_muted
+                          }
+                        >
+                          Uncategorized
+                        </Text>
+                      </TouchableOpacity>
+                    }
                   />
                 </View>
               ) : (
@@ -268,6 +329,21 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 16,
     alignSelf: "center",
+  },
+  uncategorizedButton: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+    gap: 12,
+    borderRadius: 12,
+    marginVertical: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+  },
+  uncategorizedButtonText: {
+    fontSize: 16,
   },
 });
 

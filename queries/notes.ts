@@ -1,6 +1,6 @@
 import { db_client } from "@/db/client";
 import { notebooks, notes } from "@/db/schema";
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, isNull } from "drizzle-orm";
 import { updateNotebookUpdatedAt } from "./notebooks";
 
 export async function createNote(note: NewNoteProps) {
@@ -144,7 +144,10 @@ export async function getAllNotes() {
   }
 }
 
-export async function getAllNotesCustom(notebookId?: number) {
+export async function getAllNotesCustom(
+  notebookId?: number,
+  fetchUncategorized?: boolean
+) {
   try {
     const query = db_client
       .select({
@@ -159,7 +162,9 @@ export async function getAllNotesCustom(notebookId?: number) {
       .from(notes)
       .leftJoin(notebooks, eq(notes.notebook_id, notebooks.id));
 
-    if (notebookId !== undefined) {
+    if (fetchUncategorized) {
+      query.where(isNull(notes.notebook_id));
+    } else if (notebookId !== undefined) {
       query.where(eq(notes.notebook_id, notebookId));
     }
 

@@ -6,6 +6,7 @@ import useColorScheme from "@/hooks/useColorScheme";
 import colors from "@/constants/colors";
 import { useNotebooksSelectedToMoveMode } from "@/hooks/useNotebookSelectedToMove";
 import { Image } from "expo-image";
+import { useNotebooksSelectedToFilterMode } from "@/hooks/useNotebookSelectedToFilter";
 
 const SelectedIndicator = ({
   notebookId,
@@ -85,30 +86,56 @@ const SelectedIndicatorToMove = ({
   name,
   numberOfLinesName,
   isLoading,
+  isToMove,
+  isToFilter,
+  defaultSelected,
+  disabled,
 }: {
   notebookId: number;
   name: string;
   numberOfLinesName: number;
   isLoading: boolean;
+  isToMove: boolean;
+  isToFilter: boolean;
+  defaultSelected: boolean;
+  disabled: boolean;
 }) => {
   const {
-    selectedNotebook,
-    toggleNotebooksSelectedToMoveMode,
-    selectNotebook,
+    selectedNotebook: selectedNotebookMove,
+    toggleNotebooksSelectedToMoveMode: toggleNotebooksSelectedToMoveMode,
+    selectNotebook: selectNotebookMove,
   } = useNotebooksSelectedToMoveMode();
+
+  const {
+    selectedNotebook: selectedNotebookFilter,
+    toggleNotebooksSelectedToFilterMode: toggleNotebooksSelectedToFilterMode,
+    selectNotebook: selectNotebookFilter,
+  } = useNotebooksSelectedToFilterMode();
 
   const theme = useColorScheme();
 
-  const isSelected = selectedNotebook === notebookId;
+  const isSelected =
+    defaultSelected ||
+    selectedNotebookMove === notebookId ||
+    selectedNotebookFilter === notebookId;
 
   const handlePress = () => {
-    selectNotebook(notebookId);
+    if (isToMove) {
+      selectNotebookMove(notebookId);
+    } else if (isToFilter) {
+      selectNotebookFilter(notebookId);
+    }
   };
 
   const handleLongPress = () => {
     if (!isSelected) {
-      toggleNotebooksSelectedToMoveMode();
-      selectNotebook(notebookId);
+      if (isToMove) {
+        toggleNotebooksSelectedToMoveMode();
+        selectNotebookMove(notebookId);
+      } else if (isToFilter) {
+        toggleNotebooksSelectedToFilterMode();
+        selectNotebookFilter(notebookId);
+      }
     }
   };
 
@@ -117,6 +144,7 @@ const SelectedIndicatorToMove = ({
       onPress={handlePress}
       onLongPress={handleLongPress}
       style={styles.selectIndicatorContainer}
+      disabled={disabled}
     >
       <View style={[styles.nameContainer, { bottom: 22 }]}>
         <Text
@@ -147,9 +175,11 @@ const NotebookCard = React.memo(
     onPress,
     isLoading = false,
     isToMove = false,
+    isToFilter = false,
     disabled = false,
     mini = false,
     showName = true,
+    defaultSelected = false,
   }: NoteBookCardProps) => {
     const isBackgroundAColor =
       typeof notebook.background === "string" &&
@@ -175,17 +205,22 @@ const NotebookCard = React.memo(
           styles.container,
           isAdding && { minWidth: !mini && width > 400 ? 120 : 104 },
           { height: !mini && width > 400 ? 180 : 156 },
+          { opacity: defaultSelected ? 0.5 : 1 },
         ]}
         customBackgroundColor="transparent"
       >
         {showName && (
           <>
-            {isToMove ? (
+            {isToMove || isToFilter ? (
               <SelectedIndicatorToMove
                 notebookId={notebook.id!}
                 name={notebook.name}
                 numberOfLinesName={numberOfLinesName}
                 isLoading={isLoading}
+                isToMove={isToMove}
+                isToFilter={isToFilter}
+                defaultSelected={defaultSelected}
+                disabled={disabled}
               />
             ) : (
               <SelectedIndicator
@@ -224,7 +259,9 @@ const NotebookCard = React.memo(
       prevProps.notebook.id === nextProps.notebook.id &&
       prevProps.notebook.name === nextProps.notebook.name &&
       prevProps.notebook.background === nextProps.notebook.background &&
-      prevProps.isLoading === nextProps.isLoading
+      prevProps.isLoading === nextProps.isLoading &&
+      prevProps.defaultSelected === nextProps.defaultSelected &&
+      prevProps.disabled === nextProps.disabled
     );
   }
 );

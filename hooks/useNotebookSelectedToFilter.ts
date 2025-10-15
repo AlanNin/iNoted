@@ -1,11 +1,11 @@
 import { create } from "zustand";
 
-type NotebooksSelectedToMoveModeState = {
-  isNotebooksSelectedToMoveMode: boolean;
+type NotebooksSelectedToFilterModeState = {
+  isNotebooksSelectedToFilterMode: boolean;
   selectedNotebook: number | null;
-  toggleNotebooksSelectedToMoveMode: () => void;
-  setNotebooksSelectedToMoveMode: (
-    isNotebooksSelectedToMoveMode: boolean
+  toggleNotebooksSelectedToFilterMode: () => void;
+  setNotebooksSelectedToFilterMode: (
+    isNotebooksSelectedToFilterMode: boolean
   ) => void;
   selectNotebook: (noteId: number) => void;
   clearSelectedNotebook: () => void;
@@ -13,19 +13,19 @@ type NotebooksSelectedToMoveModeState = {
   setUncategorizedSelected: (isUncategorizedSelected: boolean) => void;
 };
 
-export const useNotebooksSelectedToMoveMode =
-  create<NotebooksSelectedToMoveModeState>((set) => ({
-    isNotebooksSelectedToMoveMode: false,
+export const useNotebooksSelectedToFilterMode =
+  create<NotebooksSelectedToFilterModeState>((set) => ({
+    isNotebooksSelectedToFilterMode: false,
     selectedNotebook: null,
     uncategorizedSelected: false,
-    toggleNotebooksSelectedToMoveMode: () =>
+    toggleNotebooksSelectedToFilterMode: () =>
       set((state) => ({
-        isNotebooksSelectedToMoveMode: !state.isNotebooksSelectedToMoveMode,
+        isNotebooksSelectedToFilterMode: !state.isNotebooksSelectedToFilterMode,
         selectedNotebook: null,
         uncategorizedSelected: false,
       })),
-    setNotebooksSelectedToMoveMode: (isNotebooksSelectedToMoveMode) =>
-      set({ isNotebooksSelectedToMoveMode }),
+    setNotebooksSelectedToFilterMode: (isNotebooksSelectedToFilterMode) =>
+      set({ isNotebooksSelectedToFilterMode }),
     selectNotebook: (noteId) =>
       set((state) => {
         if (state.uncategorizedSelected) {
@@ -35,7 +35,8 @@ export const useNotebooksSelectedToMoveMode =
           selectedNotebook: state.selectedNotebook === noteId ? null : noteId,
         };
       }),
-    clearSelectedNotebook: () => set({ selectedNotebook: null }),
+    clearSelectedNotebook: () =>
+      set({ selectedNotebook: null, uncategorizedSelected: false }),
     setUncategorizedSelected: (isUncategorizedSelected) =>
       set((state) => {
         if (isUncategorizedSelected) {

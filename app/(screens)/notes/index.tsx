@@ -10,7 +10,11 @@ import {
 } from "@/components/themed";
 import colors from "@/constants/colors";
 import { router, useNavigation } from "expo-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { createNote, deleteNotes, getAllNotesCustom } from "@/queries/notes";
 import NoteCard from "@/components/note_card";
 import Loader from "@/components/loading";
@@ -66,7 +70,8 @@ export default function NotesScreen() {
     true
   );
 
-  const { selectedNotebookToShow } = useNotebooksNotes();
+  const { selectedNotebookToShow, uncategorizedToShowSelected } =
+    useNotebooksNotes();
 
   const openMenu = () => {
     setNotesEditMode(false);
@@ -78,17 +83,22 @@ export default function NotesScreen() {
     isLoading: isLoadingNotesData,
     refetch: refetchNotes,
   } = useQuery({
-    queryKey: ["notes"],
-    queryFn: () => getAllNotesCustom(selectedNotebookToShow?.id),
+    queryKey: [
+      "notes",
+      selectedNotebookToShow?.id,
+      uncategorizedToShowSelected,
+    ],
+    queryFn: () =>
+      getAllNotesCustom(
+        selectedNotebookToShow?.id,
+        uncategorizedToShowSelected
+      ),
+    placeholderData: keepPreviousData,
   });
 
   async function refetchCalendar() {
     await queryClient.refetchQueries({ queryKey: ["notes_calendar"] });
   }
-
-  React.useEffect(() => {
-    refetchNotes();
-  }, [selectedNotebookToShow]);
 
   const sortedNotes = React.useMemo(() => {
     if (!notesData) return [];
@@ -281,6 +291,8 @@ export default function NotesScreen() {
               >
                 {selectedNotebookToShow
                   ? selectedNotebookToShow?.name
+                  : uncategorizedToShowSelected
+                  ? "Uncategorized"
                   : "All Notes"}{" "}
                 ({isLoadingNotesData ? "..." : notesData?.length})
               </Text>
