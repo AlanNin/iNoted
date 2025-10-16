@@ -34,8 +34,5 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-# native files
-/ios
-
 # keys
 inoted-google-key.json
