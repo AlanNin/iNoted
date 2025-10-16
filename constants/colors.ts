@@ -1,3 +1,5 @@
+import { Colors } from "@/types/colors";
+
 const colors: Colors = {
   light: {
     text: "#000",

@@ -2,6 +2,7 @@ import { db_client } from "@/db/client";
 import { notebooks, notes } from "@/db/schema";
 import { eq, inArray, isNull } from "drizzle-orm";
 import { updateNotebookUpdatedAt } from "./notebooks";
+import { NewNoteProps } from "@/types/notes";
 
 export async function createNote(note: NewNoteProps) {
   try {

@@ -1,4 +1,6 @@
-type NoteCardProps = {
+import { NoteProps } from "./notes";
+
+export type NoteCardProps = {
   note: NoteProps;
   viewMode: "grid" | "list";
   onPress?: () => void;

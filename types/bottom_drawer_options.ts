@@ -4,7 +4,7 @@ type BottomDrawerOptionProps = {
   icon?: string;
 };
 
-type BottomDrawerOptionsProps = {
+export type BottomDrawerOptionsProps = {
   title: string;
   description?: string;
   options: BottomDrawerOptionProps[];

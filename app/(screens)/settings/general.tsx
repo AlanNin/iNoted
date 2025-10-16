@@ -1,11 +1,6 @@
 import { StyleSheet } from "react-native";
 import React from "react";
-import {
-  SafeAreaView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "@/components/themed";
+import { Text, TouchableOpacity, View } from "@/components/themed";
 import { router } from "expo-router";
 import Icon from "@/components/icon";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
@@ -56,7 +51,7 @@ const AppearanceScreen = () => {
 
   return (
     <>
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.wrapper}>
           <View style={styles.header}>
             <View style={styles.headerButton}>
@@ -115,7 +110,7 @@ const AppearanceScreen = () => {
             </View>
           </View>
         </View>
-      </SafeAreaView>
+      </View>
       <BottomDrawerOptions
         ref={startScreenBottomDrawerRef}
         title="Choose Your Start Screen"

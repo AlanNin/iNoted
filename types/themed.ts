@@ -1,7 +1,6 @@
 import {
   Text as DefaultText,
   View as DefaultView,
-  SafeAreaView as DefaultSafeAreaView,
   TouchableOpacity as DefaultTouchableOpacity,
   TextInput as DefaultTextInput,
 } from "react-native";
@@ -21,7 +20,6 @@ type ThemedInputProps = ThemedTextProps & {
 };
 
 export type ViewProps = ThemedProps & DefaultView["props"];
-export type SafeAreaViewProps = ThemedProps & DefaultSafeAreaView["props"];
 export type TextProps = ThemedTextProps & DefaultText["props"];
 export type TouchableOpacityProps = ThemedProps &
   React.ComponentProps<typeof DefaultTouchableOpacity>;

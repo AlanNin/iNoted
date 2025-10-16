@@ -1,7 +1,6 @@
 import LexicalEditorComponent from "@/components/lexical";
-import { SafeAreaView, View } from "@/components/themed";
 import { toast } from "@backpackapp-io/react-native-toast";
-import { router, useLocalSearchParams, usePathname } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
 import {
   AppState,
@@ -24,6 +23,7 @@ import { convertToJson, parseEditorState } from "@/lib/text_editor";
 import { getNavigationBarType } from "react-native-navigation-bar-detector";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { ToastAndroid } from "react-native";
+import { View } from "@/components/themed";
 
 export default function NoteScreen() {
   const theme = useColorScheme();
@@ -86,11 +86,12 @@ export default function NoteScreen() {
       return false;
     };
 
-    BackHandler.addEventListener("hardwareBackPress", backHandler);
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backHandler
+    );
 
-    return () => {
-      BackHandler.removeEventListener("hardwareBackPress", backHandler);
-    };
+    return () => subscription.remove();
   }, [title, content, isShowMoreModalOpen]);
 
   // save note on app state change
@@ -217,7 +218,7 @@ export default function NoteScreen() {
 
   return (
     <>
-      <SafeAreaView
+      <View
         style={styles.container}
         customBackgroundColor={colors[theme].background}
         key={stableKey}
@@ -252,7 +253,7 @@ export default function NoteScreen() {
             theme={theme}
           />
         </KeyboardAwareScrollView>
-      </SafeAreaView>
+      </View>
 
       <BottomDrawerConfirm
         ref={bottomDeleteNoteDrawerRef}

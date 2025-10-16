@@ -15,6 +15,8 @@ import { FlashList } from "@shopify/flash-list";
 import { useNotebooksSelectedToMoveMode } from "@/hooks/useNotebookSelectedToMove";
 import Icon from "../icon";
 import Loader from "../loading";
+import { NotebookProps } from "@/types/notebooks";
+import { BottomDrawerMoveNoteProps } from "@/types/bottom_drawer_move_note";
 
 const BottomDrawerMoveNote = React.forwardRef<
   BottomSheetModal,
@@ -165,7 +167,6 @@ const BottomDrawerMoveNote = React.forwardRef<
                     data={notebooks}
                     renderItem={renderNotebooks}
                     numColumns={3}
-                    estimatedItemSize={width > 400 ? 180 : 156}
                     ListFooterComponent={
                       <TouchableOpacity
                         style={[

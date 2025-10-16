@@ -2,7 +2,6 @@ import { StyleSheet, BackHandler } from "react-native";
 import React from "react";
 import {
   MotiView,
-  SafeAreaView,
   Text,
   TextInput,
   TouchableOpacity,
@@ -30,6 +29,7 @@ import BottomDrawerCreateNotebook from "@/components/drawers/bottom_drawer_creat
 import NotebookCard from "@/components/notebook_card";
 import { useConfig } from "@/providers/config";
 import { sortTypes } from "@/types/bottom_drawer_sort";
+import { NewNotebookProps, NotebookProps } from "@/types/notebooks";
 
 export default function NotebooksScreen() {
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -176,7 +176,7 @@ export default function NotebooksScreen() {
 
   return (
     <>
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.header}>
           <View
             style={styles.searchContainer}
@@ -272,7 +272,6 @@ export default function NotebooksScreen() {
                   renderItem={renderItem}
                   numColumns={3}
                   removeClippedSubviews={true}
-                  estimatedItemSize={212}
                 />
               ) : (
                 <View style={styles.noNotebooksContainer}>
@@ -365,7 +364,7 @@ export default function NotebooksScreen() {
             </TouchableOpacity>
           </MotiView>
         )}
-      </SafeAreaView>
+      </View>
 
       <BottomDrawerSort
         ref={sortBottomDrawerRef}
@@ -422,7 +421,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
-    lineHeight: 28,
+    height: 48,
   },
 
   settingsButton: {

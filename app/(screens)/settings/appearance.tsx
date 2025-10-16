@@ -1,11 +1,6 @@
 import { StyleSheet } from "react-native";
 import React from "react";
-import {
-  SafeAreaView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "@/components/themed";
+import { Text, TouchableOpacity, View } from "@/components/themed";
 import { router } from "expo-router";
 import Icon from "@/components/icon";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
@@ -19,16 +14,15 @@ import { sortTypes } from "@/types/bottom_drawer_sort";
 
 const themeOptions = ["system", "light", "dark"] as const;
 
-export type ThemeProps = typeof themeOptions[number];
+export type ThemeProps = (typeof themeOptions)[number];
 
 const AppearanceScreen = () => {
   const theme = useColorScheme();
 
   // Theme
   const [appTheme, saveAppTheme] = useConfig<ThemeProps>("appTheme", "system");
-  const [selectedTheme, setSelectedTheme] = React.useState<ThemeProps>(
-    appTheme
-  );
+  const [selectedTheme, setSelectedTheme] =
+    React.useState<ThemeProps>(appTheme);
 
   React.useEffect(() => {
     setSelectedTheme(appTheme);
@@ -60,7 +54,7 @@ const AppearanceScreen = () => {
   };
 
   const [notesSortBy, saveNotesSortBy] = useConfig<{
-    key: typeof sortTypes[number];
+    key: (typeof sortTypes)[number];
     order: "asc" | "desc";
   }>("notesSortBy", { key: sortTypes[0], order: "desc" });
 
@@ -76,7 +70,7 @@ const AppearanceScreen = () => {
   };
 
   const [notebooksSortBy, saveNotebooksSortBy] = useConfig<{
-    key: typeof sortTypes[number];
+    key: (typeof sortTypes)[number];
     order: "asc" | "desc";
   }>("notebooksSortBy", { key: sortTypes[0], order: "desc" });
 
@@ -102,7 +96,7 @@ const AppearanceScreen = () => {
 
   return (
     <>
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.wrapper}>
           <View style={styles.header}>
             <View style={styles.headerButton}>
@@ -192,7 +186,7 @@ const AppearanceScreen = () => {
             </View>
           </View>
         </View>
-      </SafeAreaView>
+      </View>
       <BottomDrawerTheme
         ref={bottomThemeDrawerRef}
         title="Select Theme"

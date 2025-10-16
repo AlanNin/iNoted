@@ -1,10 +1,10 @@
-type NewNoteProps = {
+export type NewNoteProps = {
   title: string;
   content: string;
   notebook_id?: number | null;
 };
 
-type NoteProps = {
+export type NoteProps = {
   id: number;
   title: string;
   content: string;

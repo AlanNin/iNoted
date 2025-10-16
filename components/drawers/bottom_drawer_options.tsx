@@ -9,6 +9,7 @@ import { BackHandler, StyleSheet } from "react-native";
 import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
 import Icon from "../icon";
+import { BottomDrawerOptionsProps } from "@/types/bottom_drawer_options";
 
 const BottomDrawerOptions = React.forwardRef<
   BottomSheetModal,
@@ -19,9 +20,8 @@ const BottomDrawerOptions = React.forwardRef<
     ref
   ) => {
     const theme = useColorScheme();
-    const [temporalSelection, setTemporalSelection] = React.useState<string>(
-      selectedOption
-    );
+    const [temporalSelection, setTemporalSelection] =
+      React.useState<string>(selectedOption);
     const isApplyDisabled = temporalSelection === selectedOption;
 
     const closeDrawer = () => {

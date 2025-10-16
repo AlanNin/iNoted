@@ -1,10 +1,12 @@
-type BottomDrawerCreateNotebookProps = {
+import { NewNotebookProps } from "./notebooks";
+
+export type BottomDrawerCreateNotebookProps = {
   title: string;
   description?: string;
   onSubmit: (notebook: NewNotebookProps) => void;
 };
 
-type BottomDrawerNotebookProps = {
+export type BottomDrawerNotebookProps = {
   notebookId?: number;
   onSubmit: (notebook: NewNotebookProps) => void;
 };

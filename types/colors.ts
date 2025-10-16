@@ -43,7 +43,7 @@ type ColorScheme = {
   notebook_indicator: string;
 };
 
-type Colors = {
+export type Colors = {
   light: ColorScheme;
   dark: ColorScheme;
 };

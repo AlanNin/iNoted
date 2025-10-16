@@ -30,6 +30,7 @@ import EditablePlugin from "@/components/lexical/plugins/editablePlugin";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 import { AutoLinkPlugin } from "@lexical/react/LexicalAutoLinkPlugin";
 import { LinkNode, AutoLinkNode } from "@lexical/link";
+import { LexicalProps } from "@/types/lexical";
 
 const placeholder = "Capture your thoughts...";
 

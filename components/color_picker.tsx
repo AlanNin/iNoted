@@ -45,7 +45,7 @@ export default function ColorPickerComponent({
             <ColorPicker
               style={{ width: "100%", borderRadius: 12 }}
               value="white"
-              onComplete={({ hex }: { hex: string }) => setColor(hex)}
+              onCompleteJS={({ hex }: { hex: string }) => setColor(hex)}
               thumbSize={32}
             >
               <Panel1 style={styles.panel} />

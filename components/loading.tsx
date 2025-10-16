@@ -4,6 +4,7 @@ import useColorScheme from "@/hooks/useColorScheme";
 import { MotiView } from "moti";
 import colors from "@/constants/colors";
 import { Easing } from "react-native-reanimated";
+import { LoaderProps } from "@/types/loader";
 
 export default function Loader({
   size = 32,

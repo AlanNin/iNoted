@@ -649,6 +649,7 @@ export default function ToolbarPlugin({
         style={{
           flexDirection: "row",
           alignItems: "center",
+          // @ts-ignore
           overflowX: "scroll",
           width: "100%",
           backgroundColor: colors[theme].editor.toolbar_background,
@@ -807,6 +808,7 @@ export default function ToolbarPlugin({
         style={{
           flexDirection: "row",
           alignItems: "center",
+          // @ts-ignore
           overflowX: "scroll",
           width: "100%",
           backgroundColor: colors[theme].editor.toolbar_background,
@@ -891,6 +893,7 @@ export default function ToolbarPlugin({
         style={{
           flexDirection: "row",
           alignItems: "center",
+          // @ts-ignore
           overflowX: "scroll",
           width: "100%",
           backgroundColor: colors[theme].editor.toolbar_background,

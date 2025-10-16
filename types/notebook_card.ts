@@ -1,4 +1,6 @@
-type NoteBookCardProps = {
+import { NotebookProps } from "./notebooks";
+
+export type NoteBookCardProps = {
   index?: number;
   isAdding?: boolean;
   numberOfLinesName?: number;

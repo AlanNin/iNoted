@@ -1,11 +1,6 @@
 import React from "react";
 import { BackHandler, StyleSheet } from "react-native";
-import {
-  SafeAreaView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "@/components/themed";
+import { Text, TouchableOpacity, View } from "@/components/themed";
 import Icon from "@/components/icon";
 import { useNavigation } from "expo-router";
 import { DrawerActions } from "@react-navigation/native";
@@ -20,6 +15,7 @@ import Loader from "@/components/loading";
 import { Calendar } from "react-native-calendars";
 import { ScrollView } from "moti";
 import { useConfig } from "@/providers/config";
+import { NoteProps } from "@/types/notes";
 
 const MemoizedNoteCard = React.memo(NoteCard);
 const EmptyNotesView = React.memo(({ message }: { message: string }) => (
@@ -126,7 +122,7 @@ export default function CalendarScreen() {
 
   return (
     <>
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.wrapper}>
           <View
             style={[
@@ -194,7 +190,6 @@ export default function CalendarScreen() {
                         renderItem={renderNote}
                         numColumns={notesViewMode === "grid" ? 3 : 1}
                         removeClippedSubviews={true}
-                        estimatedItemSize={notesViewMode === "grid" ? 212 : 140}
                         key={notesViewMode}
                       />
                     )}
@@ -204,7 +199,7 @@ export default function CalendarScreen() {
             </View>
           </ScrollView>
         </View>
-      </SafeAreaView>
+      </View>
     </>
   );
 }
@@ -237,7 +232,6 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     padding: 16,
     paddingVertical: 28,
-    overflowY: "scroll",
     gap: 28,
   },
   calendar: {

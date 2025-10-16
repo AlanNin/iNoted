@@ -1,4 +1,4 @@
-type LexicalProps = {
+export type LexicalProps = {
   handleBack: () => void;
   isKeyboardVisible: boolean;
   isShowMoreModalOpen: boolean;

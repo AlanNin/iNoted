@@ -1,11 +1,6 @@
 import { Linking, StyleSheet } from "react-native";
 import React from "react";
-import {
-  SafeAreaView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "@/components/themed";
+import { Text, TouchableOpacity, View } from "@/components/themed";
 import { router } from "expo-router";
 import Icon from "@/components/icon";
 import colors from "@/constants/colors";
@@ -34,7 +29,7 @@ const AboutScreen = () => {
   const image = theme === "light" ? "app_long" : "dark_app_long";
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.wrapper}>
         <View style={styles.header}>
           <View style={styles.headerButton}>
@@ -77,7 +72,7 @@ const AboutScreen = () => {
           </Text>
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 

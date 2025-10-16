@@ -1,5 +1,4 @@
 import React from "react";
-
 import { Text, TouchableOpacity, View } from "./themed";
 import { StyleSheet } from "react-native";
 import { Switch } from "react-native-gesture-handler";

@@ -1,11 +1,6 @@
 import { StyleSheet } from "react-native";
 import React from "react";
-import {
-  SafeAreaView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "@/components/themed";
+import { Text, TouchableOpacity, View } from "@/components/themed";
 import { router } from "expo-router";
 import Icon from "@/components/icon";
 import * as DocumentPicker from "expo-document-picker";
@@ -14,7 +9,7 @@ import { expo_db } from "@/db/client";
 import { reloadAppAsync } from "expo";
 import BottomDrawerConfirm from "@/components/drawers/bottom_drawer_confirm";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import useColorScheme from "@/hooks/useColorScheme";
 import colors from "@/constants/colors";
 
@@ -75,13 +70,11 @@ const StorageScreen = () => {
   const storageBackupItems = [
     {
       title: "Create Backup",
-      icon: "Backup",
       description: "Save your data to ensure it's safe and easily recoverable.",
       onPress: handleCreateBackup,
     },
     {
       title: "Restore Backup",
-      icon: "Restore",
       description:
         "Recover your saved data from a previous backup to restore your settings and files.",
       onPress: handleRestoreBackupConfirmation,
@@ -95,9 +88,7 @@ const StorageScreen = () => {
 
       for (const item of items) {
         const itemPath = `${dirPath}${item}`;
-        const itemInfo = await FileSystem.getInfoAsync(itemPath, {
-          size: true,
-        });
+        const itemInfo = await FileSystem.getInfoAsync(itemPath);
 
         if (itemInfo.exists) {
           if (itemInfo.isDirectory) {
@@ -129,8 +120,7 @@ const StorageScreen = () => {
 
         if (FileSystem.cacheDirectory) {
           const cacheDirInfo = await FileSystem.getInfoAsync(
-            FileSystem.cacheDirectory,
-            { size: true }
+            FileSystem.cacheDirectory
           );
           if (cacheDirInfo.exists && cacheDirInfo.size) {
             totalSize += cacheDirInfo.size;
@@ -183,7 +173,7 @@ const StorageScreen = () => {
 
   return (
     <>
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.wrapper}>
           <View style={styles.header}>
             <View style={styles.headerButton}>
@@ -207,8 +197,6 @@ const StorageScreen = () => {
                   style={styles.itemsButton}
                   onPress={item.onPress}
                 >
-                  {item.icon && <Icon name={item.icon} size={24} />}
-
                   <View style={styles.itemButtonDetails}>
                     <Text>{item.title}</Text>
                     {item.description && (
@@ -297,7 +285,7 @@ const StorageScreen = () => {
             </View>
           </View>
         </View>
-      </SafeAreaView>
+      </View>
       <BottomDrawerConfirm
         ref={bottomConfirmRestoreDrawerRef}
         title="Restore data from backup"

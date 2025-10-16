@@ -11,13 +11,12 @@ import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
 import NotebookCard from "../notebook_card";
 import Icon from "../icon";
-import { LinearGradient } from "expo-linear-gradient";
 import ColorPickerComponent from "../color_picker";
 import { pickImage } from "@/lib/pick_image";
 import { useQuery } from "@tanstack/react-query";
 import { getNotebookById } from "@/queries/notebooks";
-
 import { Image } from "expo-image";
+import { BottomDrawerNotebookProps } from "@/types/bottom_drawer_notebook";
 
 const colorsOptions = ["#FF5781", "#E76F51", "#00838F"];
 

@@ -11,6 +11,7 @@ import useColorScheme from "@/hooks/useColorScheme";
 import { formatLongDate } from "@/lib/format_date";
 import { getNotebookById } from "@/queries/notebooks";
 import { useQuery } from "@tanstack/react-query";
+import { BottomDrawerNoteDetailsProps } from "@/types/bottom_drawer_note_details";
 
 const BottomDrawerNoteDetails = React.forwardRef<
   BottomSheetModal,

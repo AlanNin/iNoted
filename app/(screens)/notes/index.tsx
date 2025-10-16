@@ -2,7 +2,6 @@ import { StyleSheet, BackHandler } from "react-native";
 import React from "react";
 import {
   MotiView,
-  SafeAreaView,
   Text,
   TextInput,
   TouchableOpacity,
@@ -33,6 +32,7 @@ import BottomDrawerSelectNotebook from "@/components/drawers/bottom_drawer_selec
 import { useNotebooksNotes } from "@/hooks/useNotebookNotes";
 import { useConfig } from "@/providers/config";
 import { sortTypes } from "@/types/bottom_drawer_sort";
+import { NoteProps } from "@/types/notes";
 
 export default function NotesScreen() {
   const queryClient = useQueryClient();
@@ -231,7 +231,7 @@ export default function NotesScreen() {
 
   return (
     <>
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.header}>
           <View
             style={styles.searchContainer}
@@ -362,7 +362,6 @@ export default function NotesScreen() {
                   renderItem={renderItem}
                   numColumns={notesViewMode === "grid" ? 3 : 1}
                   removeClippedSubviews={true}
-                  estimatedItemSize={notesViewMode === "grid" ? 212 : 140}
                 />
               ) : (
                 <View style={styles.noNotesContainer}>
@@ -474,7 +473,7 @@ export default function NotesScreen() {
             </TouchableOpacity>
           </MotiView>
         )}
-      </SafeAreaView>
+      </View>
       <BottomDrawerSort
         ref={sortBottomDrawerRef}
         title="Sort Your Notes"
@@ -529,7 +528,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
-    lineHeight: 28,
+    height: 48,
   },
 
   settingsButton: {

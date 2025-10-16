@@ -38,29 +38,35 @@ const Icon = ({
 }: IconProps) => {
   const theme = useColorScheme();
 
-  const LucideIcon = (icons as Record<
-    string,
-    React.ComponentType<{
-      color: string;
-      size: number;
-      strokeWidth: number;
-      style?: ViewStyle;
-      backgroundColor?: string;
-    }>
-  >)[name];
+  const LucideIcon = (
+    icons as Record<
+      string,
+      React.ComponentType<{
+        color: string;
+        size: number;
+        strokeWidth: number;
+        style?: ViewStyle;
+        backgroundColor?: string;
+      }>
+    >
+  )[name];
 
   const iconColorType = getIconColorType(themed, muted, grayscale);
-
   const iconColor = customColor || getColor(theme, iconColorType);
 
-  return LucideIcon ? (
+  if (!LucideIcon) {
+    console.warn(`Icon "${name}" not found in lucide-react-native`);
+    return null;
+  }
+
+  return (
     <LucideIcon
       color={iconColor}
       size={size}
       strokeWidth={strokeWidth}
       style={style}
     />
-  ) : null;
+  );
 };
 
 export default Icon;

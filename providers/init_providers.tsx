@@ -8,10 +8,16 @@ import {
 } from "@react-navigation/native";
 import { useNavigation } from "expo-router";
 import React from "react";
-import { Alert, BackHandler } from "react-native";
+import { BackHandler } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useConfig } from "./config";
 import ExitConfirmationAlert from "@/components/exit_confirmation";
+import {
+  setStatusBarStyle,
+  setStatusBarBackgroundColor,
+} from "expo-status-bar";
+import { AppState } from "react-native";
+import { AppStateStatus } from "react-native";
 
 export default function InitProviders({
   children,
@@ -45,10 +51,8 @@ export default function InitProviders({
     "isExitConfirmationEnabled",
     false
   );
-  const [
-    exitConfirmationModalVisible,
-    setExitConfirmationModalVisible,
-  ] = React.useState(false);
+  const [exitConfirmationModalVisible, setExitConfirmationModalVisible] =
+    React.useState(false);
 
   const handleCancelExitConfirmation = () => {
     setExitConfirmationModalVisible(false);
@@ -68,12 +72,37 @@ export default function InitProviders({
       return false;
     };
 
-    BackHandler.addEventListener("hardwareBackPress", handleBackPress);
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      handleBackPress
+    );
+
+    return () => subscription.remove();
+  }, [navigation, isExitConfirmationEnabled]);
+
+  React.useEffect(() => {
+    const changeStatusBarStyle = () => {
+      setStatusBarStyle(theme === "light" ? "dark" : "light");
+      setStatusBarBackgroundColor(colors[theme].background);
+    };
+
+    changeStatusBarStyle();
+
+    const handleAppStateChange = (nextAppState: AppStateStatus) => {
+      if (nextAppState === "active") {
+        changeStatusBarStyle();
+      }
+    };
+
+    const subscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange
+    );
 
     return () => {
-      BackHandler.removeEventListener("hardwareBackPress", handleBackPress);
+      subscription.remove();
     };
-  }, [navigation, isExitConfirmationEnabled]);
+  }, [theme]);
 
   return (
     <ThemeProvider

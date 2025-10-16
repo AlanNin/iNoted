@@ -3,7 +3,6 @@ import {
   View as DefaultView,
   TouchableOpacity as DefaultTouchableOpacity,
   TextInput as DefaultTextInput,
-  SafeAreaView as DefaultSafeAreaView,
 } from "react-native";
 import { MotiView as DefaultMotiView } from "moti";
 import useColorScheme from "@/hooks/useColorScheme";
@@ -14,7 +13,6 @@ import {
   TextProps,
   TouchableOpacityProps,
   ViewProps,
-  SafeAreaViewProps,
 } from "@/types/themed";
 
 type Theme = keyof typeof colors;
@@ -30,10 +28,11 @@ function hasTextProp(x: unknown): x is { text: string } {
 
 export function useThemeColor(
   props: { light?: string; dark?: string },
-  colorName: keyof typeof colors["light"] & keyof typeof colors["dark"]
+  colorName: keyof (typeof colors)["light"] & keyof (typeof colors)["dark"]
 ) {
   const theme = useColorScheme() as Theme;
-  const colorFromProps = props[theme];
+
+  const colorFromProps = props[theme as keyof typeof props];
 
   if (colorFromProps) {
     return colorFromProps;
@@ -87,18 +86,6 @@ export function View(props: ViewProps) {
   );
 
   return <DefaultView style={[{ backgroundColor }, style]} {...otherProps} />;
-}
-
-export function SafeAreaView(props: SafeAreaViewProps) {
-  const { style, customBackgroundColor, ...otherProps } = props;
-  const backgroundColor = useThemeColor(
-    { light: customBackgroundColor, dark: customBackgroundColor },
-    "background"
-  );
-
-  return (
-    <DefaultSafeAreaView style={[{ backgroundColor }, style]} {...otherProps} />
-  );
 }
 
 export function TouchableOpacity(props: TouchableOpacityProps) {

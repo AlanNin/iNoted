@@ -12,6 +12,7 @@ import React from "react";
 import { useNotesEditMode } from "@/hooks/useNotesEditMode";
 import { parseEditorState } from "@/lib/text_editor";
 import Icon from "./icon";
+import { NoteCardProps } from "@/types/note_card";
 
 const SelectedIndicator = ({
   noteId,

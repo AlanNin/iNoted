@@ -14,6 +14,7 @@ import Icon from "../icon";
 import ColorPickerComponent from "../color_picker";
 import { pickImage } from "@/lib/pick_image";
 import { Image } from "expo-image";
+import { BottomDrawerCreateNotebookProps } from "@/types/bottom_drawer_notebook";
 
 const colorsOptions = ["#FF5781", "#E76F51", "#00838F"];
 

@@ -7,6 +7,7 @@ import colors from "@/constants/colors";
 import { useNotebooksSelectedToMoveMode } from "@/hooks/useNotebookSelectedToMove";
 import { Image } from "expo-image";
 import { useNotebooksSelectedToFilterMode } from "@/hooks/useNotebookSelectedToFilter";
+import { NoteBookCardProps } from "@/types/notebook_card";
 
 const SelectedIndicator = ({
   notebookId,

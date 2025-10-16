@@ -1,10 +1,12 @@
-type NewNotebookProps = {
+import { NoteProps } from "./notes";
+
+export type NewNotebookProps = {
   id?: number | null;
   name: string;
   background: string;
 };
 
-type NotebookProps = {
+export type NotebookProps = {
   id?: number;
   name: string;
   background: string;

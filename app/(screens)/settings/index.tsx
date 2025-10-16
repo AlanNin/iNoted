@@ -1,11 +1,6 @@
 import { StyleSheet } from "react-native";
 import React from "react";
-import {
-  SafeAreaView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "@/components/themed";
+import { Text, TouchableOpacity, View } from "@/components/themed";
 import Icon from "@/components/icon";
 import { router } from "expo-router";
 
@@ -44,7 +39,7 @@ const settings = [
   },
   {
     title: "FAQ",
-    icon: "CircleHelp",
+    icon: "MessageCircleQuestionMark",
     description:
       "Get answers to common questions and learn how to use the app effectively.",
     route: "settings/faq",
@@ -54,7 +49,7 @@ const settings = [
 
 const SettingsScreen = () => {
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.wrapper}>
         <View style={styles.header}>
           <View style={styles.headerButton}>
@@ -94,7 +89,7 @@ const SettingsScreen = () => {
           ))}
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 

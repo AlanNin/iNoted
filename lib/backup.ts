@@ -4,7 +4,7 @@ import { drizzle } from "drizzle-orm/expo-sqlite";
 import { ExpoSQLiteDatabase } from "drizzle-orm/expo-sqlite/driver";
 import * as schemas from "@/db/schema";
 import { eq } from "drizzle-orm";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 
 interface BackupData {
   appConfig: Record<string, any>;
@@ -48,7 +48,8 @@ class AppBackupManager {
   async createBackup(): Promise<void> {
     try {
       // Request permissions
-      const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+      const permissions =
+        await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
 
       if (!permissions.granted) {
         throw new Error("Permission to access storage was denied");

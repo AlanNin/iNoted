@@ -1,11 +1,5 @@
 import Icon from "@/components/icon";
-import {
-  MotiView,
-  SafeAreaView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "@/components/themed";
+import { MotiView, Text, TouchableOpacity, View } from "@/components/themed";
 import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
 import {
@@ -19,10 +13,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { BackHandler, NativeScrollEvent, StyleSheet } from "react-native";
-import {
-  ScrollView,
-  TouchableWithoutFeedback,
-} from "react-native-gesture-handler";
+import { ScrollView, Pressable } from "react-native-gesture-handler";
 import { Image } from "expo-image";
 import NotebookCard from "@/components/notebook_card";
 import { formatMediumDate } from "@/lib/format_date";
@@ -39,6 +30,8 @@ import BottomDrawerMoveNote from "@/components/drawers/bottom_drawer_move_note";
 import { useConfig } from "@/providers/config";
 import { sortTypes } from "@/types/bottom_drawer_sort";
 import BottomDrawerSort from "@/components/drawers/bottom_drawer_sort";
+import { NewNotebookProps } from "@/types/notebooks";
+import { NoteProps } from "@/types/notes";
 
 const MemoizedNoteCard = React.memo(NoteCard);
 
@@ -59,7 +52,7 @@ export default function NotebookScreen() {
   );
   const [notesViewMode] = useConfig<"grid" | "list">("notesViewMode", "grid");
   const [notebooksNotesSortBy, saveNotebooksNotesSortBy] = useConfig<{
-    key: typeof sortTypes[number];
+    key: (typeof sortTypes)[number];
     order: "asc" | "desc";
   }>(`notebookNotesSortBy-${notebookId}`, {
     key: sortTypes[0],
@@ -150,7 +143,7 @@ export default function NotebookScreen() {
   }
 
   const renderItem = React.useCallback(
-    ({ item, index }: { item: NoteProps; index: number }) => (
+    ({ item }: { item: NoteProps; index: number }) => (
       <MemoizedNoteCard
         key={`${item.id}-${item.title}-${item.content}`}
         note={item}
@@ -276,7 +269,7 @@ export default function NotebookScreen() {
 
   return (
     <>
-      <SafeAreaView
+      <View
         style={[styles.container, { paddingBottom: isNotesEditMode ? 68 : 0 }]}
       >
         <ScrollView
@@ -288,7 +281,7 @@ export default function NotebookScreen() {
             minHeight: "100%",
           }}
         >
-          <TouchableWithoutFeedback onPressIn={() => setIsMoreModalOpen(false)}>
+          <Pressable onPressIn={() => setIsMoreModalOpen(false)}>
             <MotiView
               style={[styles.header, { borderColor: colors[theme].foggier }]}
               animate={{
@@ -322,7 +315,7 @@ export default function NotebookScreen() {
                 style={styles.moreContainer}
                 customBackgroundColor="transparent"
               >
-                <TouchableWithoutFeedback>
+                <Pressable>
                   <TouchableOpacity
                     style={styles.headerButton}
                     customBackgroundColor={
@@ -342,9 +335,9 @@ export default function NotebookScreen() {
                       }
                     />
                   </TouchableOpacity>
-                </TouchableWithoutFeedback>
+                </Pressable>
                 {isMoreModalOpen && (
-                  <TouchableWithoutFeedback>
+                  <Pressable>
                     <MotiView
                       style={styles.moreModal}
                       customBackgroundColor={colors[theme].grayscale_light}
@@ -427,12 +420,12 @@ export default function NotebookScreen() {
                         </Text>
                       </TouchableOpacity>
                     </MotiView>
-                  </TouchableWithoutFeedback>
+                  </Pressable>
                 )}
               </View>
             </MotiView>
-          </TouchableWithoutFeedback>
-          <TouchableWithoutFeedback
+          </Pressable>
+          <Pressable
             onPressIn={() => setIsMoreModalOpen(false)}
             style={{ backgroundColor: colors[theme].background }}
           >
@@ -473,8 +466,8 @@ export default function NotebookScreen() {
                 style={styles.gradientBottom}
               />
             </View>
-          </TouchableWithoutFeedback>
-          <TouchableWithoutFeedback onPressIn={() => setIsMoreModalOpen(false)}>
+          </Pressable>
+          <Pressable onPressIn={() => setIsMoreModalOpen(false)}>
             <View
               style={styles.photoAndTitleContainer}
               customBackgroundColor="transparent"
@@ -483,19 +476,23 @@ export default function NotebookScreen() {
                 customBackgroundColor="transparent"
                 style={{ marginBottom: -16, marginHorizontal: -8 }}
               >
-                <NotebookCard
-                  notebook={{
-                    name: notebookData?.name || "Untitled",
-                    background: isBackgroundAColor ? colorSource : imageSource,
-                  }}
-                  isAdding
-                  isLoading={isLoadingNotebookData}
-                  onPress={() => {}}
-                  disabled={true}
-                  numberOfLinesName={2}
-                  mini={true}
-                  showName={false}
-                />
+                <Pressable onPressIn={() => setIsMoreModalOpen(false)}>
+                  <NotebookCard
+                    notebook={{
+                      name: notebookData?.name || "Untitled",
+                      background: isBackgroundAColor
+                        ? colorSource
+                        : imageSource,
+                    }}
+                    isAdding
+                    isLoading={isLoadingNotebookData}
+                    onPress={() => {}}
+                    disabled={true}
+                    numberOfLinesName={2}
+                    mini={true}
+                    showName={false}
+                  />
+                </Pressable>
               </View>
               <View
                 style={styles.nameContainer}
@@ -509,9 +506,9 @@ export default function NotebookScreen() {
                 </Text>
               </View>
             </View>
-          </TouchableWithoutFeedback>
+          </Pressable>
 
-          <TouchableWithoutFeedback onPressIn={() => setIsMoreModalOpen(false)}>
+          <Pressable onPressIn={() => setIsMoreModalOpen(false)}>
             <View style={styles.detailsContainer}>
               <View style={styles.detail}>
                 <Icon
@@ -553,12 +550,10 @@ export default function NotebookScreen() {
                 </Text>
               </TouchableOpacity>
             </View>
-          </TouchableWithoutFeedback>
+          </Pressable>
 
           {notebookData && notebookData.notes.length > 0 ? (
-            <TouchableWithoutFeedback
-              onPressIn={() => setIsMoreModalOpen(false)}
-            >
+            <Pressable onPressIn={() => setIsMoreModalOpen(false)}>
               <Text style={styles.notesTxt} disabled>
                 Your notes
               </Text>
@@ -572,17 +567,16 @@ export default function NotebookScreen() {
                   renderItem={renderItem}
                   numColumns={notesViewMode === "grid" ? 3 : 1}
                   removeClippedSubviews={true}
-                  estimatedItemSize={notesViewMode === "grid" ? 212 : 140}
                   key={notesViewMode}
                 />
               </View>
-            </TouchableWithoutFeedback>
+            </Pressable>
           ) : (
             <View
               style={styles.noNotesContainer}
               onTouchStart={() => setIsMoreModalOpen(false)}
             >
-              <TouchableWithoutFeedback
+              <Pressable
                 onPressIn={() => setIsMoreModalOpen(false)}
                 style={styles.noNotesContainer}
               >
@@ -590,7 +584,7 @@ export default function NotebookScreen() {
                 <Text style={styles.noNotesText} disabled>
                   No notes found
                 </Text>
-              </TouchableWithoutFeedback>
+              </Pressable>
             </View>
           )}
         </ScrollView>
@@ -651,7 +645,7 @@ export default function NotebookScreen() {
             </TouchableOpacity>
           </MotiView>
         )}
-      </SafeAreaView>
+      </View>
       <BottomDrawerSort
         ref={bottomSortNotesDrawerRef}
         title="Sort Your Notes"

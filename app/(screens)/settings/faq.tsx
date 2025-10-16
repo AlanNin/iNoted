@@ -1,11 +1,6 @@
 import { StyleSheet } from "react-native";
 import React, { useState } from "react";
-import {
-  SafeAreaView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "@/components/themed";
+import { Text, TouchableOpacity, View } from "@/components/themed";
 import { router } from "expo-router";
 import Icon from "@/components/icon";
 import Collapsible from "react-native-collapsible";
@@ -97,7 +92,7 @@ const FAQScreen = () => {
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.wrapper}>
         <View style={styles.header}>
           <View style={styles.headerButton}>
@@ -131,7 +126,7 @@ const FAQScreen = () => {
           </View>
         </ScrollView>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 

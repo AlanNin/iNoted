@@ -5,7 +5,7 @@ import {
   BottomSheetModalProvider,
 } from "@gorhom/bottom-sheet";
 import { Text, TouchableOpacity, View } from "../themed";
-import { BackHandler, Dimensions, StyleSheet } from "react-native";
+import { BackHandler, StyleSheet } from "react-native";
 import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
 import NotebookCard from "../notebook_card";
@@ -16,6 +16,8 @@ import Icon from "../icon";
 import Loader from "../loading";
 import { useNotebooksNotes } from "@/hooks/useNotebookNotes";
 import { useNotebooksSelectedToFilterMode } from "@/hooks/useNotebookSelectedToFilter";
+import { NotebookProps } from "@/types/notebooks";
+import { BottomDrawerSelectNotebookProps } from "@/types/bottom_drawer_select_notebook";
 
 const BottomDrawerSelectNotebook = React.forwardRef<
   BottomSheetModal,
@@ -100,8 +102,6 @@ const BottomDrawerSelectNotebook = React.forwardRef<
 
     return () => backHandler.remove();
   }, [sheetStatus, setSheetStatus]);
-
-  const { width } = Dimensions.get("screen");
 
   const renderNotebooks = ({
     item,
@@ -202,7 +202,6 @@ const BottomDrawerSelectNotebook = React.forwardRef<
                     data={notebooks}
                     renderItem={renderNotebooks}
                     numColumns={3}
-                    estimatedItemSize={width > 400 ? 180 : 156}
                     ListFooterComponent={
                       <TouchableOpacity
                         style={[

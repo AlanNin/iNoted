@@ -1,5 +1,6 @@
 import { db_client } from "@/db/client";
 import { notebooks, notes } from "@/db/schema";
+import { NewNotebookProps } from "@/types/notebooks";
 import { eq, inArray } from "drizzle-orm";
 
 export async function createNotebook(notebook: NewNotebookProps) {
