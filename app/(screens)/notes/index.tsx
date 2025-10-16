@@ -237,13 +237,11 @@ export default function NotesScreen() {
             style={styles.searchContainer}
             customBackgroundColor={colors[theme].foggier}
           >
-            <TouchableOpacity onPress={openMenu}>
-              <Icon
-                name="Menu"
-                strokeWidth={1.8}
-                size={20}
-                style={{ marginTop: 1 }}
-              />
+            <TouchableOpacity
+              onPress={openMenu}
+              style={styles.headerActionButton}
+            >
+              <Icon name="Menu" strokeWidth={1.8} size={20} />
             </TouchableOpacity>
 
             <TextInput
@@ -257,25 +255,21 @@ export default function NotesScreen() {
               <TouchableOpacity
                 onPress={() => saveNotesViewMode("list")}
                 disabled={notesData?.length === 0}
+                style={styles.headerActionButton}
               >
                 <Icon
                   name="LayoutGrid"
                   muted={notesData?.length === 0}
                   size={20}
-                  style={{ marginTop: 1 }}
                 />
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
                 onPress={() => saveNotesViewMode("grid")}
                 disabled={notesData?.length === 0}
+                style={styles.headerActionButton}
               >
-                <Icon
-                  name="Rows2"
-                  muted={notesData?.length === 0}
-                  size={20}
-                  style={{ marginTop: 1 }}
-                />
+                <Icon name="Rows2" muted={notesData?.length === 0} size={20} />
               </TouchableOpacity>
             )}
           </View>
@@ -677,5 +671,12 @@ const styles = StyleSheet.create({
   },
   editMenuButtonText: {
     fontSize: 12,
+  },
+  headerActionButton: {
+    padding: 5,
+    margin: -5,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

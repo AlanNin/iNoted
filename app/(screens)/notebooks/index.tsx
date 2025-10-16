@@ -39,7 +39,7 @@ export default function NotebooksScreen() {
   const createNotebookBottomDrawerRef = React.useRef<BottomSheetModal>(null);
   const bottomDeleteMultipleDrawerRef = React.useRef<BottomSheetModal>(null);
   const [notebooksSortBy, saveNotebooksSortBy] = useConfig<{
-    key: typeof sortTypes[number];
+    key: (typeof sortTypes)[number];
     order: "asc" | "desc";
   }>("notebooksSortBy", { key: sortTypes[0], order: "desc" });
   const [isFirstNotebook, saveIsFirstNotebook] = useConfig<boolean>(
@@ -182,13 +182,11 @@ export default function NotebooksScreen() {
             style={styles.searchContainer}
             customBackgroundColor={colors[theme].foggier}
           >
-            <TouchableOpacity onPress={openMenu}>
-              <Icon
-                name="Menu"
-                strokeWidth={1.8}
-                size={20}
-                style={{ marginTop: 1 }}
-              />
+            <TouchableOpacity
+              onPress={openMenu}
+              style={styles.headerActionButton}
+            >
+              <Icon name="Menu" strokeWidth={1.8} size={20} />
             </TouchableOpacity>
 
             <TextInput
@@ -557,5 +555,12 @@ const styles = StyleSheet.create({
   },
   editMenuButtonText: {
     fontSize: 12,
+  },
+  headerActionButton: {
+    padding: 5,
+    margin: -5,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
