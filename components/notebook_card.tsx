@@ -8,6 +8,7 @@ import { useNotebooksSelectedToMoveMode } from "@/hooks/useNotebookSelectedToMov
 import { Image } from "expo-image";
 import { useNotebooksSelectedToFilterMode } from "@/hooks/useNotebookSelectedToFilter";
 import { NoteBookCardProps } from "@/types/notebook_card";
+import * as Haptics from "expo-haptics";
 
 const SelectedIndicator = ({
   notebookId,
@@ -137,6 +138,7 @@ const SelectedIndicatorToMove = ({
         toggleNotebooksSelectedToFilterMode();
         selectNotebookFilter(notebookId);
       }
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
   };
 

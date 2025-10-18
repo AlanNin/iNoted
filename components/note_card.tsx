@@ -13,6 +13,7 @@ import { useNotesEditMode } from "@/hooks/useNotesEditMode";
 import { parseEditorState } from "@/lib/text_editor";
 import Icon from "./icon";
 import { NoteCardProps } from "@/types/note_card";
+import * as Haptics from "expo-haptics";
 
 const SelectedIndicator = ({
   noteId,
@@ -52,6 +53,7 @@ const SelectedIndicator = ({
     if (!isSelected) {
       toggleNotesEditMode();
       selectNote(noteId);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
   }, [selectedNotes, toggleNotesEditMode, selectNote, noteId]);
 
