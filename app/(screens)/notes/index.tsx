@@ -222,7 +222,6 @@ export default function NotesScreen() {
 
   const renderItem = ({ item }: { item: NoteProps }) => (
     <NoteCard
-      key={`${item.id}-${item.title}-${item.content}`}
       note={item}
       viewMode={notesViewMode}
       showNotebookIndicator={isNotebookIndicatorNotesEnabled}
@@ -354,7 +353,9 @@ export default function NotesScreen() {
               {filteredNotes!.length > 0 ? (
                 <FlashList
                   showsVerticalScrollIndicator={false}
-                  key={notesViewMode}
+                  key={`${notesViewMode}-${
+                    selectedNotebookToShow?.id ?? "all"
+                  }-${uncategorizedToShowSelected ? "uncat" : "all"}`}
                   keyExtractor={(item, index) =>
                     item.id ? item.id?.toString() : `placeholder-${index}`
                   }
