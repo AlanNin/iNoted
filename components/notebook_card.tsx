@@ -50,6 +50,7 @@ const SelectedIndicator = ({
     if (!isSelected) {
       toggleNotebooksEditMode();
       selectNotebook(notebookId);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
   }, [selectedNotebooks, toggleNotebooksEditMode, selectNotebook, notebookId]);
 
