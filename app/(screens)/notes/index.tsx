@@ -114,6 +114,10 @@ export default function NotesScreen() {
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
           break;
         case sortTypes[1]:
+          compareResult =
+            new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+          break;
+        case sortTypes[2]:
           compareResult = a.title.localeCompare(b.title);
           break;
         default:
@@ -478,7 +482,7 @@ export default function NotesScreen() {
       <BottomDrawerSort
         ref={sortBottomDrawerRef}
         title="Sort Your Notes"
-        options={[sortTypes[0], sortTypes[1]]}
+        options={[sortTypes[0], sortTypes[1], sortTypes[2]]}
         selectedSort={notesSortBy}
         handleSortOrder={handleSaveNotesSortOrder}
       />

@@ -82,6 +82,10 @@ export default function NotebooksScreen() {
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
           break;
         case sortTypes[1]:
+          compareResult =
+            new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+          break;
+        case sortTypes[2]:
           compareResult = a.name.localeCompare(b.name);
           break;
         default:
@@ -369,7 +373,7 @@ export default function NotebooksScreen() {
       <BottomDrawerSort
         ref={sortBottomDrawerRef}
         title="Sort Your Notebooks"
-        options={[sortTypes[0], sortTypes[1]]}
+        options={[sortTypes[0], sortTypes[1], sortTypes[2]]}
         selectedSort={notebooksSortBy}
         handleSortOrder={handleSaveNotebooksSortOrder}
       />

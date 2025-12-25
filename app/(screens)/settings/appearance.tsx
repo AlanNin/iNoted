@@ -201,14 +201,14 @@ const AppearanceScreen = () => {
       <BottomDrawerSort
         ref={notesSortBottomDrawerRef}
         title="Sort Your Notes"
-        options={[sortTypes[0], sortTypes[1]]}
+        options={[sortTypes[0], sortTypes[1], sortTypes[2]]}
         selectedSort={notesSortBy}
         handleSortOrder={handleSaveNotesSortOrder}
       />
       <BottomDrawerSort
         ref={notebooksSortBottomDrawerRef}
         title="Sort Your Notebooks"
-        options={[sortTypes[0], sortTypes[1]]}
+        options={[sortTypes[0], sortTypes[1], sortTypes[2]]}
         selectedSort={notebooksSortBy}
         handleSortOrder={handleSaveNotebooksSortOrder}
       />

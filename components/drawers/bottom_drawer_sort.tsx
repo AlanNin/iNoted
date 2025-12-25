@@ -20,9 +20,8 @@ const BottomDrawerSort = React.forwardRef<
   Omit<BottomDrawerSortProps, "ref">
 >(({ title, description, options, selectedSort, handleSortOrder }, ref) => {
   const theme = useColorScheme();
-  const [temporalSelection, setTemporalSelection] = React.useState<
-    BottomDrawerSortOptionProps
-  >(selectedSort);
+  const [temporalSelection, setTemporalSelection] =
+    React.useState<BottomDrawerSortOptionProps>(selectedSort);
   const isApplyDisabled =
     temporalSelection.key === selectedSort.key &&
     selectedSort.order === temporalSelection.order;
@@ -41,7 +40,7 @@ const BottomDrawerSort = React.forwardRef<
     closeDrawer();
   };
 
-  const toggleSortOrder = (key: typeof sortTypes[number]) => {
+  const toggleSortOrder = (key: (typeof sortTypes)[number]) => {
     setTemporalSelection((prevState) => {
       return {
         key,

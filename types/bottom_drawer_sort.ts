@@ -1,4 +1,6 @@
-export const sortTypes = ["Recently added", "A-Z"] as const;
+export const sortTypes = ["Recently added", "Recently updated", "A-Z"] as const;
+
+export type SortType = (typeof sortTypes)[number];
 
 export type BottomDrawerSortOptionProps = {
   key: string;
@@ -8,7 +10,7 @@ export type BottomDrawerSortOptionProps = {
 export type BottomDrawerSortProps = {
   title: string;
   description?: string;
-  options: typeof sortTypes;
+  options: readonly SortType[];
   selectedSort: BottomDrawerSortOptionProps;
   handleSortOrder: (sort: BottomDrawerSortOptionProps) => void;
 };
