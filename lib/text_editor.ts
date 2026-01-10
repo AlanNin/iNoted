@@ -80,30 +80,30 @@ export function parseEditorState(content: any) {
   if (typeof content === "string") {
     try {
       data = JSON.parse(content);
-    } catch (error) {
+    } catch {
       return content;
     }
   }
 
-  let texts: any = [];
+  if (!data?.root?.children) return "";
 
-  function traverse(node: any) {
-    if (!node) return;
+  const lines: string[] = [];
 
-    if (node.type === "text" && node.text) {
-      texts.push(node.text);
-      return;
-    }
+  for (const node of data.root.children) {
+    if (node.type === "paragraph") {
+      if (!node.children || node.children.length === 0) {
+        lines.push("");
+        continue;
+      }
 
-    if (Array.isArray(node.children)) {
-      node.children.forEach(traverse);
-    }
+      const paragraphText = node.children
+        .filter((child: any) => child.type === "text")
+        .map((child: any) => child.text)
+        .join("");
 
-    if (node.root) {
-      traverse(node.root);
+      lines.push(paragraphText);
     }
   }
 
-  traverse(data);
-  return texts.join("\n");
+  return lines.join("\n");
 }

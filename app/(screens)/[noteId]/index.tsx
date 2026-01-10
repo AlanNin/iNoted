@@ -34,6 +34,8 @@ export default function NoteScreen() {
   const bottomMoveNoteDrawerRef = React.useRef<BottomSheetModal>(null);
   const bottomNoteDetailsDrawerRef = React.useRef<BottomSheetModal>(null);
   const bottomDeleteNoteDrawerRef = React.useRef<BottomSheetModal>(null);
+  const [isSearching, setIsSearching] = React.useState(false);
+
   const navigationType = getNavigationBarType();
 
   const { data: noteData, isLoading: isLoadingNoteData } = useQuery({
@@ -66,33 +68,31 @@ export default function NoteScreen() {
 
   // save note on back press
   React.useEffect(() => {
-    const backAction = async () => {
+    const backAction = () => {
       if (isShowMoreModalOpen) {
         setIsShowMoreModalOpen(false);
         return true;
       }
 
-      try {
-        await handleUpdateNote();
-        return true;
-      } catch (error) {
-        toast.error("Failed to save note. Please try again.");
+      if (isSearching) {
+        setIsSearching(false);
         return true;
       }
-    };
 
-    const backHandler = () => {
-      backAction();
+      handleUpdateNote().catch(() => {
+        toast.error("Failed to save note. Please try again.");
+      });
+
       return false;
     };
 
     const subscription = BackHandler.addEventListener(
       "hardwareBackPress",
-      backHandler
+      backAction
     );
 
     return () => subscription.remove();
-  }, [title, content, isShowMoreModalOpen]);
+  }, [title, content, isShowMoreModalOpen, isSearching]);
 
   // save note on app state change
   React.useEffect(() => {
@@ -188,15 +188,15 @@ export default function NoteScreen() {
     }
   }
 
-  const handleToggleBottomMoveNoteDrawer = () => {
+  const handleOpenBottomMoveNoteDrawer = () => {
     bottomMoveNoteDrawerRef.current?.present();
   };
 
-  const handleToggleBottomNoteDetailsDrawer = () => {
+  const handleOpenBottomNoteDetailsDrawer = () => {
     bottomNoteDetailsDrawerRef.current?.present();
   };
 
-  const handleToggleBottomNoteDeleteDrawer = () => {
+  const handleOpenBottomNoteDeleteDrawer = () => {
     bottomDeleteNoteDrawerRef.current?.present();
   };
 
@@ -235,14 +235,14 @@ export default function NoteScreen() {
             isKeyboardVisible={isKeyboardVisible}
             isShowMoreModalOpen={isShowMoreModalOpen}
             setIsShowMoreModalOpen={setIsShowMoreModalOpen}
+            isSearching={isSearching}
+            setIsSearching={setIsSearching}
             handleShare={handleShare}
-            handleToggleBottomMoveNoteDrawer={handleToggleBottomMoveNoteDrawer}
-            handleToggleBottomNoteDetailsDrawer={
-              handleToggleBottomNoteDetailsDrawer
+            handleOpenBottomMoveNoteDrawer={handleOpenBottomMoveNoteDrawer}
+            handleOpenBottomNoteDetailsDrawer={
+              handleOpenBottomNoteDetailsDrawer
             }
-            handleToggleBottomNoteDeleteDrawer={
-              handleToggleBottomNoteDeleteDrawer
-            }
+            handleOpenBottomNoteDeleteDrawer={handleOpenBottomNoteDeleteDrawer}
             setTitle={setTitle}
             setContent={setContent}
             title={initialTitle!}

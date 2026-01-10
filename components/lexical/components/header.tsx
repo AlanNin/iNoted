@@ -1,36 +1,55 @@
 // dom component, use inside existing dom component or specify "use dom" in the file
 import Icon from "@/components/icon";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import React from "react";
+import React, { useEffect } from "react";
 import colors from "@/constants/colors";
 import { MotiView } from "moti";
+import { Keyboard } from "react-native";
 
 export default function Header({
   isShowMoreModalOpen,
   setIsShowMoreModalOpen,
+  isSearching,
+  setIsSearching,
   handleBack,
   handleShare,
-  handleToggleBottomMoveNoteDrawer,
-  handleToggleBottomNoteDetailsDrawer,
-  handleToggleBottomNoteDeleteDrawer,
+  handleOpenBottomMoveNoteDrawer,
+  handleOpenBottomNoteDetailsDrawer,
+  handleOpenBottomNoteDeleteDrawer,
   handleToastAndroid,
   mode,
   SetMode,
   setIsTitleEditable,
   theme,
+  searchResultsNumber,
+  searchIndex,
+  searchTerm,
+  isSearchFocused,
+  setSearchIndex,
+  setSearchTerm,
+  setIsSearchFocused,
 }: {
   isShowMoreModalOpen: boolean;
   setIsShowMoreModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isSearching: boolean;
+  setIsSearching: React.Dispatch<React.SetStateAction<boolean>>;
   handleBack: () => void;
   handleShare: () => void;
-  handleToggleBottomMoveNoteDrawer: () => void;
-  handleToggleBottomNoteDetailsDrawer: () => void;
-  handleToggleBottomNoteDeleteDrawer: () => void;
+  handleOpenBottomMoveNoteDrawer: () => void;
+  handleOpenBottomNoteDetailsDrawer: () => void;
+  handleOpenBottomNoteDeleteDrawer: () => void;
   handleToastAndroid: (message: string) => void;
   mode: "edit" | "view";
   SetMode: (mode: "edit" | "view") => void;
   setIsTitleEditable: React.Dispatch<React.SetStateAction<boolean>>;
   theme: "light" | "dark";
+  searchResultsNumber: number;
+  searchIndex: number;
+  searchTerm: string | null;
+  isSearchFocused: boolean;
+  setSearchIndex: React.Dispatch<React.SetStateAction<number>>;
+  setSearchTerm: React.Dispatch<React.SetStateAction<string | null>>;
+  setIsSearchFocused: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [editor] = useLexicalComposerContext();
   const moreContainerRef = React.useRef<HTMLDivElement>(null);
@@ -78,97 +97,160 @@ export default function Header({
       onClick: handleShare,
     },
     {
+      name: mode === "edit" ? "Read Only" : "Enable Edit",
+      icon: "BookOpenText",
+      onClick:
+        mode === "edit" ? () => toggleMode("view") : () => toggleMode("edit"),
+    },
+    {
       name: "Move",
       icon: "BookCopy",
-      onClick: handleToggleBottomMoveNoteDrawer,
+      onClick: handleOpenBottomMoveNoteDrawer,
     },
     {
       name: "Details",
       icon: "Info",
-      onClick: handleToggleBottomNoteDetailsDrawer,
+      onClick: handleOpenBottomNoteDetailsDrawer,
     },
     {
       name: "Delete",
       icon: "Eraser",
       color: colors[theme].danger,
-      onClick: handleToggleBottomNoteDeleteDrawer,
+      onClick: handleOpenBottomNoteDeleteDrawer,
     },
   ];
 
+  function searchPreviousNote() {
+    setSearchIndex((prev) => Math.max(0, prev - 1));
+    Keyboard.dismiss();
+  }
+
+  function searchNextNote() {
+    setSearchIndex((prev) => Math.min(searchResultsNumber - 1, prev + 1));
+    Keyboard.dismiss();
+  }
+
+  useEffect(() => {
+    if (!isSearchFocused) {
+      setIsSearchFocused(false);
+    }
+  }, [setIsSearchFocused]);
+
   return (
     <header className="header">
-      <button onClick={() => handleBack()}>
-        <Icon name="ArrowLeft" customColor={colors[theme].tint} />
-      </button>
-      <div className="header-right">
-        {mode === "edit" && (
-          <button onClick={() => toggleMode("view")}>
-            <Icon name="BookOpenText" customColor={colors[theme].tint} />
+      {isSearching ? (
+        <>
+          <button onClick={() => setIsSearching(false)}>
+            <Icon name="ArrowLeft" customColor={colors[theme].tint} />
           </button>
-        )}
-        {mode === "view" && (
-          <button onClick={() => toggleMode("edit")}>
-            <Icon name="FilePen" customColor={colors[theme].tint} />
-          </button>
-        )}
-
-        <div className="more-container" ref={moreContainerRef}>
-          <button onClick={toggleMoreModal}>
-            <Icon name="EllipsisVertical" customColor={colors[theme].tint} />
-          </button>
-          {isShowMoreModalOpen && (
-            <MotiView
-              from={{ opacity: 0, translateY: -10 }}
-              animate={{ opacity: 1, translateY: 0 }}
-              transition={{
-                type: "timing",
-                duration: 150,
-              }}
-              style={{ zIndex: 10 }}
-            >
-              <div
-                className="more-modal"
-                style={{ backgroundColor: colors[theme].grayscale_light }}
-              >
-                {moreOptions.map((option, index) => (
-                  <React.Fragment key={option.name}>
-                    <button
-                      onClick={() => {
-                        setIsShowMoreModalOpen(false);
-                        option.onClick();
-                      }}
-                      className="more-modal-button"
-                    >
-                      <Icon
-                        name={option.icon}
-                        strokeWidth={1.2}
-                        size={18}
-                        customColor={option.color || colors[theme].tint}
-                      />
-                      <p style={{ color: option.color || colors[theme].text }}>
-                        {option.name}
-                      </p>
-                    </button>
-
-                    {index === 0 && (
-                      <div
-                        className="divider"
-                        style={{ backgroundColor: colors[theme].foggiest }}
-                      />
-                    )}
-                    {index === moreOptions.length - 2 && (
-                      <div
-                        className="divider"
-                        style={{ backgroundColor: colors[theme].foggiest }}
-                      />
-                    )}
-                  </React.Fragment>
-                ))}
-              </div>
-            </MotiView>
+          <input
+            className="header-search-input"
+            placeholder="Find in note..."
+            autoFocus={true}
+            onChange={(e) => {
+              if (searchIndex !== 0) {
+                setSearchIndex(0);
+              }
+              setSearchTerm(e.target.value);
+            }}
+            onFocus={() => {
+              setIsSearchFocused(true);
+              editor.setEditable(false);
+            }}
+            onBlur={() => {
+              setIsSearchFocused(false);
+              editor.setEditable(true);
+            }}
+          />
+          {searchTerm && searchTerm?.length > 0 && searchResultsNumber > 1 && (
+            <div className="header-search-right">
+              <button onClick={() => searchPreviousNote()}>
+                <Icon name="ChevronUp" customColor={colors[theme].tint} />
+              </button>
+              {searchIndex + 1} / {searchResultsNumber}
+              <button onClick={() => searchNextNote()}>
+                <Icon name="ChevronDown" customColor={colors[theme].tint} />
+              </button>
+            </div>
           )}
-        </div>
-      </div>
+        </>
+      ) : (
+        <>
+          <button onClick={() => handleBack()}>
+            <Icon name="ArrowLeft" customColor={colors[theme].tint} />
+          </button>
+          <div className="header-right">
+            <button onClick={() => setIsSearching(true)}>
+              <Icon name="ScanSearch" customColor={colors[theme].tint} />
+            </button>
+
+            <div className="more-container" ref={moreContainerRef}>
+              <button onClick={toggleMoreModal}>
+                <Icon
+                  name="EllipsisVertical"
+                  customColor={colors[theme].tint}
+                />
+              </button>
+              {isShowMoreModalOpen && (
+                <MotiView
+                  from={{ opacity: 0, translateY: -10 }}
+                  animate={{ opacity: 1, translateY: 0 }}
+                  transition={{
+                    type: "timing",
+                    duration: 150,
+                  }}
+                  style={{ zIndex: 10 }}
+                >
+                  <div
+                    className="more-modal"
+                    style={{ backgroundColor: colors[theme].grayscale_light }}
+                  >
+                    {moreOptions.map((option, index) => (
+                      <React.Fragment key={option.name}>
+                        <button
+                          onClick={() => {
+                            setIsShowMoreModalOpen(false);
+                            option.onClick();
+                          }}
+                          className="more-modal-button"
+                        >
+                          <Icon
+                            name={option.icon}
+                            strokeWidth={1.2}
+                            size={18}
+                            customColor={option.color || colors[theme].tint}
+                          />
+                          <p
+                            style={{
+                              color: option.color || colors[theme].text,
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {option.name}
+                          </p>
+                        </button>
+
+                        {index === 0 && (
+                          <div
+                            className="divider"
+                            style={{ backgroundColor: colors[theme].foggiest }}
+                          />
+                        )}
+                        {index === moreOptions.length - 2 && (
+                          <div
+                            className="divider"
+                            style={{ backgroundColor: colors[theme].foggiest }}
+                          />
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </div>
+                </MotiView>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </header>
   );
 }

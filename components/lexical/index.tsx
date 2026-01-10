@@ -18,7 +18,6 @@ import colors from "@/constants/colors";
 import React from "react";
 import Header from "./components/header";
 import ContentTop from "./components/contentTop";
-import TreeViewPlugin from "./plugins/treeViewPlugin";
 import { HashtagPlugin } from "@lexical/react/LexicalHashtagPlugin";
 import { HashtagNode } from "@lexical/hashtag";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
@@ -31,6 +30,7 @@ import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 import { AutoLinkPlugin } from "@lexical/react/LexicalAutoLinkPlugin";
 import { LinkNode, AutoLinkNode } from "@lexical/link";
 import { LexicalProps } from "@/types/lexical";
+import SearchPlugin from "@/components/lexical/plugins/searchPlugin";
 
 const placeholder = "Capture your thoughts...";
 
@@ -59,9 +59,9 @@ export default function LexicalEditorComponent({
   handleShare,
   handleBack,
   isKeyboardVisible,
-  handleToggleBottomMoveNoteDrawer,
-  handleToggleBottomNoteDetailsDrawer,
-  handleToggleBottomNoteDeleteDrawer,
+  handleOpenBottomMoveNoteDrawer,
+  handleOpenBottomNoteDetailsDrawer,
+  handleOpenBottomNoteDeleteDrawer,
   setContent,
   setTitle,
   title,
@@ -70,12 +70,26 @@ export default function LexicalEditorComponent({
   navigationType,
   handleToastAndroid,
   theme,
+  isSearching,
+  setIsSearching,
 }: LexicalProps) {
   const [mode, SetMode] = React.useState<"edit" | "view">("edit");
   const [isTitleEditable, setIsTitleEditable] = React.useState<boolean>(true);
   const [isTitleFocused, setIsTitleFocused] = React.useState<boolean>(false);
   const [canUndo, setCanUndo] = React.useState(false);
   const [canRedo, setCanRedo] = React.useState(false);
+  const [searchTerm, setSearchTerm] = React.useState<string | null>(null);
+  const [searchIndex, setSearchIndex] = React.useState<number>(0);
+  const [searchResultsNumber, setSearchResultsNumber] =
+    React.useState<number>(0);
+  const [isSearchFocused, setIsSearchFocused] = React.useState<boolean>(false);
+
+  React.useEffect(() => {
+    if (!isSearching) {
+      setSearchIndex(0);
+      setSearchTerm(null);
+    }
+  }, [isSearching]);
 
   const editorConfig = {
     namespace: "Lexical Editor",
@@ -119,20 +133,25 @@ export default function LexicalEditorComponent({
         <Header
           isShowMoreModalOpen={isShowMoreModalOpen}
           setIsShowMoreModalOpen={setIsShowMoreModalOpen}
+          isSearching={isSearching}
+          setIsSearching={setIsSearching}
           handleBack={handleBack}
           handleShare={handleShare}
-          handleToggleBottomMoveNoteDrawer={handleToggleBottomMoveNoteDrawer}
-          handleToggleBottomNoteDetailsDrawer={
-            handleToggleBottomNoteDetailsDrawer
-          }
-          handleToggleBottomNoteDeleteDrawer={
-            handleToggleBottomNoteDeleteDrawer
-          }
+          handleOpenBottomMoveNoteDrawer={handleOpenBottomMoveNoteDrawer}
+          handleOpenBottomNoteDetailsDrawer={handleOpenBottomNoteDetailsDrawer}
+          handleOpenBottomNoteDeleteDrawer={handleOpenBottomNoteDeleteDrawer}
           handleToastAndroid={handleToastAndroid}
           mode={mode}
           SetMode={SetMode}
           setIsTitleEditable={setIsTitleEditable}
           theme={theme}
+          searchResultsNumber={searchResultsNumber}
+          searchIndex={searchIndex}
+          searchTerm={searchTerm}
+          isSearchFocused={isSearchFocused}
+          setSearchIndex={setSearchIndex}
+          setSearchTerm={setSearchTerm}
+          setIsSearchFocused={setIsSearchFocused}
         />
         <ContentTop
           noteDate={noteDate}
@@ -199,18 +218,27 @@ export default function LexicalEditorComponent({
               attributes={{ rel: "noreferrer", target: "_blank" }}
             />
             <AutoLinkPlugin matchers={MATCHERS} />
+            <SearchPlugin
+              searchTerm={searchTerm}
+              matchIndex={searchIndex}
+              setSearchResultsNumber={setSearchResultsNumber}
+              handleToastAndroid={handleToastAndroid}
+            />
             {/* <TreeViewPlugin /> */}
           </div>
         </div>
-        {mode === "edit" && isKeyboardVisible && !isTitleFocused && (
-          <ToolbarPlugin
-            theme={theme}
-            canUndo={canUndo}
-            canRedo={canRedo}
-            setCanUndo={setCanUndo}
-            setCanRedo={setCanRedo}
-          />
-        )}
+        {mode === "edit" &&
+          isKeyboardVisible &&
+          !isTitleFocused &&
+          !isSearchFocused && (
+            <ToolbarPlugin
+              theme={theme}
+              canUndo={canUndo}
+              canRedo={canRedo}
+              setCanUndo={setCanUndo}
+              setCanRedo={setCanRedo}
+            />
+          )}
       </main>
     </LexicalComposer>
   );

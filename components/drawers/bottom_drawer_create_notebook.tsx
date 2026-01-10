@@ -198,7 +198,7 @@ const BottomDrawerCreateNotebook = React.forwardRef<
               style={[
                 styles.input,
                 {
-                  backgroundColor: colors[theme].foggier,
+                  backgroundColor: colors[theme].foggiest,
                   color: colors[theme].text,
                 },
               ]}

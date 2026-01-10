@@ -48,6 +48,21 @@ h2 {
   gap: 12px;
 }
 
+.header-search-input {
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  font-size: 18px;
+}
+
+.header-search-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
 .more-container {
   position: relative;
 }
