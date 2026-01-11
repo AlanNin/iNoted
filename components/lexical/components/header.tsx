@@ -161,6 +161,7 @@ export default function Header({
               setIsSearchFocused(false);
               editor.setEditable(true);
             }}
+            style={{ color: colors[theme].tint }}
           />
           {searchTerm && searchTerm?.length > 0 && (
             <div className="header-search-right">
