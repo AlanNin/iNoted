@@ -162,15 +162,25 @@ export default function Header({
               editor.setEditable(true);
             }}
           />
-          {searchTerm && searchTerm?.length > 0 && searchResultsNumber > 1 && (
+          {searchTerm && searchTerm?.length > 0 && (
             <div className="header-search-right">
-              <button onClick={() => searchPreviousNote()}>
-                <Icon name="ChevronUp" customColor={colors[theme].tint} />
-              </button>
-              {searchIndex + 1} / {searchResultsNumber}
-              <button onClick={() => searchNextNote()}>
-                <Icon name="ChevronDown" customColor={colors[theme].tint} />
-              </button>
+              {searchResultsNumber > 0 && (
+                <>
+                  <button
+                    onClick={() => searchPreviousNote()}
+                    disabled={searchIndex === 0}
+                  >
+                    <Icon name="ChevronUp" customColor={colors[theme].tint} />
+                  </button>
+                  {searchIndex + 1} / {searchResultsNumber}
+                  <button
+                    onClick={() => searchNextNote()}
+                    disabled={searchIndex === searchResultsNumber - 1}
+                  >
+                    <Icon name="ChevronDown" customColor={colors[theme].tint} />
+                  </button>
+                </>
+              )}
             </div>
           )}
         </>

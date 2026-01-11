@@ -54,6 +54,7 @@ h2 {
   border: none;
   outline: none;
   font-size: 18px;
+  margin-right: 16px;
 }
 
 .header-search-right {
@@ -61,6 +62,17 @@ h2 {
   align-items: center;
   gap: 8px;
   white-space: nowrap;
+}
+
+.header-search-right button {
+  &:disabled {
+    opacity: 0.5;
+  }
+}
+
+.header-search-no-results {
+  margin-right: 8px;
+  font-weight: 400;
 }
 
 .more-container {
