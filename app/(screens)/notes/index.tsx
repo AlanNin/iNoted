@@ -25,7 +25,6 @@ import BottomDrawerConfirm from "@/components/drawers/bottom_drawer_confirm";
 import { toast } from "@backpackapp-io/react-native-toast";
 import { FlashList } from "@shopify/flash-list";
 import { useNotesEditMode } from "@/hooks/useNotesEditMode";
-import { DrawerActions } from "@react-navigation/native";
 import BottomDrawerMoveNote from "@/components/drawers/bottom_drawer_move_note";
 import { addNotesToNotebook } from "@/queries/notebooks";
 import BottomDrawerSelectNotebook from "@/components/drawers/bottom_drawer_select_notebook";
@@ -75,7 +74,7 @@ export default function NotesScreen() {
 
   const openMenu = () => {
     setNotesEditMode(false);
-    navigation.dispatch(DrawerActions.openDrawer());
+    navigation.dispatch({ type: "OPEN_DRAWER" });
   };
 
   const {

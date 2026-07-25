@@ -20,7 +20,6 @@ import BottomDrawerConfirm from "@/components/drawers/bottom_drawer_confirm";
 import BottomDrawerMoveNote from "@/components/drawers/bottom_drawer_move_note";
 import BottomDrawerNoteDetails from "@/components/drawers/bottom_drawer_note_details";
 import { convertToJson, parseEditorState } from "@/lib/text_editor";
-import { getNavigationBarType } from "react-native-navigation-bar-detector";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { ToastAndroid } from "react-native";
 import { View } from "@/components/themed";
@@ -35,8 +34,6 @@ export default function NoteScreen() {
   const bottomNoteDetailsDrawerRef = React.useRef<BottomSheetModal>(null);
   const bottomDeleteNoteDrawerRef = React.useRef<BottomSheetModal>(null);
   const [isSearching, setIsSearching] = React.useState(false);
-
-  const navigationType = getNavigationBarType();
 
   const { data: noteData, isLoading: isLoadingNoteData } = useQuery({
     queryKey: ["note", Number(noteId)],
@@ -61,12 +58,47 @@ export default function NoteScreen() {
   const [title, setTitle] = React.useState(initialTitle ?? "");
   const [content, setContent] = React.useState(initialContent ?? "");
 
+  const titleRef = React.useRef(title);
+  const contentRef = React.useRef(content);
+
+  React.useEffect(() => {
+    titleRef.current = title;
+  }, [title]);
+
+  React.useEffect(() => {
+    contentRef.current = content;
+  }, [content]);
+
   React.useEffect(() => {
     setTitle(noteData?.title || "");
     setContent(initialContent!);
   }, [noteData]);
 
-  // save note on back press
+  const handleUpdateNote = React.useCallback(async () => {
+    const currentTitle = titleRef.current;
+    const currentContent = contentRef.current;
+    const noChanges =
+      currentTitle === noteData?.title && currentContent === initialContent;
+
+    if (noChanges && currentTitle.length > 0) {
+      return;
+    }
+
+    try {
+      await updateNote(Number(noteId), {
+        title: currentTitle.length === 0 ? "Untitled note" : currentTitle,
+        content: currentContent,
+      });
+
+      refetchNotes();
+      refetchNotebooks();
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [noteId, noteData?.title, initialContent]);
+
+  // save note on back press (hardware button)
   React.useEffect(() => {
     const backAction = () => {
       if (isShowMoreModalOpen) {
@@ -92,13 +124,13 @@ export default function NoteScreen() {
     );
 
     return () => subscription.remove();
-  }, [title, content, isShowMoreModalOpen, isSearching]);
+  }, [isShowMoreModalOpen, isSearching, handleUpdateNote]);
 
   // save note on app state change
   React.useEffect(() => {
     const handleAppStateChange = async (nextAppState: AppStateStatus) => {
       if (nextAppState === "background" || nextAppState === "inactive") {
-        if (content.length > 0) {
+        if (contentRef.current.length > 0) {
           await handleUpdateNote();
         }
       }
@@ -112,7 +144,7 @@ export default function NoteScreen() {
     return () => {
       subscription.remove();
     };
-  }, [title, content]);
+  }, [handleUpdateNote]);
 
   async function refetchNotes() {
     await queryClient.refetchQueries({ queryKey: ["notes"] });
@@ -124,16 +156,18 @@ export default function NoteScreen() {
     await queryClient.refetchQueries({ queryKey: ["notebook"] });
   }
 
-  async function handleShare() {
+  const handleShare = React.useCallback(async () => {
     try {
       await Share.share({
-        title: title,
-        message: `${title || "Untitled Note"}\n\n${parseEditorState(content)}`,
+        title: titleRef.current,
+        message: `${titleRef.current || "Untitled Note"}\n\n${parseEditorState(
+          contentRef.current
+        )}`,
       });
     } catch (error) {
       toast.error("An error occurred. Please try again.");
     }
-  }
+  }, []);
 
   async function handleDeleteNote() {
     try {
@@ -168,49 +202,29 @@ export default function NoteScreen() {
     }
   }
 
-  async function handleUpdateNote() {
-    const noChanges = title === noteData?.title && content === initialContent;
-
-    if (noChanges && title.length > 0) {
-      return;
-    }
-
-    try {
-      await updateNote(Number(noteId), {
-        title: title.length === 0 ? "Untitled note" : title,
-        content,
-      });
-
-      refetchNotes();
-      refetchNotebooks();
-    } catch (error) {
-      toast.error("An error occurred. Please try again.");
-    }
-  }
-
-  const handleOpenBottomMoveNoteDrawer = () => {
+  const handleOpenBottomMoveNoteDrawer = React.useCallback(() => {
     bottomMoveNoteDrawerRef.current?.present();
-  };
+  }, []);
 
-  const handleOpenBottomNoteDetailsDrawer = () => {
+  const handleOpenBottomNoteDetailsDrawer = React.useCallback(() => {
     bottomNoteDetailsDrawerRef.current?.present();
-  };
+  }, []);
 
-  const handleOpenBottomNoteDeleteDrawer = () => {
+  const handleOpenBottomNoteDeleteDrawer = React.useCallback(() => {
     bottomDeleteNoteDrawerRef.current?.present();
-  };
+  }, []);
 
   // save note on back press button
-  async function handleBack() {
-    await setIsKeyboardVisible(false);
+  const handleBack = React.useCallback(async () => {
+    setIsKeyboardVisible(false);
     Keyboard.dismiss();
     await handleUpdateNote();
     router.back();
-  }
+  }, [handleUpdateNote]);
 
-  function handleToastAndroid(message: string) {
+  const handleToastAndroid = React.useCallback((message: string) => {
     ToastAndroid.show(message, ToastAndroid.SHORT);
-  }
+  }, []);
 
   if (isLoadingNoteData || noteData === undefined) {
     return null;
@@ -248,7 +262,6 @@ export default function NoteScreen() {
             title={initialTitle!}
             content={initialContent!}
             noteDate={noteDate!}
-            navigationType={navigationType}
             handleToastAndroid={handleToastAndroid}
             theme={theme}
           />

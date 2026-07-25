@@ -1,21 +1,19 @@
-import {
-  DrawerContentScrollView,
-  DrawerItem,
-  DrawerItemList,
-} from "@react-navigation/drawer";
+import { ScrollView, StyleSheet, TouchableOpacity } from "react-native";
 import { Text, View } from "../themed";
 import Icon from "../icon";
 import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
-import { StyleSheet } from "react-native";
 import { router } from "expo-router";
-import { Route } from "@react-navigation/native";
 import { Image } from "expo-image";
 import * as Application from "expo-application";
+import { DrawerContentComponentProps } from "expo-router/drawer";
 
-export default function CustomDrawerContent(props: any) {
+export default function CustomDrawerContent(
+  props: DrawerContentComponentProps
+) {
   const theme = useColorScheme();
   const image = theme === "light" ? "app_long" : "dark_app_long";
+  const { state, descriptors, navigation } = props;
 
   return (
     <View
@@ -24,7 +22,7 @@ export default function CustomDrawerContent(props: any) {
         overflow: "hidden",
       }}
     >
-      <DrawerContentScrollView {...props}>
+      <ScrollView contentContainerStyle={{ paddingTop: 12 }}>
         <View style={styles.drawerHeader}>
           <Image
             source={image}
@@ -32,33 +30,84 @@ export default function CustomDrawerContent(props: any) {
             contentFit="contain"
           />
         </View>
-        <DrawerItemList {...props} />
-      </DrawerContentScrollView>
+
+        {state.routes
+          .filter((route) => {
+            const options = descriptors[route.key]?.options;
+            const style = StyleSheet.flatten(options?.drawerItemStyle);
+
+            return style?.display !== "none";
+          })
+          .map((route, index) => {
+            const { options } = descriptors[route.key] ?? { options: {} };
+            const focused = state.index === index;
+            const label =
+              typeof options.drawerLabel === "string"
+                ? options.drawerLabel
+                : options.title ?? route.name;
+
+            return (
+              <TouchableOpacity
+                key={route.key}
+                onPress={() => navigation.navigate(route.name)}
+                style={[
+                  styles.drawerItem,
+                  focused && { backgroundColor: colors[theme].primary },
+                ]}
+              >
+                {options.drawerIcon?.({
+                  focused,
+                  size: 20,
+                  color: focused ? colors.dark.text : colors[theme].text_muted,
+                })}
+                <Text
+                  style={{
+                    color: focused
+                      ? colors.dark.text
+                      : colors[theme].text_muted,
+                    marginLeft: 12,
+                  }}
+                >
+                  {label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+      </ScrollView>
+
       <View style={[styles.drawerSettingsContainer]}>
-        <DrawerItem
-          label="Settings"
-          focused={
-            props.state.index ===
-            props.state.routes.findIndex(
-              (route: Route<string>) => route.name === "settings"
-            )
-          }
-          activeBackgroundColor={colors[theme].primary}
-          activeTintColor={colors.dark.text}
-          inactiveTintColor={colors[theme].text_muted}
-          style={{ borderRadius: 8 }}
-          icon={({ size, focused }) => (
-            <Icon
-              name="Settings"
-              size={size}
-              customColor={
-                focused ? colors.dark.tint : colors[theme].text_muted
-              }
-            />
-          )}
+        <TouchableOpacity
           onPress={() => router.push("/settings")}
-        />
+          style={[
+            styles.drawerItem,
+            state.routes[state.index]?.name === "settings" && {
+              backgroundColor: colors[theme].primary,
+            },
+          ]}
+        >
+          <Icon
+            name="Settings"
+            size={20}
+            customColor={
+              state.routes[state.index]?.name === "settings"
+                ? colors.dark.tint
+                : colors[theme].text_muted
+            }
+          />
+          <Text
+            style={{
+              color:
+                state.routes[state.index]?.name === "settings"
+                  ? colors.dark.text
+                  : colors[theme].text_muted,
+              marginLeft: 12,
+            }}
+          >
+            Settings
+          </Text>
+        </TouchableOpacity>
       </View>
+
       <View
         style={[
           styles.drawerFooter,
@@ -83,6 +132,15 @@ const styles = StyleSheet.create({
   drawerHeaderImage: {
     width: 180,
     height: 180,
+  },
+  drawerItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 12,
+    marginVertical: 4,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 8,
   },
   drawerSettingsContainer: {
     marginTop: "auto",

@@ -3,7 +3,6 @@ import { Drawer } from "expo-router/drawer";
 import colors from "@/constants/colors";
 import Icon from "@/components/icon";
 import CustomDrawerContent from "@/components/drawers/custom_drawer_content";
-import React from "react";
 
 export default function ScreensLayout() {
   const theme = useColorScheme();

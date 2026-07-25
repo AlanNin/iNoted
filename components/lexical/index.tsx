@@ -22,10 +22,9 @@ import { HashtagPlugin } from "@lexical/react/LexicalHashtagPlugin";
 import { HashtagNode } from "@lexical/hashtag";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
 import { TRANSFORMERS } from "@lexical/markdown";
-import { CodeNode } from "@lexical/code";
+import { CodeNode } from "@lexical/code-core";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
-import EditablePlugin from "@/components/lexical/plugins/editablePlugin";
 import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 import { AutoLinkPlugin } from "@lexical/react/LexicalAutoLinkPlugin";
 import { LinkNode, AutoLinkNode } from "@lexical/link";
@@ -67,7 +66,6 @@ export default function LexicalEditorComponent({
   title,
   content,
   noteDate,
-  navigationType,
   handleToastAndroid,
   theme,
   isSearching,
@@ -153,6 +151,7 @@ export default function LexicalEditorComponent({
           setSearchTerm={setSearchTerm}
           setIsSearchFocused={setIsSearchFocused}
         />
+
         <ContentTop
           noteDate={noteDate}
           setTitle={setTitle}
@@ -206,12 +205,6 @@ export default function LexicalEditorComponent({
             <ListPlugin />
             <CheckListPlugin />
             <MarkdownShortcutPlugin transformers={TRANSFORMERS} />
-            <EditablePlugin
-              isKeyboardVisible={isKeyboardVisible}
-              setIsTitleEditable={setIsTitleEditable}
-              navigationType={navigationType}
-              mode={mode}
-            />
             <HashtagPlugin />
             <LinkPlugin
               validateUrl={isSafeUrl}

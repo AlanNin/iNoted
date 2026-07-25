@@ -14,7 +14,6 @@ export type LexicalProps = {
   title: string;
   content: string;
   noteDate: string;
-  navigationType: string;
   handleToastAndroid: (message: string) => void;
   theme: "light" | "dark";
 };

@@ -18,7 +18,6 @@ import BottomDrawerSort from "@/components/drawers/bottom_drawer_sort";
 import BottomDrawerConfirm from "@/components/drawers/bottom_drawer_confirm";
 import { toast } from "@backpackapp-io/react-native-toast";
 import { FlashList } from "@shopify/flash-list";
-import { DrawerActions } from "@react-navigation/native";
 import {
   createNotebook,
   deleteNotebooks,
@@ -56,7 +55,7 @@ export default function NotebooksScreen() {
 
   const openMenu = () => {
     setNotebooksEditMode(false);
-    navigation.dispatch(DrawerActions.openDrawer());
+    navigation.dispatch({ type: "OPEN_DRAWER" });
   };
 
   const {

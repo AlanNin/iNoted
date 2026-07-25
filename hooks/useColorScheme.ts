@@ -8,7 +8,7 @@ const useColorScheme = (): "light" | "dark" => {
 
   const theme = appTheme === "system" ? systemColorScheme ?? "dark" : appTheme;
 
-  return theme;
+  return theme as "light" | "dark";
 };
 
 export default useColorScheme;

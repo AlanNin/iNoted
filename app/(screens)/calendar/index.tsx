@@ -3,7 +3,6 @@ import { BackHandler, StyleSheet } from "react-native";
 import { Text, TouchableOpacity, View } from "@/components/themed";
 import Icon from "@/components/icon";
 import { useNavigation } from "expo-router";
-import { DrawerActions } from "@react-navigation/native";
 import { FlashList } from "@shopify/flash-list";
 import colors from "@/constants/colors";
 import useColorScheme from "@/hooks/useColorScheme";
@@ -47,7 +46,7 @@ export default function CalendarScreen() {
   const theme = useColorScheme();
   const navigation = useNavigation();
   const openMenu = () => {
-    navigation.dispatch(DrawerActions.openDrawer());
+    navigation.dispatch({ type: "OPEN_DRAWER" });
   };
   const [isCalendarModalOpen, setIsCalendarModalOpen] = React.useState(false);
   const [date, setDate] = React.useState(getMaxDateInUTC());

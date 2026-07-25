@@ -14,6 +14,11 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SheetProvider } from "react-native-actions-sheet";
 import { ConfigProvider } from "@/providers/config";
 import InitProviders from "@/providers/init_providers";
+import { LogBox } from "react-native";
+
+LogBox.ignoreLogs([
+  /Call to function 'DomWebView\.injectJavaScript' has been rejected/,
+]);
 
 SplashScreen.preventAutoHideAsync();
 

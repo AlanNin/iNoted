@@ -5,17 +5,14 @@ import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider,
-} from "@react-navigation/native";
+} from "expo-router/react-navigation";
 import { useNavigation } from "expo-router";
 import React from "react";
 import { BackHandler } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useConfig } from "./config";
 import ExitConfirmationAlert from "@/components/exit_confirmation";
-import {
-  setStatusBarStyle,
-  setStatusBarBackgroundColor,
-} from "expo-status-bar";
+import { StatusBar } from "expo-status-bar";
 import { AppState } from "react-native";
 import { AppStateStatus } from "react-native";
 
@@ -82,8 +79,7 @@ export default function InitProviders({
 
   React.useEffect(() => {
     const changeStatusBarStyle = () => {
-      setStatusBarStyle(theme === "light" ? "dark" : "light");
-      setStatusBarBackgroundColor(colors[theme].background);
+      StatusBar.setStyle(theme === "light" ? "dark" : "light");
     };
 
     changeStatusBarStyle();
